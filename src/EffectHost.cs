@@ -271,6 +271,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private void HandleMidiMessage(IMidiMessage message)
     {
+        var midiMapping = controller as IMidiMapping;
         if (message is ChannelMessage channelMessage)
         {
             // TODO: Midi Stop All see https://forums.steinberg.net/t/vst3-velocity-clarification/908883
@@ -295,9 +296,19 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                     noteId: channelMessage.Data1);
                 inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
             }
+            else if (channelMessage.Command == ChannelCommand.Controller)
+            {
+                if (midiMapping is null)
+                    return;
+
+                if (midiMapping.getMidiControllerAssignment(0, (short)channelMessage.MidiChannel, (ControllerNumbers)channelMessage.Data1, out var paramId))
+                {
+                    var value = MessageUtils.MidiIntToFloat(channelMessage.Data2);
+                    synchronizationContext?.Post(s => SetParameter(paramId, value), null);
+                }
+            }
             else if (channelMessage.Command == ChannelCommand.PitchWheel)
             {
-                var midiMapping = controller as IMidiMapping;
                 if (midiMapping is null)
                     return;
 

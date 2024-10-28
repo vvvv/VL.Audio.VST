@@ -25,7 +25,7 @@ From https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentat
   - IPlugView - sizing yes, keyboard handling no
 - Multiple Dynamic I/O Support - no
 - Silence flags - no
-- Parameter MIDI Mapping - only checking for pitch bend, but should be easy to extend
+- Parameter MIDI Mapping - yes
 - Parameter Finder - no
 - Audio Presentation Latency - no
 - Dirty State, Open Editor Request and UI Group Editing Support - no

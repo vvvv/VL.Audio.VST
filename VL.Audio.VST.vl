@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns:p="property" xmlns:r="reflection" Id="UgcPFn5dcR2MW546v4XLqB" LanguageVersion="2024.6.7-0208-g078c5b3e84" Version="0.128">
+  <NugetDependency Id="UIwWjVtDngaQQN9ruSCYBE" Location="VL.CoreLib" Version="2024.6.7-0208-g078c5b3e84" />
+  <Patch Id="Qg9qJ1DPxuBMSYmlRd5fkQ">
+    <Canvas Id="HUKa0nTRGahMHSYnC7lmL0" DefaultCategory="Audio.VST" CanvasType="FullCategory" />
+    <!--
+
+    ************************ Application ************************
+
+-->
+    <Node Name="Application" Bounds="100,100" Id="S0H5teLm15oQItISPeDS0T">
+      <p:NodeReference>
+        <Choice Kind="ContainerDefinition" Name="Process" />
+        <CategoryReference Kind="Category" Name="Primitive" />
+      </p:NodeReference>
+      <Patch Id="Te0Z7waV9yAMbNEQiYF0Ml">
+        <Canvas Id="Hlxz8Z7jm4sOhIFUh1u1tS" CanvasType="Group" />
+        <Patch Id="JZuP9xwpvZsNpqhmCCVs0r" Name="Create" />
+        <Patch Id="AttvOuDzapdQEyqntUb5Tg" Name="Update" />
+        <ProcessDefinition Id="CvDB52H9nRDOgdaQ6bXgXl">
+          <Fragment Id="UvlAt0EfKlePhIt7ZdfZGB" Patch="JZuP9xwpvZsNpqhmCCVs0r" Enabled="true" />
+          <Fragment Id="UMiZP98Et7NQOIIuS8727o" Patch="AttvOuDzapdQEyqntUb5Tg" Enabled="true" />
+        </ProcessDefinition>
+      </Patch>
+    </Node>
+  </Patch>
+  <NugetDependency Id="PtRn3YsB37lPncqYUJefPp" Location="VL.Audio" IsForward="true" Version="1.8.4" />
+  <PlatformDependency Id="AFxd1LZA6evPGCWAh66A2Y" Location="./lib/net8.0-windows/VL.Audio.VST.dll" />
+  <NodeFactoryDependency Id="IFiy7md81vcL9q1xd8NlAm" Location="VL.Audio.VST.Nodes" IsForward="true" />
+</Document>

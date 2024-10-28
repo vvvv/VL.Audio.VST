@@ -46,7 +46,7 @@ From https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentat
 - UI Snapshots - no
 - NoteExpression Physical UI Mapping - no
 - Legacy MIDI CC Out Event - no
-- MIDI Learn - no
+- MIDI Learn - yes
 - Host Query Interface support - no
 - MPE support for Wrappers - no
 - Parameter Function Name - no

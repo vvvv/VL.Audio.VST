@@ -44,8 +44,10 @@ partial interface IUnitInfo
 	void getProgramInfo(ProgramListID listId, int programIndex,
 		[MarshalAs(UnmanagedType.LPStr)] string attributeId /*in*/, String128 attributeValue /*out*/);
 
-	/** Returns kResultTrue if the given program index of a given program list ID supports PitchNames. */
-	[return: MarshalAs(UnmanagedType.Bool)] bool hasProgramPitchNames(ProgramListID listId, int programIndex);
+    /** Returns kResultTrue if the given program index of a given program list ID supports PitchNames. */
+    [PreserveSig]
+    [return: MarshalUsing(typeof(VstBoolMarshaller))]
+    bool hasProgramPitchNames(ProgramListID listId, int programIndex);
 
 	/** Gets the PitchName for a given program list ID, program index and pitch.
 		If PitchNames are changed the plug-in should inform the host with IUnitHandler::notifyProgramListChange. */

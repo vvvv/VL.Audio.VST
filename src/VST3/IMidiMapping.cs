@@ -5,25 +5,24 @@ namespace VST3;
 
 /// <summary>
 /// MIDI Mapping interface: Vst::IMidiMapping
-/// \ingroup vstIPlug vst301
-/// - [plug imp]
-/// - [extends IEditController]
-/// - [released: 3.0.1]
-/// - [optional]
-///
+/// </summary>
+/// <remarks>
+/// <para>
 /// MIDI controllers are not transmitted directly to a VST component. MIDI as hardware protocol has
 /// restrictions that can be avoided in software. Controller data in particular come along with unclear
 /// and often ignored semantics. On top of this they can interfere with regular parameter automation and
 /// the host is unaware of what happens in the plug-in when passing MIDI controllers directly.
-///
+/// </para>
+/// <para>
 /// So any functionality that is to be controlled by MIDI controllers must be exported as regular parameter.
 /// The host will transform incoming MIDI controller data using this interface and transmit them as regular
 /// parameter change. This allows the host to automate them in the same way as other parameters.
 /// CtrlNumber can be a typical MIDI controller value extended to some others values like pitchbend or
-/// aftertouch (see \ref ControllerNumbers).
+/// aftertouch (see <see cref="ControllerNumbers"/>).
 /// If the mapping has changed, the plug-in must call IComponentHandler::restartComponent (kMidiCCAssignmentChanged)
 /// to inform the host about this change.
-/// </summary>
+/// </para>
+/// </remarks>
 /// <example>
 /// <code>
 /// //--------------------------------------
@@ -62,11 +61,12 @@ partial interface IMidiMapping
     /// <summary>
     /// Gets an (preferred) associated ParamID for a given Input Event Bus index, channel and MIDI Controller.
     /// </summary>
-    /// <param name="busIndex">index of Input Event Bus</param>
-    /// <param name="channel">channel of the bus</param>
-    /// <param name="midiControllerNumber">see \ref ControllerNumbers for expected values (could be bigger than 127)</param>
-    /// <param name="id">return the associated ParamID to the given midiControllerNumber</param>
-    /// <returns>True if the assignment is successful, otherwise false</returns>
-    [return: MarshalAs(UnmanagedType.Bool)]
+    /// <param name="busIndex">Index of Input Event Bus.</param>
+    /// <param name="channel">Channel of the bus.</param>
+    /// <param name="midiControllerNumber">See <see cref="ControllerNumbers"/> for expected values (could be bigger than 127).</param>
+    /// <param name="id">Returns the associated ParamID to the given midiControllerNumber.</param>
+    /// <returns>True if the assignment is successful, otherwise false.</returns>
+    [return: MarshalUsing(typeof(VstBoolMarshaller))]
+    [PreserveSig]
     bool getMidiControllerAssignment(int busIndex, short channel, ControllerNumbers midiControllerNumber, out ParamID id);
-};
+}

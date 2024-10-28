@@ -271,9 +271,10 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private void HandleMidiMessage(IMidiMessage message)
     {
-        var midiMapping = controller as IMidiMapping;
         if (message is ChannelMessage channelMessage)
         {
+            var midiChannel = (short)channelMessage.MidiChannel;
+
             // TODO: Midi Stop All see https://forums.steinberg.net/t/vst3-velocity-clarification/908883
             if (channelMessage.IsNoteOn())
             {
@@ -296,27 +297,44 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                     noteId: channelMessage.Data1);
                 inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
             }
-            else if (channelMessage.Command == ChannelCommand.Controller)
+            else
             {
-                if (midiMapping is null)
-                    return;
+                // IMidiMapping and IMidiLearn expect to be called on main thread
+                synchronizationContext?.Post(m => HandleMidiMessageOnMainThread((ChannelMessage)m!), channelMessage);
+            }
+        }
+    }
 
-                if (midiMapping.getMidiControllerAssignment(0, (short)channelMessage.MidiChannel, (ControllerNumbers)channelMessage.Data1, out var paramId))
+    private void HandleMidiMessageOnMainThread(ChannelMessage channelMessage)
+    {
+        var midiChannel = (short)channelMessage.MidiChannel;
+        var midiMapping = controller as IMidiMapping;
+
+        if (channelMessage.Command == ChannelCommand.Controller)
+        {
+            var midiLearn = controller as IMidiLearn;
+            if (midiLearn != null)
+            {
+                if (midiLearn.onLiveMIDIControllerInput(0, midiChannel, (ControllerNumbers)channelMessage.Data1))
                 {
-                    var value = MessageUtils.MidiIntToFloat(channelMessage.Data2);
-                    synchronizationContext?.Post(s => SetParameter(paramId, value), null);
+                    // Plugin did map the controller to one of its parameters
                 }
             }
-            else if (channelMessage.Command == ChannelCommand.PitchWheel)
+            if (midiMapping != null && midiMapping.getMidiControllerAssignment(0, midiChannel, (ControllerNumbers)channelMessage.Data1, out var paramId))
             {
-                if (midiMapping is null)
-                    return;
+                var value = MessageUtils.MidiIntToFloat(channelMessage.Data2);
+                SetParameter(paramId, value);
+            }
+        }
+        else if (channelMessage.Command == ChannelCommand.PitchWheel)
+        {
+            if (midiMapping is null)
+                return;
 
-                if (midiMapping.getMidiControllerAssignment(0, (short)channelMessage.MidiChannel, ControllerNumbers.kPitchBend, out var paramId))
-                {
-                    var value = channelMessage.GetPitchWheel();
-                    synchronizationContext?.Post(s => SetParameter(paramId, value), null);
-                }
+            if (midiMapping.getMidiControllerAssignment(0, midiChannel, ControllerNumbers.kPitchBend, out var paramId))
+            {
+                var value = channelMessage.GetPitchWheel();
+                SetParameter(paramId, value);
             }
         }
     }

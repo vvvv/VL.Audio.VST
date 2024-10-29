@@ -48,6 +48,9 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private static readonly ParameterChanges s_noChanges = new();
 
+    private readonly ManualResetEventSlim processingEvent = new(initialState: true);
+    private bool isDisposed;
+
     private readonly NodeContext nodeContext;
     private readonly ILogger logger;
     private readonly PlugProvider plugProvider;
@@ -173,6 +176,13 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     public void Dispose()
     {
+        if (isDisposed)
+            return;
+
+        isDisposed = true;
+        // Ensure we're not processing any audio currently
+        processingEvent.Wait();
+
         midiInputSubscription.Dispose();
         window?.Dispose();
         outputSignal.Dispose();
@@ -500,11 +510,11 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     unsafe void Process(AudioBufferStereo audioBufferStereo)
     {
-        //if (isDisposed)
-        //    return;
+        if (isDisposed)
+            return;
 
         // Block a potential Dispose call
-        //processingEvent.Reset();
+        processingEvent.Reset();
 
         inputEvents.Clear();
         var inputEventCount = inputEventQueue.Count;
@@ -580,7 +590,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             pendingOutputChanges = null;
 
         // Unblock Dispose call
-        //processingEvent.Set();
+        processingEvent.Set();
     }
 
     sealed class AudioIn : IVLPin<IEnumerable<AudioSignal>>

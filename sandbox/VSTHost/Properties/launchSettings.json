@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "VSTHost": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

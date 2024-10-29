@@ -146,14 +146,17 @@ class Module : IDisposable
         if (modulePtr == default)
             return false;
 
-        var factoryProc = (delegate* unmanaged[Cdecl]<nint>)NativeLibrary.GetExport(modulePtr, "GetPluginFactory");
-        if (factoryProc is null)
+        if (!NativeLibrary.TryGetExport(modulePtr, "GetPluginFactory", out var getPluginFactoryAddress))
             return false;
 
-        var dllEntry = (delegate* unmanaged[Cdecl]<bool>)NativeLibrary.GetExport(modulePtr, "InitDll");
-        if (dllEntry is not null && !dllEntry())
-            return false;
+        if (NativeLibrary.TryGetExport(modulePtr, "InitDll", out var initDllAddress))
+        {
+            var dllEntry = (delegate* unmanaged[Cdecl]<bool>)initDllAddress;
+            if (!dllEntry())
+                return false;
+        }
 
+        var factoryProc = (delegate* unmanaged[Cdecl]<nint>)getPluginFactoryAddress;
         var pluginFactoryPtr = factoryProc();
         var pluginFactory = VstWrappers.Instance.CreateObjectForComInstance<IPluginFactory>(pluginFactoryPtr);
         module = new Module(modulePtr, Path.GetFileName(path), path, isBundle, new PluginFactory(pluginFactory));
@@ -192,9 +195,11 @@ class Module : IDisposable
     {
         Factory.Dispose();
 
-        var exitDll = (delegate* unmanaged[Cdecl]<bool>)NativeLibrary.GetExport(module, "ExitDll");
-        if (exitDll is not null)
+        if (NativeLibrary.TryGetExport(module, "ExitDll", out var exitDllAddress))
+        {
+            var exitDll = (delegate* unmanaged[Cdecl]<bool>)exitDllAddress;
             exitDll();
+        }
 
         NativeLibrary.Free(module);
     }

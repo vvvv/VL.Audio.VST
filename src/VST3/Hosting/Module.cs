@@ -132,15 +132,15 @@ class Module : IDisposable
         if (Directory.Exists(path))
         {
             isBundle = true;
-            modulePtr = LoadAsPackage(GetArchString());
+            modulePtr = LoadAsPackage(path, GetArchString());
 
             if (modulePtr == default && TestForArm64X())
-                modulePtr = LoadAsPackage(Arm64XWin);
+                modulePtr = LoadAsPackage(path, Arm64XWin);
         }
         else
         {
             isBundle = false;
-            modulePtr = LoadAsDll();
+            modulePtr = LoadAsDll(path);
         }
 
         if (modulePtr == default)
@@ -162,15 +162,17 @@ class Module : IDisposable
         module = new Module(modulePtr, Path.GetFileName(path), path, isBundle, new PluginFactory(pluginFactory));
         return true;
 
-        nint LoadAsDll()
+        static nint LoadAsDll(string path)
         {
-            return NativeLibrary.Load(path);
+            NativeLibrary.TryLoad(path, out var handle);
+            return handle;
         }
 
-        nint LoadAsPackage(string archString)
+        static nint LoadAsPackage(string path, string archString)
         {
             var p = Path.Combine(path, "Contents", archString, Path.GetFileName(path));
-            return NativeLibrary.Load(p);
+            NativeLibrary.TryLoad(p, out var handle);
+            return handle;
         }
     }
 

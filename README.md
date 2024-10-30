@@ -1,7 +1,8 @@
 # VL.Audio.VST
 Use VST3 instruments and effects and control them via input parameters or MIDI. 
 
-![VST Compatible](https://raw.githubusercontent.com/vvvv/VL.Audio.VST/main/.github/images/vst.png)
+<img src=".github/images/vst.png" width="15%" alt="VST Compatiblen" />
+
 VST® is a trademark of [Steinberg Media Technologies GmbH](https://www.steinberg.net/), registered in Europe and other countries.
 
 For use with vvvv, the visual live-programming environment for .NET: http://visualprogramming.net

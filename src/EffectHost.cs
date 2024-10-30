@@ -121,7 +121,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             {
                 ProcessMode = ProcessModes.Realtime,
                 SymbolicSampleSize = Utils.GetSymbolicSampleSizes(outputSignal.WaveFormat),
-                MaxSamplesPerBlock = Math.Min(AudioService.Engine.Settings.BufferSize, 4096),
+                MaxSamplesPerBlock = Math.Max(AudioService.Engine.Settings.BufferSize, 4096),
                 SampleRate = AudioService.Engine.Settings.SampleRate
             });
 

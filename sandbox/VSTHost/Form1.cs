@@ -1,11 +1,21 @@
+using Microsoft.VisualBasic.Devices;
+using NAudio.Wave;
+using Sanford.Multimedia.Midi;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
+using VL.Audio;
 using VL.Audio.VST;
+using VL.Core;
 using VST3;
 using VST3.Hosting;
+using Utils = VL.Audio.VST.Utils;
 
 namespace VSTHost
 {
-    public partial class Form1 : Form
+    [GeneratedComClass]
+    public unsafe partial class Form1 : Form, IComponentHandler
     {
         IPlugView? view;
         private PlugProvider? plugProvider;
@@ -47,6 +57,49 @@ namespace VSTHost
                 // This crashes for JUCE based plugins :(
                 //var plugProvider1 = Task.Run(() => PlugProvider.Create(pluginFactory, info, context)).Result;
                 plugProvider = PlugProvider.Create(pluginFactory, info, context);
+
+                var component = plugProvider.Component;
+                var processor = (IAudioProcessor)component;
+                var controller = plugProvider.Controller;
+
+                var outputSignal = new BufferCallerSignal()
+                {
+                };
+
+                var processContext = new ProcessContext()
+                {
+
+                };
+
+
+                ProcessSetup processSetup;
+                processor.setupProcessing(
+                    processSetup = new ProcessSetup()
+                    {
+                        ProcessMode = ProcessModes.Realtime,
+                        SymbolicSampleSize = Utils.GetSymbolicSampleSizes(outputSignal.WaveFormat),
+                        MaxSamplesPerBlock = Math.Max(AudioService.Engine.Settings.BufferSize, 4096),
+                        SampleRate = AudioService.Engine.Settings.SampleRate
+                    });
+
+
+                // Activate main buses
+                component.activateBus(MediaTypes.kAudio, BusDirections.kOutput, 0, true);
+                component.activateBus(MediaTypes.kEvent, BusDirections.kInput, 0, true);
+
+                component.setActive(true);
+                processor.SetProcessing_IgnoreNotImplementedException(true);
+
+               
+                if (controller != null)
+                {
+                    controller.setComponentHandler(this);
+
+                    foreach (var p in controller.GetParameters())
+                    {
+                    }
+                }
+
                 CreateView();
                 break;
             }
@@ -98,9 +151,37 @@ namespace VSTHost
         private void CreateView()
         {
             view = plugProvider.Controller.createView("editor");
+            try
+            {
+                view.getSize();
+            }
+            catch (Exception)
+            {
+
+            }
             var plugFrame = new PlugFrame((r) => ClientSize = new Size(r.Width, r.Height));
             view.setFrame(plugFrame);
             view.attached(Handle, "HWND");
+        }
+
+        void IComponentHandler.beginEdit(uint id)
+        {
+            
+        }
+
+        void IComponentHandler.performEdit(uint id, double valueNormalized)
+        {
+            
+        }
+
+        void IComponentHandler.endEdit(uint id)
+        {
+            
+        }
+
+        void IComponentHandler.restartComponent(RestartFlags flags)
+        {
+            
         }
     }
 }

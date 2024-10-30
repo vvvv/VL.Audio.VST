@@ -1,5 +1,6 @@
 ﻿using Sanford.Multimedia.Midi;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace VL.Audio.VST;
 
 public sealed class Startup : AssemblyInitializer<Startup>
 {
+    private static readonly ConcurrentDictionary<string, ImmutableArray<ClassInfo>> s_classInfos = new();
     private readonly HostApp context = new HostApp();
 
     public override void Configure(AppHost appHost)
@@ -44,22 +46,34 @@ public sealed class Startup : AssemblyInitializer<Startup>
         base.Configure(appHost);
     }
 
+    ImmutableArray<ClassInfo> GetClassInfos(string path)
+    {
+        return s_classInfos.GetOrAdd(path, p =>
+        {
+            var builder = ImmutableArray.CreateBuilder<ClassInfo>();
+            if (Module.TryCreate(p, out var module))
+            {
+                using (module)
+                {
+                    builder.AddRange(module.Factory.ClassInfos);
+                }
+            }
+            return builder.ToImmutable();
+        });
+    }
+
     ImmutableArray<IVLNodeDescription> GetNodes(IVLNodeDescriptionFactory f, IEnumerable<string> modules)
     {
         var nodes = ImmutableArray.CreateBuilder<IVLNodeDescription>();
 
         foreach (var p in modules)
         {
-            if (!Module.TryCreate(p, out var module))
-                continue;
-
-            var pluginFactory = module.Factory;
-            foreach (var info in pluginFactory.ClassInfos)
+            foreach (var info in GetClassInfos(p))
             {
                 if (info.Category != ClassInfo.VstAudioEffectClass)
                     continue;
 
-                var nodeInfo = GetNodeDescription(f, pluginFactory, info);
+                var nodeInfo = GetNodeDescription(f, p, info);
                 nodes.Add(nodeInfo);
             }
         }
@@ -67,7 +81,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
         return nodes.ToImmutable();
     }
 
-    IVLNodeDescription GetNodeDescription(IVLNodeDescriptionFactory nodeDescriptionFactory, PluginFactory factory, ClassInfo info)
+    IVLNodeDescription GetNodeDescription(IVLNodeDescriptionFactory nodeDescriptionFactory, string modulePath, ClassInfo info)
     {
         return nodeDescriptionFactory.NewNodeDescription(info.Name, "Audio.VST", fragmented: false, ctx =>
         {
@@ -89,7 +103,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
 
             return ctx.Node(inputs, outputs, c =>
             {
-                return new EffectHost(c.NodeContext, c.NodeDescription, factory, info, context);
+                return new EffectHost(c.NodeContext, c.NodeDescription, modulePath, info, context);
             });
         });
     }

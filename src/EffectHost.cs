@@ -94,7 +94,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private Form? window;
 
-    public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, PluginFactory factory, ClassInfo info, IHostApplication hostApplication) : base(nodeContext)
+    public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info, IHostApplication hostApplication) : base(nodeContext)
     {
         this.nodeContext = nodeContext;
         this.logger = nodeContext.GetLogger();
@@ -102,7 +102,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         NodeDescription = nodeDescription;
 
-        plugProvider = PlugProvider.Create(factory, info, hostApplication)!;
+        Module.TryCreate(modulePath, out var module);
+        plugProvider = PlugProvider.Create(module.Factory, info, hostApplication)!;
         component = plugProvider.Component;
         processor = (IAudioProcessor)component;
         controller = plugProvider.Controller;

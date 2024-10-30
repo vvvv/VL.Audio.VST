@@ -213,11 +213,15 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     public void Update()
     {
-        if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value ?? PluginState.Default))
+        if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value) && state != null)
         {
-            component.setState(state.GetComponentStream());
-            controller?.IgnoreNotImplementedException(c => c.setComponentState(state.GetComponentStream()));
-            controller?.IgnoreNotImplementedException(c => c.setState(state.GetControllerStream()));
+            if (state.HasComponentData)
+            { 
+                component.IgnoreNotImplementedException(c => c.setState(state.GetComponentStream()));
+                controller?.IgnoreNotImplementedException(c => c.setComponentState(state.GetComponentStream()));
+            }
+            if (state.HasControllerData)
+                controller?.IgnoreNotImplementedException(c => c.setState(state.GetControllerStream()));
         }
 
         if (Acknowledge(ref midiInput, midiInputPin.Value))

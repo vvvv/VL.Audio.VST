@@ -10,6 +10,9 @@ public record PluginState(ImmutableArray<byte> Component, ImmutableArray<byte> C
 {
     public static readonly PluginState Default = new PluginState(ImmutableArray<byte>.Empty, ImmutableArray<byte>.Empty);
 
+    internal bool HasComponentData => Component.Length > 0;
+    internal bool HasControllerData => Controller.Length > 0;
+
     internal IBStream GetComponentStream() => GetStream(Component);
 
     internal IBStream GetControllerStream() => GetStream(Controller);

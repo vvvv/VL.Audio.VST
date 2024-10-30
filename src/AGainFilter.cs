@@ -57,13 +57,14 @@ internal unsafe partial class AGainFilter : IDisposable
         window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
         window.HandleCreated += (s, e) =>
         {
-            var plugFrame = new PlugFrame((v, r) => { });
+            var plugFrame = new PlugFrame((r) => { });
             view.setFrame(plugFrame);
             view.attached(window.Handle, "HWND");
         };
         window.HandleDestroyed += (s, e) =>
         {
             view.removed();
+            view.ReleaseComObject();
         };
         window.Show();
 
@@ -155,15 +156,15 @@ internal unsafe partial class AGainFilter : IDisposable
 
             var processData = new ProcessData()
             {
-                processMode = ProcessModes.Realtime,
-                symbolicSampleSize = processSetup.SymbolicSampleSize,
-                numSamples = numSamples,
-                numInputs = 1,
-                numOutputs = 1,
-                inputs = &inputs,
-                outputs = &outputs,
-                inputParameterChanges = inputParameterChanges.GetComPtr(in IParameterChanges.Guid),
-                outputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid)
+                ProcessMode = ProcessModes.Realtime,
+                SymbolicSampleSize = processSetup.SymbolicSampleSize,
+                NumSamples = numSamples,
+                NumInputs = 1,
+                NumOutputs = 1,
+                Inputs = &inputs,
+                Outputs = &outputs,
+                InputParameterChanges = inputParameterChanges.GetComPtr(in IParameterChanges.Guid),
+                OutputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid)
             };
 
             processor.process(in processData);

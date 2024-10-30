@@ -1,59 +1,66 @@
 ﻿namespace VST3;
 
-//------------------------------------------------------------------------
-/** BusInfo:
-This is the structure used with getBusInfo, informing the host about what is a specific given bus.
-\n See also: Steinberg::Vst::IComponent::getBusInfo
-*/
+/// <summary>
+/// BusInfo:
+/// This is the structure used with getBusInfo, informing the host about what is a specific given bus.
+/// See also: <see cref="IComponent.getBusInfo"/>
+/// </summary>
 struct BusInfo
 {
-    ///<summary>
+    private readonly MediaTypes mediaType;
+    private readonly BusDirections direction;
+    private readonly int channelCount;
+    private readonly String128 name;
+    private readonly BusTypes busType;
+    private readonly BusFlags flags;
+
+    /// <summary>
     /// Media type - has to be a value of <see cref="MediaTypes"/>.
-    ///</summary>
-    MediaTypes mediaType;
+    /// </summary>
+    public MediaTypes MediaType => mediaType;
 
-    ///<summary>
+    /// <summary>
     /// Input or output <see cref="BusDirections"/>.
-    ///</summary>
-    BusDirections direction;
+    /// </summary>
+    public BusDirections Direction => direction;
 
-    ///<summary>
+    /// <summary>
     /// Number of channels (if used then need to be rechecked after <see cref="IAudioProcessor.setBusArrangements"/> is called).
     /// For a bus of type <see cref="MediaTypes.kEvent"/>, the channelCount corresponds to the number of supported MIDI channels by this bus.
-    ///</summary>
-    int channelCount;
+    /// </summary>
+    public int ChannelCount => channelCount;
 
-    ///<summary>
+    /// <summary>
     /// Name of the bus.
-    ///</summary>
-    String128 name;
+    /// </summary>
+    public string Name => name.ToString();
 
-    ///<summary>
+    /// <summary>
     /// Main or aux - has to be a value of <see cref="BusTypes"/>.
-    ///</summary>
-    BusTypes busType;
+    /// </summary>
+    public BusTypes BusType => busType;
 
-    ///<summary>
+    /// <summary>
     /// Flags - a combination of <see cref="BusFlags"/>.
-    ///</summary>
-    BusFlags flags;
+    /// </summary>
+    public BusFlags Flags => flags;
 
     [Flags]
-    enum BusFlags
+    public enum BusFlags
     {
-        ///<summary>
+        /// <summary>
         /// The bus should be activated by the host per default on instantiation (activateBus call is requested).
         /// By default, a bus is inactive.
-        ///</summary>
-        kDefaultActive = 1 << 0,
+        /// </summary>
+        DefaultActive = 1 << 0,
 
-        ///<summary>
+        /// <summary>
         /// The bus does not contain ordinary audio data, but data used for control changes at sample rate.
         /// The data is in the same format as the audio data [-1..1].
         /// A host has to prevent unintended routing to speakers to prevent damage.
         /// Only valid for audio media type busses.
         /// [released: 3.7.0]
-        ///</summary>
-        kIsControlVoltage = 1 << 1
-    };
-};
+        /// </summary>
+        IsControlVoltage = 1 << 1
+    }
+}

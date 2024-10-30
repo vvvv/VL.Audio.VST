@@ -58,5 +58,5 @@ partial interface IEditController : IPluginBase
     // view -------------------------------
     /** Creates the editor view of the plug-in, currently only "editor" is supported, see \ref ViewType.
 		The life time of the editor view will never exceed the life time of this controller instance. */
-    [return:MarshalUsing(typeof(VstInterfaceMarshaller<IPlugView>))] [PreserveSig] IPlugView createView([MarshalAs(UnmanagedType.LPStr)] string name);
+    [return:MarshalUsing(typeof(VstUniqueInterfaceMarshaller<IPlugView>))] [PreserveSig] IPlugView createView([MarshalAs(UnmanagedType.LPStr)] string name);
 };

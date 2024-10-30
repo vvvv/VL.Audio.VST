@@ -19,5 +19,5 @@ partial interface IPlugFrame
     //------------------------------------------------------------------------
     /** Called to inform the host about the resize of a given view.
 	 *	Afterwards the host has to call IPlugView::onSize (). */
-    void resizeView([MarshalUsing(typeof(VstInterfaceMarshaller<IPlugView>))] IPlugView view, in ViewRect newSize);
+    void resizeView(/* IPlugView, but would need custom marshalling to ensure lifetime is not prolonged by RCW */nint view, in ViewRect newSize);
 };

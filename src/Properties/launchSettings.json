@@ -3,8 +3,8 @@
     "VL.Audio.VST": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files\\vvvv\\vvvv_gamma_6.7-0208-g078c5b3e84-win-x64\\\\vvvv.exe",
-      "commandLineArgs": "--package-repositories $(MsBuildThisFileDirectory)..\\..\\.. --editable-packages VL.Audio.VST",
-      "nativeDebugging": true
+      "commandLineArgs": "--package-repositories $(PackageRepositories) --editable-packages VL.Audio.VST",
+      "nativeDebugging": false
     }
   }
 }

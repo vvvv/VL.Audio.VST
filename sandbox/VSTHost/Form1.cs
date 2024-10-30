@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using VL.Audio.VST;
 using VST3;
 using VST3.Hosting;
@@ -33,7 +34,7 @@ namespace VSTHost
             //}
 
             //var module = Module.Create("C:\\Program Files\\Common Files\\VST3\\Vintage.vst3");
-            if (!Module.TryCreate(PluginPath, out var module))
+            if (!Module.TryCreate(PluginPath, out module))
                 return;
 
             var pluginFactory = module.Factory;
@@ -68,6 +69,7 @@ namespace VSTHost
         private void DestroyPlugin()
         {
             view?.removed();
+            view?.ReleaseComObject();
             view = null;
 
             plugProvider?.Dispose();
@@ -96,7 +98,7 @@ namespace VSTHost
         private void CreateView()
         {
             view = plugProvider.Controller.createView("editor");
-            var plugFrame = new PlugFrame((v, r) => ClientSize = new Size(r.Width, r.Height));
+            var plugFrame = new PlugFrame((r) => ClientSize = new Size(r.Width, r.Height));
             view.setFrame(plugFrame);
             view.attached(Handle, "HWND");
         }

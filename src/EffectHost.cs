@@ -4,6 +4,7 @@ using Microsoft.Extensions.ObjectPool;
 using Sanford.Multimedia.Midi;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Reactive.Disposables;
 using System.Runtime.InteropServices.Marshalling;
@@ -60,6 +61,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly SynchronizationContext? synchronizationContext;
 
     private readonly EventList inputEvents = new();
+    private readonly EventList outputEvents = new();
     private readonly SerialDisposable midiInputSubscription = new();
     private readonly BlockingCollection<Event> inputEventQueue = new(boundedCapacity: 1024);
 
@@ -82,6 +84,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private readonly Dictionary<uint, (ParameterInfo parameter, IChannel channel)> channels = new();
 
+    private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
     private float[] leftInput = [];
     private float[] rightInput = [];
 
@@ -125,16 +128,18 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 SampleRate = AudioService.Engine.Settings.SampleRate
             });
 
+        audioInputBusses = component.GetBusInfos(MediaTypes.kAudio, BusDirections.kInput).ToImmutableArray();
+        audioOutputBusses = component.GetBusInfos(MediaTypes.kAudio, BusDirections.kOutput).ToImmutableArray();
+        eventInputBusses = component.GetBusInfos(MediaTypes.kEvent, BusDirections.kInput).ToImmutableArray();
+        eventOutputBusses = component.GetBusInfos(MediaTypes.kEvent, BusDirections.kOutput).ToImmutableArray();
+
         // Activate main buses
-        foreach (var mediaType in new[] { MediaTypes.kAudio, MediaTypes.kEvent })
-        {
-            foreach (var direction in new[] { BusDirections.kInput, BusDirections.kOutput })
-            {
-                var busCount = component.getBusCount(mediaType, direction);
-                if (busCount > 0)
-                    component.activateBus(mediaType, direction, 0, true);
-            }
-        }
+        if (HasStereoInput)
+            component.activateBus(MediaTypes.kAudio, BusDirections.kInput, 0, true);
+        if (HasStereoOutput)
+            component.activateBus(MediaTypes.kAudio, BusDirections.kOutput, 0, true);
+        if (HasEventInput)
+            component.activateBus(MediaTypes.kEvent, BusDirections.kInput, 0, true);
 
         component.setActive(true);
         processor.SetProcessing_IgnoreNotImplementedException(true);
@@ -173,6 +178,11 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     public IVLPin[] Inputs { get; }
 
     public IVLPin[] Outputs { get; }
+
+    private bool HasStereoInput => audioInputBusses.Length > 0 && audioInputBusses[0].BusType == BusTypes.kMain && audioInputBusses[0].ChannelCount == 2;
+    private bool HasStereoOutput => audioOutputBusses.Length > 0 && audioOutputBusses[0].BusType == BusTypes.kMain && audioOutputBusses[0].ChannelCount == 2;
+    private bool HasEventInput => eventInputBusses.Length > 0;
+    private bool HasEventOutput => eventOutputBusses.Length > 0;
 
     public void Dispose()
     {
@@ -457,11 +467,19 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 scaleSupport?.setContentScaleFactor(e.DeviceDpiNew / 96f);
             };
 
-            var plugViewSize = view.getSize();
-            window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
+            try
+            {
+                var plugViewSize = view.getSize();
+                window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to get initial view size");
+            }
+
             window.HandleCreated += (s, e) =>
             {
-                var plugFrame = new PlugFrame((v, r) => window.ClientSize = new Size(r.Width, r.Height));
+                var plugFrame = new PlugFrame((r) => window.ClientSize = new Size(r.Width, r.Height));
                 view.setFrame(plugFrame);
                 view.attached(window.Handle, "HWND");
                 scaleSupport?.setContentScaleFactor(window.DeviceDpi / 96f);
@@ -469,6 +487,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             window.HandleDestroyed += (s, e) =>
             {
                 view.removed();
+                view.ReleaseComObject();
             };
             window.ClientSizeChanged += (s, e) =>
             {
@@ -477,7 +496,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             };
         }
 
-        window.Show();
+        window.Visible = true;
     }
 
     private void HideEditor()
@@ -550,38 +569,40 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         leftOutput.CopyTo(leftInput);
         rightOutput.CopyTo(rightInput);
 
+        PrepareBuffers();
+
         fixed (float* leftInPtr = leftInput)
         fixed (float* rightInPtr = rightInput)
         fixed (float* leftOutPtr = leftOutput)
         fixed (float* rightOutPtr = rightOutput)
+        //fixed (float* emptyBufferPtr = emptyBuffer)
+        fixed (AudioBusBuffers* audioInputBuffersPtr = audioInputBuffers)
+        fixed (AudioBusBuffers* audioOutputBuffersPtr = audioOutputBuffers)
+        fixed (ProcessContext* ctx = &processContext)
         {
             var inputBuffers = stackalloc void*[] { leftInPtr, rightInPtr };
-            var inputs = new AudioBusBuffers()
-            {
-                numChannels = 2,
-                channelBuffers = inputBuffers
-            };
-
             var outputBuffers = stackalloc void*[] { leftOutPtr, rightOutPtr };
-            var outputs = new AudioBusBuffers()
-            {
-                numChannels = 2,
-                channelBuffers = outputBuffers
-            };
+
+            for (int i = 0; i < audioInputBuffers.Length; i++)
+                audioInputBuffers[i].channelBuffers = inputBuffers;
+            for (int i = 0; i < audioOutputBuffers.Length; i++)
+                audioOutputBuffers[i].channelBuffers = outputBuffers;
 
             var processData = new ProcessData()
             {
-                processMode = ProcessModes.Realtime,
-                symbolicSampleSize = processSetup.SymbolicSampleSize,
+                ProcessMode = ProcessModes.Realtime,
+                SymbolicSampleSize = processSetup.SymbolicSampleSize,
                 // In the unlikely event of the audio buffer getting larger than 4kb
-                numSamples = Math.Min(numSamples, processSetup.MaxSamplesPerBlock),
-                numInputs = 1,
-                numOutputs = 1,
-                inputs = &inputs,
-                outputs = &outputs,
-                inputParameterChanges = (inputParameterChanges ?? s_noChanges).GetComPtr(in IParameterChanges.Guid),
-                outputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid),
-                inputEvents = inputEvents.GetComPtr(in IEventList.Guid)
+                NumSamples = Math.Min(numSamples, processSetup.MaxSamplesPerBlock),
+                NumInputs = audioInputBuffers.Length,
+                NumOutputs = audioOutputBuffers.Length,
+                Inputs = audioInputBuffersPtr,
+                Outputs = audioOutputBuffersPtr,
+                InputParameterChanges = (inputParameterChanges ?? s_noChanges).GetComPtr(in IParameterChanges.Guid),
+                OutputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid),
+                InputEvents = inputEvents.GetComPtr(in IEventList.Guid),
+                //OutputEvents = outputEvents.GetComPtr(in IEventList.Guid),
+                //ProcessContext = (nint)ctx
             };
 
             processor.process(in processData);
@@ -603,6 +624,23 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         // Unblock Dispose call
         processingEvent.Set();
     }
+
+    [MemberNotNull(nameof(audioInputBuffers), nameof(audioOutputBuffers))]
+    void PrepareBuffers()
+    {
+        //if (emptyBuffer is null || numSamples > emptyBuffer.Length)
+        //{
+        //    emptyBuffer = new float[numSamples];
+        //    audioInputBuffers = null;
+        //    audioOutputBuffers = null;
+        //}
+        if (audioInputBuffers is null)
+            audioInputBuffers = audioInputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
+        if (audioOutputBuffers is null)
+            audioOutputBuffers = audioOutputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
+    }
+    AudioBusBuffers[]? audioInputBuffers, audioOutputBuffers;
+    //float[]? emptyBuffer;
 
     sealed class AudioIn : IVLPin<IEnumerable<AudioSignal>>
     {

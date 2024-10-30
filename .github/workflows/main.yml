@@ -37,4 +37,5 @@ jobs:
         icon-dst: ./deployment/nugeticon.png
         
         # Provide the nuget key. See: https://thegraybook.vvvv.org/reference/extending/publishing.html#getting-a-nugetorg-api-key
-        nuget-key: ${{ secrets.NUGET_KEY }}
+        nuget-key: ${{ secrets.VVVV_ORG_NUGET_KEY }}
+        nuget-feed: https://nuget.pkg.github.com/vvvv/index.json

@@ -68,7 +68,6 @@ namespace VSTHost
         private void DestroyPlugin()
         {
             view?.removed();
-            view?.ReleaseComObject();
             view = null;
 
             plugProvider?.Dispose();

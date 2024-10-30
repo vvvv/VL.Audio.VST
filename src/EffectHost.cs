@@ -195,6 +195,9 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         else
             SaveToPin(StateInputPinName, state);
 
+        processor.SetProcessing_IgnoreNotImplementedException(false);
+        component.setActive(false);
+
         plugProvider.Dispose();
     }
 

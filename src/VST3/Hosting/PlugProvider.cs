@@ -25,7 +25,8 @@ internal class PlugProvider : IDisposable
         }
 
         var provider = new PlugProvider(factory, classInfo, component, controller);
-        provider.ConnectComponents();
+        if (component != controller)
+            provider.ConnectComponents();
         return provider;
     }
 
@@ -52,16 +53,19 @@ internal class PlugProvider : IDisposable
     {
         DisconnectComponents();
 
-        var controllerIsComponent = component is IEditController;
+        if (component != controller)
+        {
+            component.terminate();
+            controller?.terminate();
 
-        component.terminate();
-
-        if (controller != null && !controllerIsComponent)
-            controller.terminate();
-
-        // TODO: Crashes for HostChecker and plugdata
-        controller?.ReleaseComObject();
-        component.ReleaseComObject();
+            controller?.ReleaseComObject();
+            component.ReleaseComObject();
+        }
+        else
+        {
+            component.terminate();
+            component.ReleaseComObject();
+        }
     }
 
     private void ConnectComponents()

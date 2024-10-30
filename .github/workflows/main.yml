@@ -29,8 +29,8 @@ jobs:
     - name: Publish VL Nuget
       uses: vvvv/PublishVLNuget@1.0.43
       with:
-        csproj: src\VL.NewLibrary.Template.csproj
-        nuspec: deployment\VL.NewLibrary.Template.nuspec
+        csproj: src\VL.Audio.VST.csproj
+        nuspec: deployment\VL.Audio.VST.nuspec
 
         # Fill the Icon file
         icon-src: https://raw.githubusercontent.com/vvvv/PublicContent/master/nugeticon.png

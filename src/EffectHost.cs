@@ -573,7 +573,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             {
                 processMode = ProcessModes.Realtime,
                 symbolicSampleSize = processSetup.SymbolicSampleSize,
-                numSamples = numSamples,
+                // In the unlikely event of the audio buffer getting larger than 4kb
+                numSamples = Math.Min(numSamples, processSetup.MaxSamplesPerBlock),
                 numInputs = 1,
                 numOutputs = 1,
                 inputs = &inputs,

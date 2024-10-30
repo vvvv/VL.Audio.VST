@@ -187,7 +187,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         window?.Dispose();
         outputSignal.Dispose();
 
-        var state = PluginState.From(component, controller);
+        var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
         var statePin = (StatePin)Inputs[0];
         var channel = statePin.Value;
         if (channel.IsValid())
@@ -213,15 +213,18 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     public void Update()
     {
-        if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value) && state != null)
+        if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value))
         {
-            if (state.HasComponentData)
-            { 
-                component.IgnoreNotImplementedException(c => c.setState(state.GetComponentStream()));
-                controller?.IgnoreNotImplementedException(c => c.setComponentState(state.GetComponentStream()));
+            if (state != null && state.Id == plugProvider.ClassInfo.ID)
+            {
+                if (state.HasComponentData)
+                {
+                    component.IgnoreNotImplementedException(c => c.setState(state.GetComponentStream()));
+                    controller?.IgnoreNotImplementedException(c => c.setComponentState(state.GetComponentStream()));
+                }
+                if (state.HasControllerData)
+                    controller?.IgnoreNotImplementedException(c => c.setState(state.GetControllerStream()));
             }
-            if (state.HasControllerData)
-                controller?.IgnoreNotImplementedException(c => c.setState(state.GetControllerStream()));
         }
 
         if (Acknowledge(ref midiInput, midiInputPin.Value))

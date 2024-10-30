@@ -6,9 +6,9 @@ using VST3.Hosting;
 
 namespace VL.Audio.VST;
 
-public record PluginState(ImmutableArray<byte> Component, ImmutableArray<byte> Controller)
+public record PluginState(Guid Id, ImmutableArray<byte> Component, ImmutableArray<byte> Controller)
 {
-    public static readonly PluginState Default = new PluginState(ImmutableArray<byte>.Empty, ImmutableArray<byte>.Empty);
+    public static readonly PluginState Default = new PluginState(default, ImmutableArray<byte>.Empty, ImmutableArray<byte>.Empty);
 
     internal bool HasComponentData => Component.Length > 0;
     internal bool HasControllerData => Controller.Length > 0;
@@ -27,12 +27,12 @@ public record PluginState(ImmutableArray<byte> Component, ImmutableArray<byte> C
         return new BStreamAdapter(memoryStream);
     }
 
-    internal static PluginState From(IComponent component, IEditController? controller)
+    internal static PluginState From(Guid id, IComponent component, IEditController? controller)
     {
         var memoryStream = new MemoryStream();
         var componentState = Read(s => component.getState(s));
         var controllerState = Read(s => controller?.getState(s));
-        return new PluginState(componentState, controllerState);
+        return new PluginState(id, componentState, controllerState);
 
         ImmutableArray<byte> Read(Action<IBStream> reader)
         {
@@ -58,6 +58,7 @@ public record PluginState(ImmutableArray<byte> Component, ImmutableArray<byte> C
         public PluginState Deserialize(SerializationContext context, object content, Type type)
         {
             return new PluginState(
+                context.Deserialize<Guid>(content, nameof(Id)),
                 context.Deserialize<ImmutableArray<byte>>(content, nameof(Component)),
                 context.Deserialize<ImmutableArray<byte>>(content, nameof(Controller)));
         }
@@ -66,6 +67,7 @@ public record PluginState(ImmutableArray<byte> Component, ImmutableArray<byte> C
         {
             return new object[]
             {
+                context.Serialize(nameof(Id), value.Id),
                 context.Serialize(nameof(Component), value.Component),
                 context.Serialize(nameof(Controller), value.Controller)
             };

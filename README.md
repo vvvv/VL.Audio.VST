@@ -1,5 +1,5 @@
 # VL.Audio.VST
-Use VST3 instruments and effects and control them via input parameters or MIDI. 
+Use VST 3 instruments and effects and control them via input parameters or MIDI. 
 
 <img src=".github/images/vst.png" width="15%" alt="VST Compatiblen" />
 
@@ -7,9 +7,11 @@ VST® is a trademark of [Steinberg Media Technologies GmbH](https://www.steinber
 
 For use with vvvv, the visual live-programming environment for .NET: http://visualprogramming.net
 
-<details> <summary>Implementation Status</summary>
+> [!IMPORTANT]
+> While this package itself is published under the LGPL-3.0, when releasing an app using it, you also must comply with [VST 3 licensing](https://steinbergmedia.github.io/vst3_dev_portal/pages/VST+3+Licensing/What+are+the+licensing+options.html)!
 
-Compare [VST3 Technical Documentation](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Index.html)
+<details> <summary>Implementation Status</summary>
+Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Index.html)
 
 | Implemented Interfaces | Status  |
 | ------------- | ------------- |

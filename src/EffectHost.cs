@@ -68,13 +68,13 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin;
     private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
-    private readonly Pin<bool> byPassPin;
+    private readonly Pin<bool> applyPin;
 
     private PluginState? state;
     private IObservable<IMidiMessage>? midiInput;
     private string? channelPrefix;
     private bool showUI;
-    private bool byPass;
+    private bool apply;
 
     private readonly ParameterInfo? byPassParameter;
 
@@ -158,7 +158,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         Inputs[i++] = new ParametersInput(this);
         Inputs[i++] = channelPrefixPin = new Pin<string>();
         Inputs[i++] = showUiPin = new Pin<bool>();
-        Inputs[i++] = byPassPin = new Pin<bool>();
+        Inputs[i++] = applyPin = new Pin<bool>();
 
         Outputs[o++] = new AudioOut(outputSignal);
 
@@ -258,10 +258,10 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 HideEditor();
         }
 
-        if (Acknowledge(ref byPass, byPassPin.Value))
+        if (Acknowledge(ref apply, applyPin.Value))
         {
             if (byPassParameter.HasValue)
-                SetParameter(byPassParameter.Value.ID, byPass ? 1.0 : 0.0);
+                SetParameter(byPassParameter.Value.ID, !apply ? 1.0 : 0.0);
         }
 
         // Move upcoming changes to audio thread and notify UI
@@ -610,7 +610,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         }
 
         // Copy input to output if bypass is enabled and plugin doesn't handle it
-        if (byPass && byPassParameter is null)
+        if (!apply && byPassParameter is null)
         {
             leftInput.CopyTo(leftOutput);
             rightInput.CopyTo(rightOutput);

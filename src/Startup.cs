@@ -93,7 +93,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
                 ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>)),
                 ctx.Pin("Channel Prefix", typeof(string), null),
                 ctx.Pin("Show Editor", typeof(bool)),
-                ctx.Pin("Bypass", typeof(bool))
+                ctx.Pin("Apply", typeof(bool), defaultValue: true)
             };
             var outputs = new List<IVLPinDescription>()
             {

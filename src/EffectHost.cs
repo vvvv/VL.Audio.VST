@@ -5,10 +5,8 @@ using Sanford.Multimedia.Midi;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.Reactive.Disposables;
 using System.Runtime.InteropServices.Marshalling;
-using System.Windows.Forms;
 using VL.Core;
 using VL.Core.Reactive;
 using VL.Lang.PublicAPI;
@@ -93,8 +91,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly BufferCallerSignal outputSignal;
     private readonly ProcessContext processContext;
     private readonly ProcessSetup processSetup;
-
-    private Form? window;
 
     public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info) : base(nodeContext)
     {
@@ -197,7 +193,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         processingEvent.Wait();
 
         midiInputSubscription.Dispose();
-        window?.Dispose();
+        HideEditor();
         outputSignal.Dispose();
 
         var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
@@ -448,65 +444,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         var inputChanges = this.upcomingChanges ??= ParameterChangesPool.Default.Get();
         var queue = inputChanges.AddParameterData(in id, out _);
         queue.addPoint(0, normalizedValue);
-    }
-
-    private void ShowEditor()
-    {
-        if (controller is null)
-            return;
-
-        if (window is null || window.IsDisposed)
-        {
-            var view = controller.createView("editor");
-            if (view is null || view.isPlatformTypeSupported("HWND") != 0)
-                return;
-
-            window = new Form();
-
-            // High DPI support
-            var scaleSupport = view as IPlugViewContentScaleSupport;
-            window.DpiChanged += (s, e) =>
-            {
-                scaleSupport?.setContentScaleFactor(e.DeviceDpiNew / 96f);
-            };
-
-            try
-            {
-                var plugViewSize = view.getSize();
-                window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to get initial view size");
-            }
-
-            window.HandleCreated += (s, e) =>
-            {
-                var plugFrame = new PlugFrame((r) => window.ClientSize = new Size(r.Width, r.Height));
-                view.setFrame(plugFrame);
-                view.attached(window.Handle, "HWND");
-                scaleSupport?.setContentScaleFactor(window.DeviceDpi / 96f);
-            };
-            window.HandleDestroyed += (s, e) =>
-            {
-                view.removed();
-                view.ReleaseComObject();
-            };
-            window.ClientSizeChanged += (s, e) =>
-            {
-                var r = window.ClientRectangle;
-                view.onSize(new ViewRect() { left = r.Left, right = r.Right, top = r.Top, bottom = r.Bottom });
-            };
-        }
-
-        window.Visible = true;
-    }
-
-    private void HideEditor()
-    {
-        window?.Close();
-        window?.Dispose();
-        window = null;
     }
 
     void IComponentHandler.beginEdit(uint id)

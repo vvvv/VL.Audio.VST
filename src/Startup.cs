@@ -83,7 +83,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
 
     IVLNodeDescription GetNodeDescription(IVLNodeDescriptionFactory nodeDescriptionFactory, string modulePath, ClassInfo info)
     {
-        return nodeDescriptionFactory.NewNodeDescription(info.Name, "Audio.VST", fragmented: false, ctx =>
+        return nodeDescriptionFactory.NewNodeDescription(info.Name, "Audio.VST", fragmented: false, invalidated: null, tags: string.Join(',', info.SubCategories), init: ctx =>
         {
             var inputs = new List<IVLPinDescription>()
             {

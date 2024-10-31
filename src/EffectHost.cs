@@ -201,10 +201,10 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
         var statePin = (StatePin)Inputs[0];
         var channel = statePin.Value;
-        if (channel.IsValid())
-            channel.Value = state;
-        else
+        if (channel is null || channel.IsSystemGenerated())
             SaveToPin(StateInputPinName, state);
+        else
+            channel.Value = state;
 
         processor.SetProcessing_IgnoreNotImplementedException(false);
         component.setActive(false);

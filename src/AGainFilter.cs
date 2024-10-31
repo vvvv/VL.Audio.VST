@@ -17,7 +17,7 @@ internal unsafe partial class AGainFilter : IDisposable
     private readonly ManualResetEventSlim processingEvent = new(initialState: true);
     private bool isDisposed;
 
-    private readonly HostApp hostApp = new();
+    private readonly HostApp hostApp = new([]);
     private readonly BufferCallerSignal outputSignal;
     private readonly IAudioProcessor processor;
 

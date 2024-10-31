@@ -53,7 +53,7 @@ namespace VSTHost
                 if (info.Category != ClassInfo.VstAudioEffectClass)
                     continue;
 
-                var context = new HostApp();
+                var context = new HostApp([]);
                 // This crashes for JUCE based plugins :(
                 //var plugProvider1 = Task.Run(() => PlugProvider.Create(pluginFactory, info, context)).Result;
                 plugProvider = PlugProvider.Create(pluginFactory, info, context);

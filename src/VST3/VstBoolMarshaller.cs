@@ -19,4 +19,9 @@ internal static unsafe class VstBoolMarshaller
                 return false;
         }
     }
+
+    public static int ConvertToUnmanaged(bool managed)
+    {
+        return managed ? 0 : 1;
+    }
 }

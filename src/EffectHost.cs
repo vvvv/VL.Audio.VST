@@ -43,11 +43,13 @@ sealed class ParameterChangesPool : DefaultObjectPool<ParameterChanges>
 }
 
 [GeneratedComClass]
-internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IDisposable 
+internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable 
 {
     public const string StateInputPinName = "State";
 
     private static readonly ParameterChanges s_noChanges = new();
+
+    private static readonly HostApp s_context = new HostApp([typeof(IMidiMapping), typeof(IMidiLearn)]);
 
     private readonly ManualResetEventSlim processingEvent = new(initialState: true);
     private bool isDisposed;
@@ -94,7 +96,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private Form? window;
 
-    public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info, IHostApplication hostApplication) : base(nodeContext)
+    public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info) : base(nodeContext)
     {
         this.nodeContext = nodeContext;
         this.logger = nodeContext.GetLogger();
@@ -103,7 +105,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         NodeDescription = nodeDescription;
 
         Module.TryCreate(modulePath, out var module);
-        plugProvider = PlugProvider.Create(module.Factory, info, hostApplication)!;
+        plugProvider = PlugProvider.Create(module.Factory, info, s_context)!;
         component = plugProvider.Component;
         processor = (IAudioProcessor)component;
         controller = plugProvider.Controller;
@@ -509,12 +511,12 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     void IComponentHandler.beginEdit(uint id)
     {
-        //throw new NotImplementedException();
+        logger.LogTrace("Begin edit for parameter {id}", id);
     }
 
     void IComponentHandler.endEdit(uint id)
     {
-
+        logger.LogTrace("End edit for parameter {id}", id);
     }
 
     void IComponentHandler.performEdit(uint id, double valueNormalized)
@@ -529,6 +531,26 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     void IComponentHandler.restartComponent(RestartFlags flags)
     {
         logger.LogTrace("Restarting component with flags {flags}", flags);
+    }
+
+    void IComponentHandler2.setDirty(bool state)
+    {
+        logger.LogTrace("Setting dirty state to {state}", state);
+    }
+
+    void IComponentHandler2.requestOpenEditor(string name)
+    {
+        logger.LogTrace("Requesting editor {name}", name);
+    }
+
+    void IComponentHandler2.startGroupEdit()
+    {
+        logger.LogTrace("Starting group edit");
+    }
+
+    void IComponentHandler2.finishGroupEdit()
+    {
+        logger.LogTrace("Finishing group edit");
     }
 
     private void SaveToPin<T>(string pinName, T value)
@@ -640,6 +662,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         if (audioOutputBuffers is null)
             audioOutputBuffers = audioOutputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
     }
+
     AudioBusBuffers[]? audioInputBuffers, audioOutputBuffers;
     //float[]? emptyBuffer;
 

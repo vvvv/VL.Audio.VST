@@ -20,7 +20,6 @@ namespace VL.Audio.VST;
 public sealed class Startup : AssemblyInitializer<Startup>
 {
     private static readonly ConcurrentDictionary<string, ImmutableArray<ClassInfo>> s_classInfos = new();
-    private readonly HostApp context = new HostApp();
 
     public override void Configure(AppHost appHost)
     {
@@ -103,7 +102,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
 
             return ctx.Node(inputs, outputs, c =>
             {
-                return new EffectHost(c.NodeContext, c.NodeDescription, modulePath, info, context);
+                return new EffectHost(c.NodeContext, c.NodeDescription, modulePath, info);
             });
         });
     }

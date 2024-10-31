@@ -17,9 +17,11 @@ sealed partial class AttributeList : IAttributeList
             data = blob.Data;
             sizeInBytes = blob.SizeInBytes;
         }
-
-        data = default;
-        sizeInBytes = default;
+        else
+        {
+            data = default;
+            sizeInBytes = default;
+        }
     }
 
     double IAttributeList.getFloat(string id)

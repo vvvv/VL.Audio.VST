@@ -89,7 +89,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private float[] rightInput = [];
 
     private readonly BufferCallerSignal outputSignal;
-    private readonly ProcessContext processContext;
     private readonly ProcessSetup processSetup;
 
     public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info) : base(nodeContext)
@@ -110,12 +109,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         {
             PerBuffer = Process
         };
-
-        processContext = new ProcessContext()
-        {
-
-        };
-
 
 
         processor.setupProcessing(
@@ -531,6 +524,30 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         PrepareBuffers();
 
+        var timer = AudioService.Engine.Timer;
+
+        var processContext = new ProcessContext()
+        {
+            sampleRate = timer.SampleRate,
+            projectTimeSamples = timer.BufferStart,
+            systemTime = DateTime.Now.Ticks * 100,
+            continousTimeSamples = timer.BufferStart, // TODO: This should be without loop, where to we get this value from?
+            projectTimeMusic = timer.Beat,
+            cycleStartMusic = timer.LoopStartBeat,
+            cycleEndMusic = timer.LoopEndBeat,
+            tempo = timer.BPM,
+            timeSigNumerator = timer.TimeSignatureNumerator,
+            timeSigDenominator = timer.TimeSignatureDenominator,
+            state = ProcessContext.StatesAndFlags.kPlaying | 
+                    ProcessContext.StatesAndFlags.kTempoValid | 
+                    ProcessContext.StatesAndFlags.kTimeSigValid | 
+                    ProcessContext.StatesAndFlags.kSystemTimeValid |
+                    ProcessContext.StatesAndFlags.kContTimeValid |
+                    ProcessContext.StatesAndFlags.kProjectTimeMusicValid |
+                    ProcessContext.StatesAndFlags.kCycleValid |
+                    (timer.Loop ? ProcessContext.StatesAndFlags.kCycleActive : default)
+        };
+
         fixed (float* leftInPtr = leftInput)
         fixed (float* rightInPtr = rightInput)
         fixed (float* leftOutPtr = leftOutput)
@@ -538,7 +555,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         //fixed (float* emptyBufferPtr = emptyBuffer)
         fixed (AudioBusBuffers* audioInputBuffersPtr = audioInputBuffers)
         fixed (AudioBusBuffers* audioOutputBuffersPtr = audioOutputBuffers)
-        fixed (ProcessContext* ctx = &processContext)
         {
             var inputBuffers = stackalloc void*[] { leftInPtr, rightInPtr };
             var outputBuffers = stackalloc void*[] { leftOutPtr, rightOutPtr };
@@ -562,7 +578,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 OutputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid),
                 InputEvents = inputEvents.GetComPtr(in IEventList.Guid),
                 //OutputEvents = outputEvents.GetComPtr(in IEventList.Guid),
-                //ProcessContext = (nint)ctx
+                ProcessContext = new nint(&processContext)
             };
 
             processor.process(in processData);

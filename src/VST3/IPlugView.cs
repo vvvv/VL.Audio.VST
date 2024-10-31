@@ -96,9 +96,9 @@ partial interface IPlugView
     void setFrame(IPlugFrame frame);
 
     /** Is view sizable by user. */
-    [PreserveSig][return: MarshalAs(UnmanagedType.Error)] int canResize();
+    [PreserveSig][return: MarshalUsing(typeof(VstBoolMarshaller))] bool canResize();
 
     /** On live resize this is called to check if the view can be resized to the given rect, if not
 	 *	adjust the rect to the allowed size. */
-    [PreserveSig][return: MarshalAs(UnmanagedType.Error)] int checkSizeConstraint(in ViewRect rect);
+    [PreserveSig][return: MarshalUsing(typeof(VstBoolMarshaller))] bool checkSizeConstraint(ref ViewRect rect);
 };

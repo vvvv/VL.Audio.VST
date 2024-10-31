@@ -10,11 +10,11 @@
 */
 struct ViewRect
 {
-    public int left;
-    public int top;
-    public int right;
-    public int bottom;
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
 
-    public int Width => right - left;
-    public int Height => bottom - top;
+    public int Width => Right - Left;
+    public int Height => Bottom - Top;
 }

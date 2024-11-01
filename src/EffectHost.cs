@@ -524,7 +524,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         PrepareBuffers();
 
-        var timer = AudioService.Engine.Timer;
+        var engine = AudioService.Engine;
+        var timer = engine.Timer;
 
         var processContext = new ProcessContext()
         {
@@ -533,18 +534,20 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             systemTime = DateTime.Now.Ticks * 100,
             continousTimeSamples = timer.BufferStart, // TODO: This should be without loop, where to we get this value from?
             projectTimeMusic = timer.Beat,
+            barPositionMusic = Math.Floor(timer.Beat / 4) * 4,
             cycleStartMusic = timer.LoopStartBeat,
             cycleEndMusic = timer.LoopEndBeat,
             tempo = timer.BPM,
             timeSigNumerator = timer.TimeSignatureNumerator,
             timeSigDenominator = timer.TimeSignatureDenominator,
-            state = ProcessContext.StatesAndFlags.kPlaying | 
+            state = (engine.Play ? ProcessContext.StatesAndFlags.kPlaying : default) |
                     ProcessContext.StatesAndFlags.kTempoValid | 
                     ProcessContext.StatesAndFlags.kTimeSigValid | 
                     ProcessContext.StatesAndFlags.kSystemTimeValid |
                     ProcessContext.StatesAndFlags.kContTimeValid |
                     ProcessContext.StatesAndFlags.kProjectTimeMusicValid |
                     ProcessContext.StatesAndFlags.kCycleValid |
+                    ProcessContext.StatesAndFlags.kBarPositionValid |
                     (timer.Loop ? ProcessContext.StatesAndFlags.kCycleActive : default)
         };
 

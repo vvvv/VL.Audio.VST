@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0216-g28b3f9b075" Version="0.128">
+  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0216-g28b3f9b075" />
+  <Patch Id="CFe1SfU8rEqMBzf3eex8lJ">
+    <Canvas Id="IWnwJeVuV0BMZ4mkWFxTqK" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
+    <!--
+
+    ************************ Application ************************
+
+-->
+    <Node Name="Application" Bounds="100,100" Id="CGLlWWnFeJTPqOelXEWGcx">
+      <p:NodeReference>
+        <Choice Kind="ContainerDefinition" Name="Process" />
+        <CategoryReference Kind="Category" Name="Primitive" />
+      </p:NodeReference>
+      <Patch Id="GHR2cakm6KiN4ZJrtFz2US">
+        <Canvas Id="DHqZui6J5unLAs9Ji1m2gm" CanvasType="Group">
+          <Node Bounds="536,394,105,19" Id="OMQRb77cF3qPfhTMR5E8po">
+            <p:NodeReference LastCategoryFullName="Audio" LastDependency="VL.Audio.VST.vl">
+              <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+              <Choice Kind="ProcessAppFlag" Name="TimingSettings" />
+            </p:NodeReference>
+            <Pin Id="PfimyaY5IZmPP2ybyu8XWh" Name="Node Context" Kind="InputPin" IsHidden="true" />
+            <Pin Id="FQtijDtppsQNTMX7uestg0" Name="Tempo" Kind="InputPin" />
+            <Pin Id="JCxwMAd1t3fMxQKTaLeZ1B" Name="Loop" Kind="InputPin" />
+            <Pin Id="IFegyw3g2i8ONQucpZSYCf" Name="Loop Start Beat" Kind="InputPin" />
+            <Pin Id="CWNDbj41qYVMc2XrPWcgtd" Name="Loop End Beat" Kind="InputPin" />
+            <Pin Id="QzyLpmYfqM1M5AxgQwuur7" Name="Seek Beat" Kind="InputPin" />
+            <Pin Id="LLbCZuH9IdXO6cmGNXZJE2" Name="Do Seek" Kind="InputPin" />
+            <Pin Id="A4qHuiRFHGXQUyHDyIrRYX" Name="Time" Kind="OutputPin" />
+            <Pin Id="TNCqgyglIjbPvjPAt8NnJE" Name="Beat" Kind="OutputPin" />
+          </Node>
+          <Pad Id="DU0NhLucJsZPjV0i21PWGb" Comment="Tempo" Bounds="538,348,41,15" ShowValueBox="true" isIOBox="true" Value="120">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="Float32" />
+            </p:TypeAnnotation>
+          </Pad>
+          <Pad Id="Qgp5TrymVdhPktAvXd8v8U" Comment="Time" Bounds="538,454,47,15" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="JqAW2zWQhLgPoo08cSxGH6" Comment="Beat" Bounds="638,454,47,15" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="KDa4GD8pLOaOfu9NQyJw6C" Bounds="50,54,96,103" ShowValueBox="true" isIOBox="true" Value="🎶">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">50</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="PvJViFpo5G4PsXJLEo1sCF" Bounds="153,54,400,145" ShowValueBox="true" isIOBox="true" Value="In the Nodebrowser you'll find all VST3s that you have installed in the default location (Program Files\Common Files\VST3) or in a folder \VST3 next to your document.&#xD;&#xA;&#xD;&#xA;The plugins are sorted into the categories:&#xD;&#xA;- Audio.VST.Effects&#xD;&#xA;- Audio.VST.Instruments">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="152,238,302,297" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on the plugins node. &#xD;&#xA;&#xD;&#xA;⚠️ VST3 only understands Note and Controller messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and wiggle the according knob in the UI to map the two.&#xD;&#xA;&#xD;&#xA;⚠️ VST3 can not return Midi directly. If you have a plugin that does Midi out, then you have to receive that via a virtual Midi cable and using the MidiIn node.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="FUpacmzA89kLmDyrVLyyIb" Bounds="151,204,122,29" ShowValueBox="true" isIOBox="true" Value="MIDI to VST">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">14</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="HueiFgIqpNIPbzMYr2tKmT" Bounds="524,204,102,29" ShowValueBox="true" isIOBox="true" Value="Timing">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">14</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="QHSdkgdUZ6hMEhYfVZsIVa" Bounds="524,239,254,73" ShowValueBox="true" isIOBox="true" Value="To configure looping and bpm infos globally for the audio engine, use the TimingSettings node.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+        </Canvas>
+        <Patch Id="DLSkAzo8hKXLih8RRj1994" Name="Create" />
+        <Patch Id="RKAjnb8RgLDPXQPQarZCQo" Name="Update" />
+        <ProcessDefinition Id="IqXT0opOoAFMfUeOrIs8AO">
+          <Fragment Id="LO9nH65AeZ3QccOQTlgbvl" Patch="DLSkAzo8hKXLih8RRj1994" Enabled="true" />
+          <Fragment Id="IHMDPgEmVsALP0FPr7jIRK" Patch="RKAjnb8RgLDPXQPQarZCQo" Enabled="true" />
+        </ProcessDefinition>
+        <Link Id="U3p2YMcInfoMaSgTxlbI5r" Ids="DU0NhLucJsZPjV0i21PWGb,FQtijDtppsQNTMX7uestg0" />
+        <Link Id="GisfF7QBx2bNYd861guPzl" Ids="A4qHuiRFHGXQUyHDyIrRYX,Qgp5TrymVdhPktAvXd8v8U" />
+        <Link Id="KAlSEES99jdMkGjBWSWamB" Ids="TNCqgyglIjbPvjPAt8NnJE,JqAW2zWQhLgPoo08cSxGH6" />
+      </Patch>
+    </Node>
+  </Patch>
+  <NugetDependency Id="N6XrLnnnSmtMKLNMoPqS3t" Location="VL.Audio.VST" Version="0.0.0" />
+  <NugetDependency Id="R1ANxEbuDwVLAs6kRlzcAr" Location="VL.IO.Midi" Version="0.0.0" />
+</Document>

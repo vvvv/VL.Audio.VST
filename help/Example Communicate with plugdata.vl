@@ -347,7 +347,7 @@
               <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Bang</p:buttonmode>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="EIUEB7XJzSYPbtBq0ueVjL" Bounds="485,616,239,114" ShowValueBox="true" isIOBox="true" Value="⚠️ No sound output? For this demo to run, you need to manually load the &quot;Example-plugdata.pd&quot; file which you can find next to this .vl document. In the plugdata editor choose: Topleft menu -&gt; Open patch...">
+          <Pad Id="BBXyyArE7BKPIsVYiNSPhm" Bounds="485,614,112,19" ShowValueBox="true" isIOBox="true" Value="Then restart vvvv!">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -384,13 +384,13 @@
         <Link Id="A7FZAEbgHjBPawvsCfphIq" Ids="TnvG4WCdB9EMJ0NWehfgcG,AyVaBYI1Qg0PAQBUx6TFJr" />
         <Link Id="BF648RlyeVdPOYJfwQ7lvk" Ids="BZr1L1Chss1OHgxfyZV4xi,G55gnKHXaTMNzquIudaA54" />
         <Link Id="UW7pFMEblpeNNJRZXkDXGa" Ids="TU2Og9VDKvqN8KMSFdypk8,LPLi6Ijblw0N4wx7turHKd" />
-        <Link Id="UVmomP7lyuwNTbLRE3vhvB" Ids="UzOBXzI76cWOCsqdons1q1,Nd9mCedpQLbL0KdUuP1H3b" />
         <Link Id="TzjsLarLTIyNbXR85dNz87" Ids="FZ3NdDaHsgOLqskJ8BpFmF,NVuMPnVt2TULpnedtCBoQn" />
         <Link Id="USaJuyeQHY1O4dcFkLS8eM" Ids="BhaYxioiXzcPuXwt0bwkGy,BBEMO21RFLGP1cM0l7LAI7" />
         <Link Id="QaOwyDydWnkOgfBTcufdbl" Ids="Q1VSMKebXREQA4VR0gxtwS,UfrCq1g8QxjNBYAC2VddZP" />
         <Link Id="QYjiTF3kq6gOnt2U9wE0gh" Ids="BXHEtxzK4SLLgqSi2rCy86,JIg8GZMJFiZLJ92dHHmmsf" />
         <Link Id="DHlnmsMZBwwPLwFRXztUzf" Ids="AUc9mbQ0FVZOcUCOzLhaFJ,PVQd027XRy0QMR0YNMCOny" />
         <Link Id="PozXryTFBmPLdzygFhauVa" Ids="P9XFzznVeZaNZx8KOrlcWD,IPpGGqFARatO8q7bafAwBe" />
+        <Link Id="G8csKf0zTbsMKeMuxEpD2g" Ids="UzOBXzI76cWOCsqdons1q1,Nd9mCedpQLbL0KdUuP1H3b" />
       </Patch>
     </Node>
   </Patch>

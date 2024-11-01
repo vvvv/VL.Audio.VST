@@ -19,6 +19,7 @@ using VST3.Hosting;
 namespace VL.Audio.VST;
 
 using StatePin = Pin<IChannel<PluginState>>;
+using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
 
 sealed class ParameterChangesPool : DefaultObjectPool<ParameterChanges>
 {
@@ -48,8 +49,9 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private static readonly ParameterChanges s_noChanges = new();
 
     private static readonly HostApp s_context = new HostApp([typeof(IMidiMapping), typeof(IMidiLearn)]);
+    private static readonly AudioSignal s_silenceSignal = new SilenceSignal();
 
-    private readonly ManualResetEventSlim processingEvent = new(initialState: true);
+    private readonly object processingLock = new();
     private bool isDisposed;
 
     private readonly NodeContext nodeContext;
@@ -71,6 +73,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly Pin<bool> applyPin;
 
     private PluginState? state;
+    private AudioPin audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
     private string? channelPrefix;
     private bool showUI;
@@ -88,8 +91,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private float[] leftInput = [];
     private float[] rightInput = [];
 
-    private readonly BufferCallerSignal outputSignal;
     private readonly ProcessSetup processSetup;
+    private readonly AudioOutput audioOutput;
 
     public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info) : base(nodeContext)
     {
@@ -105,17 +108,11 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         processor = (IAudioProcessor)component;
         controller = plugProvider.Controller;
 
-        outputSignal = new BufferCallerSignal()
-        {
-            PerBuffer = Process
-        };
-
-
         processor.setupProcessing(
             processSetup = new ProcessSetup()
             {
                 ProcessMode = ProcessModes.Realtime,
-                SymbolicSampleSize = Utils.GetSymbolicSampleSizes(outputSignal.WaveFormat),
+                SymbolicSampleSize = SymbolicSampleSizes.Sample32,
                 MaxSamplesPerBlock = Math.Max(AudioService.Engine.Settings.BufferSize, 4096),
                 SampleRate = AudioService.Engine.Settings.SampleRate
             });
@@ -126,10 +123,14 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         eventOutputBusses = component.GetBusInfos(MediaTypes.kEvent, BusDirections.kOutput).ToImmutableArray();
 
         // Activate main buses
+        audioOutput = new AudioOutput(this);
         if (HasStereoInput)
             component.activateBus(MediaTypes.kAudio, BusDirections.kInput, 0, true);
-        if (HasStereoOutput)
+        if (HasMainAudioOut)
+        {
             component.activateBus(MediaTypes.kAudio, BusDirections.kOutput, 0, true);
+            audioOutput.SetOutputCount(audioOutputBusses[0].ChannelCount);
+        }
         if (HasEventInput)
             component.activateBus(MediaTypes.kEvent, BusDirections.kInput, 0, true);
 
@@ -144,14 +145,14 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         Inputs[i] = new StatePin();
         i++;
 
-        Inputs[i++] = new AudioIn(outputSignal);
+        Inputs[i++] = audioInputPin = new AudioPin();
         Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
         Inputs[i++] = new ParametersInput(this);
         Inputs[i++] = channelPrefixPin = new Pin<string>();
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
 
-        Outputs[o++] = new AudioOut(outputSignal);
+        Outputs[o++] = audioOutputPin = new AudioPin();
 
         if (controller != null)
         {
@@ -172,7 +173,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     public IVLPin[] Outputs { get; }
 
     private bool HasStereoInput => audioInputBusses.Length > 0 && audioInputBusses[0].BusType == BusTypes.kMain && audioInputBusses[0].ChannelCount == 2;
-    private bool HasStereoOutput => audioOutputBusses.Length > 0 && audioOutputBusses[0].BusType == BusTypes.kMain && audioOutputBusses[0].ChannelCount == 2;
+    private bool HasMainAudioOut => audioOutputBusses.Length > 0 && audioOutputBusses[0].BusType == BusTypes.kMain;
     private bool HasEventInput => eventInputBusses.Length > 0;
     private bool HasEventOutput => eventOutputBusses.Length > 0;
 
@@ -182,25 +183,27 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             return;
 
         isDisposed = true;
+
         // Ensure we're not processing any audio currently
-        processingEvent.Wait();
+        lock (processingLock)
+        {
+            midiInputSubscription.Dispose();
+            HideEditor();
+            audioOutput.Dispose();
 
-        midiInputSubscription.Dispose();
-        HideEditor();
-        outputSignal.Dispose();
+            var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
+            var statePin = (StatePin)Inputs[0];
+            var channel = statePin.Value;
+            if (channel is null || channel.IsSystemGenerated())
+                SaveToPin(StateInputPinName, state);
+            else
+                channel.Value = state;
 
-        var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
-        var statePin = (StatePin)Inputs[0];
-        var channel = statePin.Value;
-        if (channel is null || channel.IsSystemGenerated())
-            SaveToPin(StateInputPinName, state);
-        else
-            channel.Value = state;
+            processor.SetProcessing_IgnoreNotImplementedException(false);
+            component.setActive(false);
 
-        processor.SetProcessing_IgnoreNotImplementedException(false);
-        component.setActive(false);
-
-        plugProvider.Dispose();
+            plugProvider.Dispose();
+        }
     }
 
     private static bool Acknowledge<T>(ref T current, T value)
@@ -215,6 +218,14 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     public void Update()
     {
+        // TODO: Make thread safe!
+        var inputChannelCount = audioInputBusses.Length > 0 ? audioInputBusses[0].ChannelCount : 0;
+        Array.Resize(ref inputAudioSignals, inputChannelCount);
+        for (int i = 0; i < inputAudioSignals.Length; i++)
+        {
+            inputAudioSignals[i] = audioInputPin.Value?.ElementAtOrDefault(i) ?? s_silenceSignal;
+        }
+
         if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value))
         {
             if (state != null && state.Id == plugProvider.ClassInfo.ID)
@@ -255,6 +266,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 SetParameter(byPassParameter.Value.ID, !apply ? 1.0 : 0.0);
         }
 
+
         // Move upcoming changes to audio thread and notify UI
         var inputChanges = this.upcomingChanges;
         if (inputChanges != null && this.committedChanges is null)
@@ -289,6 +301,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             }
             ParameterChangesPool.Default.Return(outputChanges);
         }
+
+        audioOutputPin.Value = audioOutput.Outputs;
     }
 
     private void HandleMidiMessage(IMidiMessage message)
@@ -488,177 +502,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         var solution = IDevSession.Current?.CurrentSolution
             .SetPinValue(nodeContext.Path.Stack, pinName, value);
         solution?.Confirm();
-    }
-
-    unsafe void Process(AudioBufferStereo audioBufferStereo)
-    {
-        if (isDisposed)
-            return;
-
-        // Block a potential Dispose call
-        processingEvent.Reset();
-
-        inputEvents.Clear();
-        var inputEventCount = inputEventQueue.Count;
-        while (inputEventCount-- > 0)
-        {
-            var e = inputEventQueue.Take();
-            inputEvents.AddEvent(in e);
-        }
-
-
-        var inputParameterChanges = Interlocked.Exchange(ref this.committedChanges, null);
-        var outputParameterChanges = pendingOutputChanges ??= ParameterChangesPool.Default.Get();
-
-        audioBufferStereo.GetConstants(out var numSamples, out var sampleRate, out var startTime);
-
-        var leftOutput = audioBufferStereo.Left.AsSpan();
-        var rightOutput = audioBufferStereo.Right.AsSpan();
-
-        // Input and output buffers must be different
-        Array.Resize(ref leftInput, leftOutput.Length);
-        Array.Resize(ref rightInput, rightOutput.Length);
-
-        leftOutput.CopyTo(leftInput);
-        rightOutput.CopyTo(rightInput);
-
-        PrepareBuffers();
-
-        var engine = AudioService.Engine;
-        var timer = engine.Timer;
-
-        var processContext = new ProcessContext()
-        {
-            sampleRate = timer.SampleRate,
-            projectTimeSamples = timer.BufferStart,
-            systemTime = DateTime.Now.Ticks * 100,
-            continousTimeSamples = timer.BufferStart, // TODO: This should be without loop, where to we get this value from?
-            projectTimeMusic = timer.Beat,
-            barPositionMusic = Math.Floor(timer.Beat / 4) * 4,
-            cycleStartMusic = timer.LoopStartBeat,
-            cycleEndMusic = timer.LoopEndBeat,
-            tempo = timer.BPM,
-            timeSigNumerator = timer.TimeSignatureNumerator,
-            timeSigDenominator = timer.TimeSignatureDenominator,
-            state = (engine.Play ? ProcessContext.StatesAndFlags.kPlaying : default) |
-                    ProcessContext.StatesAndFlags.kTempoValid | 
-                    ProcessContext.StatesAndFlags.kTimeSigValid | 
-                    ProcessContext.StatesAndFlags.kSystemTimeValid |
-                    ProcessContext.StatesAndFlags.kContTimeValid |
-                    ProcessContext.StatesAndFlags.kProjectTimeMusicValid |
-                    ProcessContext.StatesAndFlags.kCycleValid |
-                    ProcessContext.StatesAndFlags.kBarPositionValid |
-                    (timer.Loop ? ProcessContext.StatesAndFlags.kCycleActive : default)
-        };
-
-        fixed (float* leftInPtr = leftInput)
-        fixed (float* rightInPtr = rightInput)
-        fixed (float* leftOutPtr = leftOutput)
-        fixed (float* rightOutPtr = rightOutput)
-        fixed (float* emptyBufferPtr = emptyBuffer)
-        fixed (AudioBusBuffers* audioInputBuffersPtr = audioInputBuffers)
-        fixed (AudioBusBuffers* audioOutputBuffersPtr = audioOutputBuffers)
-        {
-            var inputBuffers = stackalloc void*[] { leftInPtr, rightInPtr };
-            var outputBuffers = stackalloc void*[] { leftOutPtr, rightOutPtr };
-            var emptyBuffers = stackalloc void*[] { emptyBufferPtr, emptyBufferPtr };
-
-            for (int i = 0; i < audioInputBuffers.Length; i++)
-            {
-                if (i == 0)
-                    audioInputBuffers[i].channelBuffers = inputBuffers;
-                else
-                    audioInputBuffers[i].channelBuffers = emptyBuffers;
-            }
-            for (int i = 0; i < audioOutputBuffers.Length; i++)
-            {
-                if (i == 0)
-                    audioOutputBuffers[i].channelBuffers = outputBuffers;
-                else
-                    audioOutputBuffers[i].channelBuffers = emptyBuffers;
-            }
-
-            var processData = new ProcessData()
-            {
-                ProcessMode = ProcessModes.Realtime,
-                SymbolicSampleSize = processSetup.SymbolicSampleSize,
-                // In the unlikely event of the audio buffer getting larger than 4kb
-                NumSamples = Math.Min(numSamples, processSetup.MaxSamplesPerBlock),
-                NumInputs = audioInputBuffers.Length,
-                NumOutputs = audioOutputBuffers.Length,
-                Inputs = audioInputBuffersPtr,
-                Outputs = audioOutputBuffersPtr,
-                InputParameterChanges = (inputParameterChanges ?? s_noChanges).GetComPtr(in IParameterChanges.Guid),
-                OutputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid),
-                InputEvents = inputEvents.GetComPtr(in IEventList.Guid),
-                //OutputEvents = outputEvents.GetComPtr(in IEventList.Guid),
-                ProcessContext = new nint(&processContext)
-            };
-
-            processor.process(in processData);
-        }
-
-        // Copy input to output if bypass is enabled and plugin doesn't handle it
-        if (!apply && byPassParameter is null)
-        {
-            leftInput.CopyTo(leftOutput);
-            rightInput.CopyTo(rightOutput);
-        }
-
-        if (inputParameterChanges != null)
-            ParameterChangesPool.Default.Return(inputParameterChanges);
-
-        if (Interlocked.CompareExchange(ref acknowledgedOutputChanges, outputParameterChanges, null) is null)
-            pendingOutputChanges = null;
-
-        // Unblock Dispose call
-        processingEvent.Set();
-    }
-
-    [MemberNotNull(nameof(audioInputBuffers), nameof(audioOutputBuffers))]
-    void PrepareBuffers()
-    {
-        //if (emptyBuffer is null || numSamples > emptyBuffer.Length)
-        //{
-        //    emptyBuffer = new float[numSamples];
-        //    audioInputBuffers = null;
-        //    audioOutputBuffers = null;
-        //}
-        if (audioInputBuffers is null)
-            audioInputBuffers = audioInputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
-        if (audioOutputBuffers is null)
-            audioOutputBuffers = audioOutputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
-        if (emptyBuffer is null)
-            emptyBuffer = new float[processSetup.MaxSamplesPerBlock];
-    }
-
-    AudioBusBuffers[]? audioInputBuffers, audioOutputBuffers;
-    float[]? emptyBuffer;
-
-    sealed class AudioIn : IVLPin<IEnumerable<AudioSignal>>
-    {
-        private readonly BufferCallerSignal bufferCallerSignal;
-
-        public AudioIn(BufferCallerSignal bufferCallerSignal)
-        {
-            this.bufferCallerSignal = bufferCallerSignal;
-        }
-
-        public IEnumerable<AudioSignal>? Value { get => throw new NotImplementedException(); set => bufferCallerSignal.SetInput(value); }
-        object? IVLPin.Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    }
-
-    sealed class AudioOut : IVLPin<IReadOnlyList<AudioSignal>>
-    {
-        private readonly BufferCallerSignal bufferCallerSignal;
-
-        public AudioOut(BufferCallerSignal bufferCallerSignal)
-        {
-            this.bufferCallerSignal = bufferCallerSignal;
-        }
-
-        public IReadOnlyList<AudioSignal>? Value { get => bufferCallerSignal.Outputs; set => throw new NotImplementedException(); }
-        object? IVLPin.Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     sealed class ParametersInput : IVLPin<IReadOnlyDictionary<string, float>>

@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <OutputPath>..\lib</OutputPath>
-    <PackageRepositories>$([System.IO.Path]::GetFullPath($(MsBuildThisFileDirectory)..\..))</PackageRepositories>
+    <PackageRepositories>$([System.IO.Path]::GetFullPath($(MsBuildThisFileDirectory)..\..));$([System.IO.Path]::GetFullPath($(MsBuildThisFileDirectory)..\..\VL.Audio))</PackageRepositories>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,9 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="VL.Audio" Version="1.8.4" />
     <PackageReference Include="VL.CoreLib" Version="2024.6.6" />
     <PackageReference Include="VL.IO.Midi" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VL.Audio\VL.Audio\src\VL.Audio.csproj" />
   </ItemGroup>
 
 </Project>

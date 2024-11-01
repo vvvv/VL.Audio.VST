@@ -552,17 +552,28 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         fixed (float* rightInPtr = rightInput)
         fixed (float* leftOutPtr = leftOutput)
         fixed (float* rightOutPtr = rightOutput)
-        //fixed (float* emptyBufferPtr = emptyBuffer)
+        fixed (float* emptyBufferPtr = emptyBuffer)
         fixed (AudioBusBuffers* audioInputBuffersPtr = audioInputBuffers)
         fixed (AudioBusBuffers* audioOutputBuffersPtr = audioOutputBuffers)
         {
             var inputBuffers = stackalloc void*[] { leftInPtr, rightInPtr };
             var outputBuffers = stackalloc void*[] { leftOutPtr, rightOutPtr };
+            var emptyBuffers = stackalloc void*[] { emptyBufferPtr, emptyBufferPtr };
 
             for (int i = 0; i < audioInputBuffers.Length; i++)
-                audioInputBuffers[i].channelBuffers = inputBuffers;
+            {
+                if (i == 0)
+                    audioInputBuffers[i].channelBuffers = inputBuffers;
+                else
+                    audioInputBuffers[i].channelBuffers = emptyBuffers;
+            }
             for (int i = 0; i < audioOutputBuffers.Length; i++)
-                audioOutputBuffers[i].channelBuffers = outputBuffers;
+            {
+                if (i == 0)
+                    audioOutputBuffers[i].channelBuffers = outputBuffers;
+                else
+                    audioOutputBuffers[i].channelBuffers = emptyBuffers;
+            }
 
             var processData = new ProcessData()
             {
@@ -614,10 +625,12 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             audioInputBuffers = audioInputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
         if (audioOutputBuffers is null)
             audioOutputBuffers = audioOutputBusses.Select(b => new AudioBusBuffers() { numChannels = b.ChannelCount }).ToArray();
+        if (emptyBuffer is null)
+            emptyBuffer = new float[processSetup.MaxSamplesPerBlock];
     }
 
     AudioBusBuffers[]? audioInputBuffers, audioOutputBuffers;
-    //float[]? emptyBuffer;
+    float[]? emptyBuffer;
 
     sealed class AudioIn : IVLPin<IEnumerable<AudioSignal>>
     {

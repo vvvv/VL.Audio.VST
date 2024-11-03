@@ -87,3 +87,9 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 - Report issues on [the vvvv forum](https://discourse.vvvv.org/c/vvvv-gamma/28)
 - For custom development requests, please [get in touch](mailto:devvvvs@vvvv.org)
 - When making a pull-request, please make sure to read the general [guidelines on contributing to vvvv libraries](https://thegraybook.vvvv.org/reference/extending/contributing.html)
+
+## Sponsoring
+Development of this library was partially sponsored by:  
+* [m box](https://www.m-box.de/)
+* [SCHNELLE BUNTE BILDER](https://schnellebuntebilder.de/)
+* [3e8.studio](https://3e8.studio/)

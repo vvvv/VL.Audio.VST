@@ -104,6 +104,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
             var outputs = new List<IVLPinDescription>()
             {
                 ctx.Pin("Output", typeof(IReadOnlyList<AudioSignal>)),
+                ctx.Pin("Midi Out", typeof(IObservable<IMidiMessage>)),
                 //ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>))
             };
 

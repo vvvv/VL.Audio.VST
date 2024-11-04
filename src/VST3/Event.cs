@@ -133,24 +133,53 @@ interface IEvent
     static abstract Event.EventTypes Type { get; }
 }
 
-//------------------------------------------------------------------------
-/** Note-on event specific data. Used in \ref Event (union)
-\ingroup vstEventGrp
-Pitch uses the twelve-tone equal temperament tuning (12-TET).
- */
-struct NoteOnEvent : IEvent
+/// <summary>
+/// Note-on event specific data. Used in <see cref="Event"/> (union).
+/// Pitch uses the twelve-tone equal temperament tuning (12-TET).
+/// </summary>
+public struct NoteOnEvent : IEvent
 {
-    short channel;		/// channel index in event bus
-	short pitch;		/// range [0, 127] = [C-2, G8] with A3=440Hz (12-TET: twelve-tone equal temperament)
-	float tuning;		/// 1.f = +1 cent, -1.f = -1 cent
-	float velocity;		/// range [0.0, 1.0]
-	int length;		    /// in sample frames (optional, Note Off has to follow in any case!)
-	int noteId;         /// note identifier (if not available then -1)
+    private short channel;
+    private short pitch;
+    private float tuning;
+    private float velocity;
+    private int length;
+    private int noteId;
 
-	public NoteOnEvent(short channel, short pitch, float tuning, float velocity, int length, int noteId)
-	{
-		this.channel = channel;
-		this.pitch = pitch;
+    /// <summary>
+    /// Channel index in event bus.
+    /// </summary>
+    public short Channel => channel;
+
+    /// <summary>
+    /// Range [0, 127] = [C-2, G8] with A3=440Hz (12-TET: twelve-tone equal temperament).
+    /// </summary>
+    public short Pitch => pitch;
+
+    /// <summary>
+    /// 1.f = +1 cent, -1.f = -1 cent.
+    /// </summary>
+    public float Tuning => tuning;
+
+    /// <summary>
+    /// Range [0.0, 1.0].
+    /// </summary>
+    public float Velocity => velocity;
+
+    /// <summary>
+    /// In sample frames (optional, Note Off has to follow in any case!).
+    /// </summary>
+    public int Length => length;
+
+    /// <summary>
+    /// Note identifier (if not available then -1).
+    /// </summary>
+    public int NoteId => noteId;
+
+    public NoteOnEvent(short channel, short pitch, float tuning, float velocity, int length, int noteId)
+    {
+        this.channel = channel;
+        this.pitch = pitch;
         this.tuning = tuning;
         this.velocity = velocity;
         this.length = length;
@@ -158,19 +187,44 @@ struct NoteOnEvent : IEvent
     }
 
     static Event.EventTypes IEvent.Type => Event.EventTypes.kNoteOnEvent;
-};
+}
 
 //------------------------------------------------------------------------
 /** Note-off event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-struct NoteOffEvent : IEvent
+public struct NoteOffEvent : IEvent
 {
-    short channel;		/// channel index in event bus
-	short pitch;		/// range [0, 127] = [C-2, G8] with A3=440Hz (12-TET)
-	float velocity;		/// range [0.0, 1.0]
-	int noteId;		/// associated noteOn identifier (if not available then -1)
-	float tuning;
+    private short channel;
+    private short pitch;
+    private float velocity;
+    private int noteId;
+    private float tuning;
+
+    /// <summary>
+    /// Channel index in event bus.
+    /// </summary>
+    public short Channel => channel;
+
+    /// <summary>
+    /// Range [0, 127] = [C-2, G8] with A3=440Hz (12-TET).
+    /// </summary>
+    public short Pitch => pitch;
+
+    /// <summary>
+    /// Range [0.0, 1.0].
+    /// </summary>
+    public float Velocity => velocity;
+
+    /// <summary>
+    /// Associated noteOn identifier (if not available then -1).
+    /// </summary>
+    public int NoteId => noteId;
+
+    /// <summary>
+    /// 1.f = +1 cent, -1.f = -1 cent.
+    /// </summary>
+    public float Tuning => tuning;
 
     public NoteOffEvent(short channel, short pitch, float velocity, int noteId, float tuning)
     {
@@ -181,74 +235,184 @@ struct NoteOffEvent : IEvent
         this.tuning = tuning;
     }
 
-    /// 1.f = +1 cent, -1.f = -1 cent
-
     static Event.EventTypes IEvent.Type => Event.EventTypes.kNoteOffEvent;
-};
+}
 
 //------------------------------------------------------------------------
 /** Data event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-unsafe struct DataEvent : IEvent
+public unsafe struct DataEvent : IEvent
 {
-    uint size;		/// size in bytes of the data block bytes
-	uint type;		/// type of this data block (see \ref DataTypes)
-	byte* bytes; /// pointer to the data block
+    private uint size;
+    private DataTypes type;
+    private byte* bytes;
+
+    /// <summary>
+    /// Size in bytes of the data block bytes.
+    /// </summary>
+    public uint Size => size;
+
+    /// <summary>
+    /// Type of this data block (see <see cref="DataTypes"/>).
+    /// </summary>
+    public DataTypes Type => type;
+
+    /// <summary>
+    /// Pointer to the data block.
+    /// </summary>
+    public byte* Bytes => bytes;
+
+    public ReadOnlySpan<byte> DataBlock => new(bytes, (int)size);
 
     /** Value for DataEvent::type */
-    enum DataTypes
+    public enum DataTypes : uint
     {
-        kMidiSysEx = 0	/// for MIDI system exclusive message
-	};
+        kMidiSysEx = 0  /// for MIDI system exclusive message
+    };
+
+    public DataEvent(uint size, DataTypes type, byte* bytes)
+    {
+        this.size = size;
+        this.type = type;
+        this.bytes = bytes;
+    }
 
     static Event.EventTypes IEvent.Type => Event.EventTypes.kDataEvent;
-};
+}
 
 //------------------------------------------------------------------------
 /** PolyPressure event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp
 */
-struct PolyPressureEvent : IEvent
+public struct PolyPressureEvent : IEvent
 {
-    short channel;		/// channel index in event bus
-	short pitch;		/// range [0, 127] = [C-2, G8] with A3=440Hz
-	float pressure;		/// range [0.0, 1.0]
-	int noteId;     /// event should be applied to the noteId (if not -1)
+    private short channel;
+    private short pitch;
+    private float pressure;
+    private int noteId;
+
+    /// <summary>
+    /// Channel index in event bus.
+    /// </summary>
+    public short Channel => channel;
+
+    /// <summary>
+    /// Range [0, 127] = [C-2, G8] with A3=440Hz.
+    /// </summary>
+    public short Pitch => pitch;
+
+    /// <summary>
+    /// Range [0.0, 1.0].
+    /// </summary>
+    public float Pressure => pressure;
+
+    /// <summary>
+    /// Event should be applied to the noteId (if not -1).
+    /// </summary>
+    public int NoteId => noteId;
+
+    public PolyPressureEvent(short channel, short pitch, float pressure, int noteId)
+    {
+        this.channel = channel;
+        this.pitch = pitch;
+        this.pressure = pressure;
+        this.noteId = noteId;
+    }
 
     static Event.EventTypes IEvent.Type => Event.EventTypes.kPolyPressureEvent;
-};
+}
 
 //------------------------------------------------------------------------
 /** Chord event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-unsafe struct ChordEvent : IEvent
+public unsafe struct ChordEvent : IEvent
 {
-    short root;			/// range [0, 127] = [C-2, G8] with A3=440Hz
-	short bassNote;		/// range [0, 127] = [C-2, G8] with A3=440Hz
-	short mask;			/// root is bit 0
-	ushort textLen;     /// the number of characters (TChar) between the beginning of text and the terminating
-                        /// null character (without including the terminating null character itself)
-    char* text; /// UTF-16, null terminated Hosts Chord Name
+    private short root;
+    private short bassNote;
+    private short mask;
+    private ushort textLen;
+    private char* text;
+
+    /// <summary>
+    /// Range [0, 127] = [C-2, G8] with A3=440Hz.
+    /// </summary>
+    public short Root => root;
+
+    /// <summary>
+    /// Range [0, 127] = [C-2, G8] with A3=440Hz.
+    /// </summary>
+    public short BassNote => bassNote;
+
+    /// <summary>
+    /// Root is bit 0.
+    /// </summary>
+    public short Mask => mask;
+
+    /// <summary>
+    /// The number of characters (TChar) between the beginning of text and the terminating null character (without including the terminating null character itself).
+    /// </summary>
+    public ushort TextLen => textLen;
+
+    /// <summary>
+    /// UTF-16, null terminated Hosts Chord Name.
+    /// </summary>
+    public string Text => new string(text);
+
+    public ChordEvent(short root, short bassNote, short mask, ushort textLen, char* text)
+    {
+        this.root = root;
+        this.bassNote = bassNote;
+        this.mask = mask;
+        this.textLen = textLen;
+        this.text = text;
+    }
 
     static Event.EventTypes IEvent.Type => Event.EventTypes.kChordEvent;
-};
+}
 
 //------------------------------------------------------------------------
 /** Scale event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-unsafe struct ScaleEvent : IEvent
+public unsafe struct ScaleEvent : IEvent
 {
-    short root;			/// range [0, 127] = root Note/Transpose Factor
-	short mask;			/// Bit 0 =  C,  Bit 1 = C#, ... (0x5ab5 = Major Scale)
-	ushort textLen;     /// the number of characters (TChar) between the beginning of text and the terminating
-                        /// null character (without including the terminating null character itself)
-    char* text; /// UTF-16, null terminated, Hosts Scale Name
+    private short root;
+    private short mask;
+    private ushort textLen;
+    private char* text;
+
+    /// <summary>
+    /// Range [0, 127] = root Note/Transpose Factor.
+    /// </summary>
+    public short Root => root;
+
+    /// <summary>
+    /// Bit 0 =  C,  Bit 1 = C#, ... (0x5ab5 = Major Scale).
+    /// </summary>
+    public short Mask => mask;
+
+    /// <summary>
+    /// The number of characters (TChar) between the beginning of text and the terminating null character (without including the terminating null character itself).
+    /// </summary>
+    public ushort TextLen => textLen;
+
+    /// <summary>
+    /// UTF-16, null terminated, Hosts Scale Name.
+    /// </summary>
+    public char* Text => text;
+
+    public ScaleEvent(short root, short mask, ushort textLen, char* text)
+    {
+        this.root = root;
+        this.mask = mask;
+        this.textLen = textLen;
+        this.text = text;
+    }
 
     static Event.EventTypes IEvent.Type => Event.EventTypes.kScaleEvent;
-};
+}
 
 //------------------------------------------------------------------------
 /** Legacy MIDI CC Out event specific data. Used in \ref Event (union)
@@ -256,13 +420,41 @@ unsafe struct ScaleEvent : IEvent
 - [released: 3.6.12]
 
 This kind of event is reserved for generating MIDI CC as output event for kEvent Bus during the process call.
- */
-struct LegacyMIDICCOutEvent : IEvent
+*/
+public struct LegacyMIDICCOutEvent : IEvent
 {
-    byte controlNumber;/// see enum ControllerNumbers [0, 255]
-	sbyte channel;		/// channel index in event bus [0, 15]
-	sbyte value;			/// value of Controller [0, 127]
-	sbyte value2;       /// [0, 127] used for pitch bend (kPitchBend) and polyPressure (kCtrlPolyPressure)
+    private byte controlNumber;
+    private sbyte channel;
+    private sbyte value;
+    private sbyte value2;
+
+    /// <summary>
+    /// See enum ControllerNumbers [0, 255].
+    /// </summary>
+    public byte ControlNumber => controlNumber;
+
+    /// <summary>
+    /// Channel index in event bus [0, 15].
+    /// </summary>
+    public sbyte Channel => channel;
+
+    /// <summary>
+    /// Value of Controller [0, 127].
+    /// </summary>
+    public sbyte Value => value;
+
+    /// <summary>
+    /// [0, 127] used for pitch bend (kPitchBend) and polyPressure (kCtrlPolyPressure).
+    /// </summary>
+    public sbyte Value2 => value2;
+
+    public LegacyMIDICCOutEvent(byte controlNumber, sbyte channel, sbyte value, sbyte value2)
+    {
+        this.controlNumber = controlNumber;
+        this.channel = channel;
+        this.value = value;
+        this.value2 = value2;
+    }
 
     static Event.EventTypes IEvent.Type => Event.EventTypes.kLegacyMIDICCOutEvent;
-};
+}

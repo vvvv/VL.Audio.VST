@@ -1,9 +1,10 @@
-﻿using System.Runtime.InteropServices.Marshalling;
+﻿using System.Collections;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace VST3.Hosting;
 
 [GeneratedComClass]
-internal partial class EventList : VstObject<IEventList>, IEventList
+internal partial class EventList : VstObject<IEventList>, IEventList, IEnumerable<Event>
 {
     private readonly List<Event> events = new List<Event>();
 
@@ -28,4 +29,10 @@ internal partial class EventList : VstObject<IEventList>, IEventList
     {
         return events.Count;
     }
+
+    public List<Event>.Enumerator GetEnumerator() => events.GetEnumerator();
+
+    IEnumerator<Event> IEnumerable<Event>.GetEnumerator() => ((IEnumerable<Event>)events).GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)events).GetEnumerator();
 }

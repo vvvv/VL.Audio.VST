@@ -6,8 +6,7 @@ namespace VL.Audio.VST;
 
 partial class EffectHost
 {
-    private AudioSignal[] inputAudioSignals;
-    private MultiChannelSignal outputSignal;
+    private AudioSignal[] inputAudioSignals = Array.Empty<AudioSignal>();
 
     private unsafe void FillBuffers(float[][] buffers, int offset, int numSamples)
     {
@@ -23,12 +22,12 @@ partial class EffectHost
 
     private unsafe void DoFillBuffers(float[][] buffers, int offset, int numSamples)
     {
-        inputEvents.Clear();
+        inputEventList.Clear();
         var inputEventCount = inputEventQueue.Count;
         while (inputEventCount-- > 0)
         {
             var e = inputEventQueue.Take();
-            inputEvents.AddEvent(in e);
+            inputEventList.AddEvent(in e);
         }
 
 
@@ -49,9 +48,15 @@ partial class EffectHost
         }
 
         // Prepare input channels
-        void** mainInputChannelBuffers = stackalloc void*[inputAudioSignals.Length];
-        for (int i = 0; i < inputAudioSignals.Length; i++)
-            mainInputChannelBuffers[i] = Marshal.UnsafeAddrOfPinnedArrayElement(inputAudioSignals[i].ReadBuffer, 0).ToPointer();
+        var mainInputChannelCount = audioInputBusses.Length > 0 ? audioInputBusses[0].ChannelCount : 0;
+        void** mainInputChannelBuffers = stackalloc void*[mainInputChannelCount];
+        for (int i = 0; i < mainInputChannelCount; i++)
+        {
+            if (i < inputAudioSignals.Length)
+                mainInputChannelBuffers[i] = Marshal.UnsafeAddrOfPinnedArrayElement(inputAudioSignals[i].ReadBuffer, 0).ToPointer();
+            else
+                mainInputChannelBuffers[i] = GetDummySampleBuffer(numSamples).ToPointer();
+        }
 
         // Prepare output channels
         void** mainOutputChannelBuffers = stackalloc void*[buffers.Length];
@@ -117,10 +122,10 @@ partial class EffectHost
             NumOutputs = audioOutputBusses.Length,
             Inputs = audioInputBuffers,
             Outputs = audioOutputBuffers,
-            InputParameterChanges = (inputParameterChanges ?? s_noChanges).ComInterfacePtr,
-            OutputParameterChanges = outputParameterChanges.ComInterfacePtr,
-            InputEvents = inputEvents.ComInterfacePtr,
-            //OutputEvents = outputEvents.GetComPtr(in IEventList.Guid),
+            InputParameterChanges = (inputParameterChanges ?? s_noChanges),
+            OutputParameterChanges = outputParameterChanges,
+            InputEvents = inputEventList,
+            OutputEvents = outputEventList,
             ProcessContext = new nint(&processContext)
         };
 
@@ -137,6 +142,17 @@ partial class EffectHost
 
         if (Interlocked.CompareExchange(ref acknowledgedOutputChanges, outputParameterChanges, null) is null)
             pendingOutputChanges = null;
+
+        // Translate output events to MIDI (if possible) and send them out on background thread
+        try
+        {
+            foreach (var e in outputEventList)
+                outputEvents.OnNext(e);
+        }
+        finally
+        {
+            outputEventList.Clear();
+        }
     }
 
     private static unsafe void** GetEmptyChannelBuffers(int numChannels, int numSamples)

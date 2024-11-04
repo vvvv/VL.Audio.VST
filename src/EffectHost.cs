@@ -4,7 +4,10 @@ using Sanford.Multimedia.Midi;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices.Marshalling;
 using VL.Core;
 using VL.Core.Reactive;
@@ -28,7 +31,6 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private static readonly ParameterChanges s_noChanges = new();
 
     private static readonly HostApp s_context = new HostApp([typeof(IMidiMapping), typeof(IMidiLearn)]);
-    private static readonly AudioSignal s_silenceSignal = new SilenceSignal();
 
     private readonly object processingLock = new();
     private bool isDisposed;
@@ -42,12 +44,13 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly IEditController? controller;
     private readonly SynchronizationContext? synchronizationContext;
 
-    private readonly EventList inputEvents = new();
-    private readonly EventList outputEvents = new();
+    private readonly EventList inputEventList = new();
+    private readonly EventList outputEventList = new();
     private readonly SerialDisposable midiInputSubscription = new();
     private readonly BlockingCollection<Event> inputEventQueue = new(boundedCapacity: 1024);
+    private readonly Subject<Event> outputEvents = new();
 
-    private readonly Pin<IObservable<IMidiMessage>> midiInputPin;
+    private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
     private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
@@ -104,7 +107,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         // Activate main buses
         audioOutput = new AudioOutput(this);
-        if (HasStereoInput)
+        if (HasMainAudioIn)
             component.activateBus(MediaTypes.kAudio, BusDirections.kInput, 0, true);
         if (HasMainAudioOut)
         {
@@ -113,6 +116,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         }
         if (HasEventInput)
             component.activateBus(MediaTypes.kEvent, BusDirections.kInput, 0, true);
+        if (HasEventOutput)
+            component.activateBus(MediaTypes.kEvent, BusDirections.kOutput, 0, true);
 
         component.setActive(true);
         processor.SetProcessing_IgnoreNotImplementedException(true);
@@ -133,6 +138,10 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         Inputs[i++] = applyPin = new Pin<bool>();
 
         Outputs[o++] = audioOutputPin = new AudioPin();
+        Outputs[o++] = midiOutputPin = new Pin<IObservable<IMidiMessage>>() 
+        { 
+            Value = outputEvents.ObserveOn(Scheduler.Default).SelectMany(e => TryTranslateToMidi(in e, out var m) ? new[] { m } : [])
+        };
 
         if (controller != null)
         {
@@ -152,7 +161,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     public IVLPin[] Outputs { get; }
 
-    private bool HasStereoInput => audioInputBusses.Length > 0 && audioInputBusses[0].BusType == BusTypes.kMain && audioInputBusses[0].ChannelCount == 2;
+    private bool HasMainAudioIn => audioInputBusses.Length > 0 && audioInputBusses[0].BusType == BusTypes.kMain;
     private bool HasMainAudioOut => audioOutputBusses.Length > 0 && audioOutputBusses[0].BusType == BusTypes.kMain;
     private bool HasEventInput => eventInputBusses.Length > 0;
     private bool HasEventOutput => eventOutputBusses.Length > 0;
@@ -200,12 +209,10 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     public void Update()
     {
         // TODO: Make thread safe!
-        var inputChannelCount = audioInputBusses.Length > 0 ? audioInputBusses[0].ChannelCount : 0;
-        Array.Resize(ref inputAudioSignals, inputChannelCount);
+        var aduioInputSignals = audioInputPin.Value ?? Array.Empty<AudioSignal>();
+        Array.Resize(ref inputAudioSignals, aduioInputSignals.Count);
         for (int i = 0; i < inputAudioSignals.Length; i++)
-        {
-            inputAudioSignals[i] = audioInputPin.Value?.ElementAtOrDefault(i) ?? s_silenceSignal;
-        }
+            inputAudioSignals[i] = aduioInputSignals[i];
 
         if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value))
         {
@@ -354,6 +361,51 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 SetParameter(paramId, value);
             }
         }
+    }
+
+    static bool TryTranslateToMidi(in Event e, [NotNullWhen(true)] out IMidiMessage? message)
+    {
+        switch (e.Type)
+        {
+            case Event.EventTypes.kNoteOnEvent:
+                var noteOn = e.GetValue<NoteOnEvent>();
+                message = MessageUtils.NoteOn(noteOn.Channel, noteOn.Pitch, noteOn.Velocity);
+                return true;
+            case Event.EventTypes.kNoteOffEvent:
+                var noteOff = e.GetValue<NoteOffEvent>();
+                message = MessageUtils.NoteOn(noteOff.Channel, noteOff.Pitch, noteOff.Velocity);
+                return true;
+            case Event.EventTypes.kDataEvent:
+                var dataEvent = e.GetValue<DataEvent>();
+                switch (dataEvent.Type)
+                {
+                    case DataEvent.DataTypes.kMidiSysEx:
+                        message = new SysExMessage(dataEvent.DataBlock.ToArray());
+                        return true;
+                    default:
+                        break;
+                }
+                break;
+            case Event.EventTypes.kPolyPressureEvent:
+                break;
+            case Event.EventTypes.kNoteExpressionValueEvent:
+                break;
+            case Event.EventTypes.kNoteExpressionTextEvent:
+                break;
+            case Event.EventTypes.kChordEvent:
+                break;
+            case Event.EventTypes.kScaleEvent:
+                break;
+            case Event.EventTypes.kLegacyMIDICCOutEvent:
+                var midiCCEvent = e.GetValue<LegacyMIDICCOutEvent>();
+                message = MessageUtils.Controller(midiCCEvent.Channel, midiCCEvent.ControlNumber, midiCCEvent.Value);
+                return true;
+            default:
+                break;
+        }
+
+        message = null;
+        return false;
     }
 
     private void LoadChannels(string prefix)

@@ -1,4 +1,5 @@
 ﻿using Sanford.Multimedia.Midi;
+using Stride.Core.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -93,18 +94,19 @@ public sealed class Startup : AssemblyInitializer<Startup>
         {
             var inputs = new List<IVLPinDescription>()
             {
-                ctx.Pin(EffectHost.StateInputPinName, typeof(IChannel<PluginState>)),
-                ctx.Pin("Input", typeof(IEnumerable<AudioSignal>)),
-                ctx.Pin("Midi In", typeof(IObservable<IMidiMessage>)),
-                ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>)),
-                ctx.Pin("Channel Prefix", typeof(string), null),
-                ctx.Pin("Show Editor", typeof(bool)),
-                ctx.Pin("Apply", typeof(bool), defaultValue: true)
+                new PinDescription(EffectHost.StateInputPinName, typeof(IChannel<PluginState>)) { IsVisible = false },
+                new PinDescription(EffectHost.BoundsInputPinName, typeof(IChannel<RectangleF>)) { IsVisible = false },
+                new PinDescription("Input", typeof(IEnumerable<AudioSignal>)),
+                new PinDescription("Midi In", typeof(IObservable<IMidiMessage>)),
+                new PinDescription("Parameters", typeof(IReadOnlyDictionary<string, float>)),
+                new PinDescription("Channel Prefix", typeof(string), null),
+                new PinDescription("Show Editor", typeof(bool)),
+                new PinDescription("Apply", typeof(bool), defaultValue: true)
             };
             var outputs = new List<IVLPinDescription>()
             {
-                ctx.Pin("Output", typeof(IReadOnlyList<AudioSignal>)),
-                ctx.Pin("Midi Out", typeof(IObservable<IMidiMessage>)),
+                new PinDescription("Output", typeof(IReadOnlyList<AudioSignal>)),
+                new PinDescription("Midi Out", typeof(IObservable<IMidiMessage>)),
                 //ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>))
             };
 
@@ -113,5 +115,27 @@ public sealed class Startup : AssemblyInitializer<Startup>
                 return new EffectHost(c.NodeContext, c.NodeDescription, modulePath, info);
             });
         });
+    }
+
+    sealed class PinDescription : IVLPinDescription, IInfo, IVLPinDescriptionWithVisibility
+    {
+        public PinDescription(string name, Type type, object? defaultValue = null)
+        {
+            Name = name;
+            Type = type;
+            DefaultValue = defaultValue;
+        }
+
+        public string Name { get; init; }
+
+        public Type Type { get; init; }
+
+        public object? DefaultValue { get; init; }
+
+        public bool IsVisible { get; init; } = true;
+
+        public string? Summary { get; init; }
+
+        public string? Remarks { get; init; }
     }
 }

@@ -4,6 +4,9 @@ using System.Windows.Forms;
 using VST3.Hosting;
 using VST3;
 using System.Runtime.InteropServices.Marshalling;
+using System.Reactive.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 
 namespace VL.Audio.VST;
 partial class EffectHost
@@ -21,7 +24,7 @@ partial class EffectHost
             if (view is null || view.isPlatformTypeSupported("HWND") != 0)
                 return;
 
-            window = new Window(view);
+            window = new Window(this, view);
 
             // High DPI support
             var scaleSupport = view as IPlugViewContentScaleSupport;
@@ -30,14 +33,23 @@ partial class EffectHost
                 scaleSupport?.setContentScaleFactor(e.DeviceDpiNew / 96f);
             };
 
-            try
+            bounds = boundsPin.Value?.Value ?? default;
+            if (!bounds.IsEmpty)
             {
-                var plugViewSize = view.getSize();
-                window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
+                window.StartPosition = FormStartPosition.Manual;
+                SetWindowBounds(bounds);
             }
-            catch (Exception e)
+            else
             {
-                logger.LogError(e, "Failed to get initial view size");
+                try
+                {
+                    var plugViewSize = view.getSize();
+                    window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to get initial view size");
+                }
             }
 
             try
@@ -55,6 +67,26 @@ partial class EffectHost
         }
 
         window.Visible = true;
+        window.Activate();
+    }
+
+    void SaveCurrentWindowBounds()
+    {
+        if (window is null || window.IsDisposed)
+            return;
+
+        var position = window.DesktopLocation;
+        var bounds = new Stride.Core.Mathematics.RectangleF(position.X, position.Y, window.ClientSize.Width, window.ClientSize.Height);
+        SaveToChannelOrPin(boundsPin.Value, BoundsInputPinName, bounds);
+    }
+
+    private void SetWindowBounds(Stride.Core.Mathematics.RectangleF bounds)
+    {
+        if (window is null || window.IsDisposed)
+            return;
+
+        window.Location = new Point((int)bounds.X, (int)bounds.Y);
+        window.ClientSize = new Size((int)bounds.Width, (int)bounds.Height);
     }
 
     private void HideEditor()
@@ -67,11 +99,14 @@ partial class EffectHost
     [GeneratedComClass]
     sealed partial class Window : Form, IPlugFrame
     {
+        private readonly EffectHost effectHost;
         private readonly IPlugView view;
         private readonly IPlugViewContentScaleSupport? scaleSupport;
+        private readonly SingleAssignmentDisposable boundsSubscription = new();
 
-        public Window(IPlugView view)
+        public Window(EffectHost effectHost, IPlugView view)
         {
+            this.effectHost = effectHost;
             this.view = view;
             this.scaleSupport = view as IPlugViewContentScaleSupport;
         }
@@ -82,11 +117,19 @@ partial class EffectHost
             view.attached(Handle, "HWND");
             scaleSupport?.setContentScaleFactor(DeviceDpi / 96f);
 
+            boundsSubscription.Disposable = Observable.Merge(
+                Observable.FromEventPattern(this, nameof(ClientSizeChanged)),
+                Observable.FromEventPattern(this, nameof(LocationChanged)))
+                .Throttle(TimeSpan.FromSeconds(0.25))
+                .ObserveOn(SynchronizationContext.Current!)
+                .Subscribe(_ => effectHost.SaveCurrentWindowBounds());
+
             base.OnHandleCreated(e);
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
+            boundsSubscription.Dispose();
             view.removed();
             view.ReleaseComObject();
 

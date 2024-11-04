@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sanford.Multimedia.Midi;
+using Stride.Core.Mathematics;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -27,6 +28,7 @@ using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
 internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable 
 {
     public const string StateInputPinName = "State";
+    public const string BoundsInputPinName = "Bounds";
 
     private static readonly ParameterChanges s_noChanges = new();
 
@@ -50,12 +52,14 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly BlockingCollection<Event> inputEventQueue = new(boundedCapacity: 1024);
     private readonly Subject<Event> outputEvents = new();
 
+    private readonly Pin<IChannel<RectangleF>> boundsPin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
     private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
 
     private PluginState? state;
+    private RectangleF bounds;
     private AudioPin audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
     private string? channelPrefix;
@@ -129,7 +133,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         Inputs[i] = new StatePin();
         i++;
-
+        Inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
         Inputs[i++] = audioInputPin = new AudioPin();
         Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
         Inputs[i++] = new ParametersInput(this);
@@ -183,10 +187,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
             var statePin = (StatePin)Inputs[0];
             var channel = statePin.Value;
-            if (channel is null || channel.IsSystemGenerated())
-                SaveToPin(StateInputPinName, state);
-            else
-                channel.Value = state;
+            SaveToChannelOrPin(channel, StateInputPinName, state);
 
             processor.SetProcessing_IgnoreNotImplementedException(false);
             component.setActive(false);
@@ -246,6 +247,12 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 ShowEditor();
             else
                 HideEditor();
+        }
+
+        if (Acknowledge(ref bounds, boundsPin.Value?.Value ?? RectangleF.Empty))
+        {
+            if (!bounds.IsEmpty)
+                SetWindowBounds(bounds);
         }
 
         if (Acknowledge(ref apply, applyPin.Value))
@@ -530,11 +537,19 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         logger.LogTrace("Finishing group edit");
     }
 
+    private void SaveToChannelOrPin<T>(IChannel<T>? channel, string pinName, T value)
+    {
+        if (channel is null || channel.IsSystemGenerated())
+            SaveToPin(pinName, value);
+        else
+            channel.Value = value;
+    }
+
     private void SaveToPin<T>(string pinName, T value)
     {
         var solution = IDevSession.Current?.CurrentSolution
             .SetPinValue(nodeContext.Path.Stack, pinName, value);
-        solution?.Confirm();
+        solution?.Confirm(Model.SolutionUpdateKind.DontCompile | Model.SolutionUpdateKind.TweakLast);
     }
 
     sealed class ParametersInput : IVLPin<IReadOnlyDictionary<string, float>>

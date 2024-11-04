@@ -117,9 +117,9 @@ partial class EffectHost
             NumOutputs = audioOutputBusses.Length,
             Inputs = audioInputBuffers,
             Outputs = audioOutputBuffers,
-            InputParameterChanges = (inputParameterChanges ?? s_noChanges).GetComPtr(in IParameterChanges.Guid),
-            OutputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid),
-            InputEvents = inputEvents.GetComPtr(in IEventList.Guid),
+            InputParameterChanges = (inputParameterChanges ?? s_noChanges).ComInterfacePtr,
+            OutputParameterChanges = outputParameterChanges.ComInterfacePtr,
+            InputEvents = inputEvents.ComInterfacePtr,
             //OutputEvents = outputEvents.GetComPtr(in IEventList.Guid),
             ProcessContext = new nint(&processContext)
         };

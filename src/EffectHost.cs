@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ObjectPool;
 using Sanford.Multimedia.Midi;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -21,26 +20,6 @@ namespace VL.Audio.VST;
 using StatePin = Pin<IChannel<PluginState>>;
 using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
 
-sealed class ParameterChangesPool : DefaultObjectPool<ParameterChanges>
-{
-    public static readonly ParameterChangesPool Default = new();
-
-    public ParameterChangesPool() : base(new Policy())
-    {
-    }
-
-    sealed class Policy : PooledObjectPolicy<ParameterChanges>
-    {
-        public override ParameterChanges Create() => new ParameterChanges();
-
-        public override bool Return(ParameterChanges obj)
-        {
-            obj.Clear();
-            return true;
-        }
-    }
-}
-
 [GeneratedComClass]
 internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable 
 {
@@ -56,6 +35,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private readonly NodeContext nodeContext;
     private readonly ILogger logger;
+    private readonly Module module;
     private readonly PlugProvider plugProvider;
     private readonly IComponent component;
     private readonly IAudioProcessor processor;
@@ -102,7 +82,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         NodeDescription = nodeDescription;
 
-        Module.TryCreate(modulePath, out var module);
+        module = Module.Create(modulePath);
         plugProvider = PlugProvider.Create(module.Factory, info, s_context)!;
         component = plugProvider.Component;
         processor = (IAudioProcessor)component;
@@ -203,6 +183,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             component.setActive(false);
 
             plugProvider.Dispose();
+            module.Dispose();
         }
     }
 

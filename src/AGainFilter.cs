@@ -35,7 +35,7 @@ internal unsafe partial class AGainFilter : IDisposable
         Module.TryCreate("C:\\Users\\elias\\source\\repos\\vst3sdk\\build\\VST3\\Debug\\again.vst3", out var module);
         var factory = module.Factory;
 
-        ComWrappers cw = Utils.comWrappers;
+        ComWrappers cw = VstWrappers.Instance;
 
         var info = module.Factory.ClassInfos[0];
         component = factory.CreateInstance<IComponent>(info.ID);
@@ -163,8 +163,8 @@ internal unsafe partial class AGainFilter : IDisposable
                 NumOutputs = 1,
                 Inputs = &inputs,
                 Outputs = &outputs,
-                InputParameterChanges = inputParameterChanges.GetComPtr(in IParameterChanges.Guid),
-                OutputParameterChanges = outputParameterChanges.GetComPtr(in IParameterChanges.Guid)
+                InputParameterChanges = inputParameterChanges.ComInterfacePtr,
+                OutputParameterChanges = outputParameterChanges.ComInterfacePtr
             };
 
             processor.process(in processData);

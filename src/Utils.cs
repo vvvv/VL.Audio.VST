@@ -11,8 +11,6 @@ namespace VL.Audio.VST;
 
 static class Utils
 {
-    public static readonly ComWrappers comWrappers = new StrategyBasedComWrappers();
-
     public static void ReleaseComObject(this object obj)
     {
         if (obj is ComObject com && IsUniqueInstance(com))
@@ -31,9 +29,9 @@ static class Utils
         if (obj is null)
             return default;
 
-        var pUnk = comWrappers.GetOrCreateComInterfaceForObject(obj, CreateComInterfaceFlags.None);
+        var pUnk = VstWrappers.Instance.GetOrCreateComInterfaceForObject(obj, CreateComInterfaceFlags.None);
         Marshal.QueryInterface(pUnk, in guid, out var pInt);
-        // TODO: Marshal.Release(pUnk) ?
+        Marshal.Release(pUnk);
         return pInt;
     }
 

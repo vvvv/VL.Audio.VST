@@ -3,7 +3,7 @@
 namespace VST3.Hosting;
 
 [GeneratedComClass]
-sealed partial class Message : IMessage
+sealed partial class Message : VstObject<IMessage>, IMessage
 {
     private string? id;
     private AttributeList? attributeList;

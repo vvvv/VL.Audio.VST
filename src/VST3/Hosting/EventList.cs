@@ -3,7 +3,7 @@
 namespace VST3.Hosting;
 
 [GeneratedComClass]
-internal partial class EventList : IEventList
+internal partial class EventList : VstObject<IEventList>, IEventList
 {
     private readonly List<Event> events = new List<Event>();
 

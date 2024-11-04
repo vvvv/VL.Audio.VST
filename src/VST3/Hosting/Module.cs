@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VST3.Hosting;
 
-class Module : IDisposable
+sealed class Module : IDisposable
 {
+    private static Dictionary<string, Module?> s_modules = new(StringComparer.OrdinalIgnoreCase);
+
     public static List<string> GetModulePaths()
     {
         // https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Locations+Format/Plugin+Locations.html
@@ -124,10 +119,26 @@ class Module : IDisposable
 
     public static unsafe bool TryCreate(string path, [NotNullWhen(true)] out Module? module)
     {
+        lock (s_modules)
+        {
+            if (!s_modules.TryGetValue(path, out module))
+                s_modules[path] = module = CreateInternal(path);
+            module?.AddRef();
+            return module != null;
+        }
+    }
+
+    public static unsafe Module Create(string path)
+    {
+        if (TryCreate(path, out var module))
+            return module;
+        throw new Exception($"Failed to create module for {path}");
+    }
+
+    private static unsafe Module? CreateInternal(string path)
+    {
         nint modulePtr;
         bool isBundle;
-
-        module = null;
 
         if (Directory.Exists(path))
         {
@@ -144,23 +155,22 @@ class Module : IDisposable
         }
 
         if (modulePtr == default)
-            return false;
+            return null;
 
         if (!NativeLibrary.TryGetExport(modulePtr, "GetPluginFactory", out var getPluginFactoryAddress))
-            return false;
+            return null;
 
         if (NativeLibrary.TryGetExport(modulePtr, "InitDll", out var initDllAddress))
         {
             var dllEntry = (delegate* unmanaged[Cdecl]<bool>)initDllAddress;
             if (!dllEntry())
-                return false;
+                return null;
         }
 
         var factoryProc = (delegate* unmanaged[Cdecl]<nint>)getPluginFactoryAddress;
         var pluginFactoryPtr = factoryProc();
         var pluginFactory = VstWrappers.Instance.CreateObjectForComInstance<IPluginFactory>(pluginFactoryPtr);
-        module = new Module(modulePtr, Path.GetFileName(path), path, isBundle, new PluginFactory(pluginFactory));
-        return true;
+        return new Module(modulePtr, Path.GetFileName(path), path, isBundle, new PluginFactory(pluginFactory));
 
         static nint LoadAsDll(string path)
         {
@@ -177,6 +187,7 @@ class Module : IDisposable
     }
 
     private readonly nint module;
+    private int refCount;
 
     private Module(nint module, string name, string filePath, bool isBundle, PluginFactory factory)
     {
@@ -193,16 +204,27 @@ class Module : IDisposable
     public PluginFactory Factory { get; }
     public bool IsBundle { get; }
 
-    public unsafe void Dispose()
+    private void AddRef() => Interlocked.Increment(ref refCount);
+
+    private unsafe void Release()
     {
-        Factory.Dispose();
-
-        if (NativeLibrary.TryGetExport(module, "ExitDll", out var exitDllAddress))
+        if (Interlocked.Decrement(ref refCount) == 0)
         {
-            var exitDll = (delegate* unmanaged[Cdecl]<bool>)exitDllAddress;
-            exitDll();
-        }
+            lock (s_modules)
+            {
+                s_modules.Remove(FilePath);
+                Factory.Dispose();
 
-        NativeLibrary.Free(module);
+                if (NativeLibrary.TryGetExport(module, "ExitDll", out var exitDllAddress))
+                {
+                    var exitDll = (delegate* unmanaged[Cdecl]<bool>)exitDllAddress;
+                    exitDll();
+                }
+
+                NativeLibrary.Free(module);
+            }
+        }
     }
+
+    public void Dispose() => Release();
 }

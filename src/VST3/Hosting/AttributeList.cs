@@ -4,7 +4,7 @@ using System.Runtime.InteropServices.Marshalling;
 namespace VST3.Hosting;
 
 [GeneratedComClass]
-sealed partial class AttributeList : IAttributeList
+sealed partial class AttributeList : VstObject<IAttributeList>, IAttributeList
 {
     record BinaryBlob(nint Data, uint SizeInBytes);
 

@@ -1,18 +1,12 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Immutable;
-using System.Runtime.InteropServices.Marshalling;
+﻿using System.Runtime.InteropServices.Marshalling;
 
 namespace VST3.Hosting;
 
 [GeneratedComClass]
-sealed partial class ParameterChanges : IParameterChanges
+sealed partial class ParameterChanges : VstObject<IParameterChanges>, IParameterChanges
 {
     private readonly List<ParameterValueQueue> queues = new();
     private int usedQueueCount;
-
-    public ParameterChanges()
-    {
-    }
 
     public ParameterValueQueue AddParameterData(in uint id, out int index)
     {

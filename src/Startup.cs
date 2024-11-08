@@ -110,7 +110,8 @@ public sealed class Startup : AssemblyInitializer<Startup>
                 //ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>))
             };
 
-            return ctx.Node(inputs, outputs, c =>
+            return ctx.Node(inputs, outputs, summary: $"By {info.Vendor}, Version {info.Version}, Sdk {info.SdkVersion}",
+                newNode: c =>
             {
                 return new EffectHost(c.NodeContext, c.NodeDescription, modulePath, info);
             });

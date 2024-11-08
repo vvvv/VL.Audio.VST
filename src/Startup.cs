@@ -98,8 +98,9 @@ public sealed class Startup : AssemblyInitializer<Startup>
                 new PinDescription(EffectHost.BoundsInputPinName, typeof(IChannel<RectangleF>)) { IsVisible = false },
                 new PinDescription("Input", typeof(IEnumerable<AudioSignal>)),
                 new PinDescription("Midi In", typeof(IObservable<IMidiMessage>)),
-                new PinDescription("Parameters", typeof(IReadOnlyDictionary<string, float>)),
-                new PinDescription("Channel Prefix", typeof(string), null),
+                // TODO: Bring parameters back via "learn", bring channels back via interface and built-in system in vvvv
+                //new PinDescription("Parameters", typeof(IReadOnlyDictionary<string, float>)),
+                //new PinDescription("Channel Prefix", typeof(string), null),
                 new PinDescription("Show Editor", typeof(bool)),
                 new PinDescription("Apply", typeof(bool), defaultValue: true)
             };

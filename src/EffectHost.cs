@@ -54,7 +54,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private readonly Pin<IChannel<RectangleF>> boundsPin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
-    private readonly Pin<string> channelPrefixPin;
+    //private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
 
@@ -136,8 +136,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         Inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
         Inputs[i++] = audioInputPin = new AudioPin();
         Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
-        Inputs[i++] = new ParametersInput(this);
-        Inputs[i++] = channelPrefixPin = new Pin<string>();
+        //Inputs[i++] = new ParametersInput(this);
+        //Inputs[i++] = channelPrefixPin = new Pin<string>();
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
 
@@ -235,11 +235,11 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             midiInputSubscription.Disposable = midiInput?.Subscribe(HandleMidiMessage);
         }
 
-        if (Acknowledge(ref channelPrefix, channelPrefixPin.Value))
-        {
-            if (!string.IsNullOrEmpty(channelPrefix))
-                LoadChannels(channelPrefix);
-        }
+        //if (Acknowledge(ref channelPrefix, channelPrefixPin.Value))
+        //{
+        //    if (!string.IsNullOrEmpty(channelPrefix))
+        //        LoadChannels(channelPrefix);
+        //}
 
         if (Acknowledge(ref showUI, showUiPin.Value))
         {

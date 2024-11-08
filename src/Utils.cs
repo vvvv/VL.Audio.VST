@@ -69,7 +69,7 @@ static class Utils
 
     public static Type GetPinType(this ParameterInfo parameterInfo)
     {
-        return parameterInfo.StepCount switch
+        return parameterInfo.GetStepCount() switch
         {
             0 => typeof(float),
             1 => typeof(bool),
@@ -80,11 +80,11 @@ static class Utils
     public static object GetValueAsObject(this ParameterInfo parameterInfo, double normalizedValue)
     {
         //var plain = controller.normalizedParamToPlain(parameterInfo.ID, normalizedValue);
-        return parameterInfo.StepCount switch
+        return parameterInfo.GetStepCount() switch
         {
             0 => (float)normalizedValue,
             1 => normalizedValue >= 0.5,
-            _ => ToDiscrete(normalizedValue, parameterInfo.StepCount)
+            _ => ToDiscrete(normalizedValue, parameterInfo.GetStepCount())
         };
     }
 
@@ -98,13 +98,15 @@ static class Utils
 
     public static double Normalize(this ParameterInfo parameterInfo, object value)
     {
-        return parameterInfo.StepCount switch
+        return parameterInfo.GetStepCount() switch
         {
             0 => value is float f ? f : default,
             1 => value is bool b ? b ? 1d : 0d : default,
-            _ => value is int i ? ToDiscrete(i, parameterInfo.StepCount) : default
+            _ => value is int i ? ToDiscrete(i, parameterInfo.GetStepCount()) : default
         };
     }
+
+    public static int GetStepCount(this ParameterInfo parameterInfo) => Math.Max(0, parameterInfo.StepCount);
 
     public static double Normalize(int discrete, int stepCount) => discrete / (double)stepCount;
 

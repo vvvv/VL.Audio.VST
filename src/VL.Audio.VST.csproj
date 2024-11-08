@@ -19,12 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="VL.Audio" Version="1.9.2" />
     <PackageReference Include="VL.CoreLib" Version="2024.6.6" />
     <PackageReference Include="VL.IO.Midi" Version="1.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\VL.Audio\VL.Audio\src\VL.Audio.csproj" />
   </ItemGroup>
 
 </Project>

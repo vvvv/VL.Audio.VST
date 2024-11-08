@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0216-g28b3f9b075" Version="0.128">
-  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0216-g28b3f9b075" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0235-g5172ef47fd" Version="0.128">
+  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0235-g5172ef47fd" />
   <Patch Id="CFe1SfU8rEqMBzf3eex8lJ">
     <Canvas Id="IWnwJeVuV0BMZ4mkWFxTqK" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
     <!--
@@ -46,7 +46,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="PvJViFpo5G4PsXJLEo1sCF" Bounds="153,54,400,145" ShowValueBox="true" isIOBox="true" Value="In the Nodebrowser you'll find all VST3s that you have installed in the default location (Program Files\Common Files\VST3) or in a folder \VST3 next to your document.&#xD;&#xA;&#xD;&#xA;The plugins are sorted into the categories:&#xD;&#xA;- Audio.VST.Effects&#xD;&#xA;- Audio.VST.Instruments">
+          <Pad Id="PvJViFpo5G4PsXJLEo1sCF" Bounds="148,54,400,145" ShowValueBox="true" isIOBox="true" Value="In the Nodebrowser you'll find all VST3s that you have installed in the default location (Program Files\Common Files\VST3) or in a folder \VST3 next to your document.&#xD;&#xA;&#xD;&#xA;The plugins are sorted into the categories:&#xD;&#xA;- Audio.VST.Effects&#xD;&#xA;- Audio.VST.Instruments">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -55,7 +55,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="152,238,302,297" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on the plugins node. &#xD;&#xA;&#xD;&#xA;⚠️ VST3 only understands Note and Controller messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and wiggle the according knob in the UI to map the two.&#xD;&#xA;&#xD;&#xA;⚠️ VST3 can not return Midi directly. If you have a plugin that does Midi out, then you have to receive that via a virtual Midi cable and using the MidiIn node.">
+          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="148,238,302,228" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on a plugins node. &#xD;&#xA;&#xD;&#xA;⚠️ VST3 only understands Note and Controller messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and wiggle the according knob in the UI to map the two.">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -64,7 +64,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="FUpacmzA89kLmDyrVLyyIb" Bounds="151,204,122,29" ShowValueBox="true" isIOBox="true" Value="MIDI to VST">
+          <Pad Id="FUpacmzA89kLmDyrVLyyIb" Bounds="148,204,122,29" ShowValueBox="true" isIOBox="true" Value="MIDI to VST">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -88,6 +88,42 @@
             </p:TypeAnnotation>
             <p:ValueBoxSettings>
               <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="FlshZSOpSUMNSl8XL6Fg1y" Bounds="38,476,109,236" ShowValueBox="true" isIOBox="true" Value="⚖️&#xD;&#xA;⚠️">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">50</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="CyD1J17tmiTOeoDQdZlgXL" Bounds="148,530,233,81" ShowValueBox="true" isIOBox="true" Value="While this package itself is published under the LGPL-3.0, when releasing an app using it, you also must comply with VST 3 licensing!">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="VWqsKJqxWnNNt6e9WVe1g7" Bounds="148,622,237,19" ShowValueBox="true" isIOBox="true" Value="https://steinbergmedia.github.io/vst3_dev_portal/pages/VST+3+Licensing/What+are+the+licensing+options.html">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="TeZektWaYxdL3pABePdBKJ" Bounds="148,491,156,29" ShowValueBox="true" isIOBox="true" Value="VST3 Licensing">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">14</p:fontsize>
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>

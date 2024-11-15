@@ -36,6 +36,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private readonly object processingLock = new();
     private bool isDisposed;
+    private int editCount;
 
     private readonly NodeContext nodeContext;
     private readonly ILogger logger;
@@ -184,17 +185,20 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
             HideEditor();
             audioOutput.Dispose();
 
-            var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
-            var statePin = (StatePin)Inputs[0];
-            var channel = statePin.Value;
-            SaveToChannelOrPin(channel, StateInputPinName, state);
-
             processor.SetProcessing_IgnoreNotImplementedException(false);
             component.setActive(false);
 
             plugProvider.Dispose();
             module.Dispose();
         }
+    }
+
+    private void SavePluginState()
+    {
+        var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
+        var statePin = (StatePin)Inputs[0];
+        var channel = statePin.Value;
+        SaveToChannelOrPin(channel, StateInputPinName, state);
     }
 
     private static bool Acknowledge<T>(ref T current, T value)
@@ -535,11 +539,17 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     void IComponentHandler.beginEdit(uint id)
     {
         logger.LogTrace("Begin edit for parameter {id}", id);
+
+        editCount++;
     }
 
     void IComponentHandler.endEdit(uint id)
     {
         logger.LogTrace("End edit for parameter {id}", id);
+
+        editCount--;
+        if (editCount == 0)
+            SavePluginState();
     }
 
     void IComponentHandler.performEdit(uint id, double valueNormalized)
@@ -554,11 +564,17 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     void IComponentHandler.restartComponent(RestartFlags flags)
     {
         logger.LogTrace("Restarting component with flags {flags}", flags);
+
+        if (flags.HasFlag(RestartFlags.kParamValuesChanged))
+            SavePluginState();
     }
 
     void IComponentHandler2.setDirty(bool state)
     {
         logger.LogTrace("Setting dirty state to {state}", state);
+
+        if (true)
+            SavePluginState();
     }
 
     void IComponentHandler2.requestOpenEditor(string name)
@@ -578,6 +594,10 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private void SaveToChannelOrPin<T>(IChannel<T>? channel, string pinName, T value)
     {
+        // Only write changes to the channel. Avoids document marked as dirty on open.
+        if (channel != null && Equals(channel.Value, value))
+            return;
+
         if (channel is null || channel.IsSystemGenerated())
             SaveToPin(pinName, value);
         else

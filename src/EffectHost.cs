@@ -368,9 +368,36 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 SetParameter(paramId, value);
             }
         }
+        else if (channelMessage.Command == ChannelCommand.ProgramChange)
+        {
+            if (controller is null)
+                return;
+
+            var unitController = controller as IUnitInfo;
+            if (unitController is null)
+                return;
+
+            try
+            {
+                if (!unitController.getUnitByBus(MediaTypes.kEvent, BusDirections.kInput, 0, channelMessage.MidiChannel, out var unitId))
+                    return;
+
+                var parameter = controller.GetParameters()
+                    .FirstOrDefault(p => p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsProgramChange) && p.UnitId == unitId);
+                if (parameter.ID > 0)
+                {
+                    var value = Utils.Normalize(channelMessage.Data1, parameter.StepCount);
+                    SetParameter(parameter.ID, value);
+                }
+            }
+            catch (NotImplementedException)
+            {
+
+            }
+        }
     }
 
-    static bool TryTranslateToMidi(in Event e, [NotNullWhen(true)] out IMidiMessage? message)
+    bool TryTranslateToMidi(in Event e, [NotNullWhen(true)] out IMidiMessage? message)
     {
         switch (e.Type)
         {
@@ -394,20 +421,32 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
                 }
                 break;
             case Event.EventTypes.kPolyPressureEvent:
-                break;
             case Event.EventTypes.kNoteExpressionValueEvent:
-                break;
             case Event.EventTypes.kNoteExpressionTextEvent:
-                break;
             case Event.EventTypes.kChordEvent:
-                break;
             case Event.EventTypes.kScaleEvent:
+                logger.LogTrace("Not implemented {type}", e.Type);
                 break;
             case Event.EventTypes.kLegacyMIDICCOutEvent:
                 var midiCCEvent = e.GetValue<LegacyMIDICCOutEvent>();
-                message = MessageUtils.Controller(midiCCEvent.Channel, midiCCEvent.ControlNumber, midiCCEvent.Value);
-                return true;
+                switch (midiCCEvent.ControlNumber)
+                {
+                    case ControllerNumbers.kCtrlProgramChange:
+                        message = new ChannelMessage(ChannelCommand.ProgramChange, midiCCEvent.Channel, midiCCEvent.Value);
+                        return true;
+                    case ControllerNumbers.kCtrlPolyPressure:
+                        message = new ChannelMessage(ChannelCommand.PolyPressure, midiCCEvent.Channel, midiCCEvent.Value, midiCCEvent.Value2);
+                        return true;
+                    case ControllerNumbers.kCtrlQuarterFrame:
+                        logger.LogTrace("Not implemented kCtrlQuarterFrame");
+                        break;
+                    default:
+                        message = MessageUtils.Controller(midiCCEvent.Channel, (int)midiCCEvent.ControlNumber, midiCCEvent.Value);
+                        return true;
+                }
+                break;
             default:
+                logger.LogTrace("Not implemented {type}", e.Type);
                 break;
         }
 

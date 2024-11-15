@@ -137,7 +137,7 @@ interface IEvent
 /// Note-on event specific data. Used in <see cref="Event"/> (union).
 /// Pitch uses the twelve-tone equal temperament tuning (12-TET).
 /// </summary>
-public struct NoteOnEvent : IEvent
+struct NoteOnEvent : IEvent
 {
     private short channel;
     private short pitch;
@@ -193,7 +193,7 @@ public struct NoteOnEvent : IEvent
 /** Note-off event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-public struct NoteOffEvent : IEvent
+struct NoteOffEvent : IEvent
 {
     private short channel;
     private short pitch;
@@ -242,7 +242,7 @@ public struct NoteOffEvent : IEvent
 /** Data event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-public unsafe struct DataEvent : IEvent
+unsafe struct DataEvent : IEvent
 {
     private uint size;
     private DataTypes type;
@@ -285,7 +285,7 @@ public unsafe struct DataEvent : IEvent
 /** PolyPressure event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp
 */
-public struct PolyPressureEvent : IEvent
+struct PolyPressureEvent : IEvent
 {
     private short channel;
     private short pitch;
@@ -327,7 +327,7 @@ public struct PolyPressureEvent : IEvent
 /** Chord event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-public unsafe struct ChordEvent : IEvent
+unsafe struct ChordEvent : IEvent
 {
     private short root;
     private short bassNote;
@@ -376,7 +376,7 @@ public unsafe struct ChordEvent : IEvent
 /** Scale event specific data. Used in \ref Event (union)
 \ingroup vstEventGrp 
 */
-public unsafe struct ScaleEvent : IEvent
+unsafe struct ScaleEvent : IEvent
 {
     private short root;
     private short mask;
@@ -421,7 +421,7 @@ public unsafe struct ScaleEvent : IEvent
 
 This kind of event is reserved for generating MIDI CC as output event for kEvent Bus during the process call.
 */
-public struct LegacyMIDICCOutEvent : IEvent
+struct LegacyMIDICCOutEvent : IEvent
 {
     private byte controlNumber;
     private sbyte channel;
@@ -431,7 +431,7 @@ public struct LegacyMIDICCOutEvent : IEvent
     /// <summary>
     /// See enum ControllerNumbers [0, 255].
     /// </summary>
-    public byte ControlNumber => controlNumber;
+    public ControllerNumbers ControlNumber => (ControllerNumbers)controlNumber;
 
     /// <summary>
     /// Channel index in event bus [0, 15].

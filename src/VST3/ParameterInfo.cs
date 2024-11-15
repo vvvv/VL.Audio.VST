@@ -39,7 +39,7 @@ struct ParameterInfo
     public string Title => title.ToString();
     public string ShortTitle => shortTitle.ToString();
     public string Units => units.ToString();
-    public int StepCount => stepCount;
+    public int StepCount => Math.Max(0, stepCount);
     public double DefaultNormalizedValue => defaultNormalizedValue;
     public int UnitId => unitId;
     public ParameterFlags Flags => flags;

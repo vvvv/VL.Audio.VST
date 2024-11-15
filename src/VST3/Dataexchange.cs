@@ -90,7 +90,7 @@ unsafe partial interface IDataExchangeReceiver
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct DataExchangeBlock
+struct DataExchangeBlock
 {
     public IntPtr data;
     public uint size;

@@ -72,7 +72,7 @@ partial class EffectHost
 
     void SaveCurrentWindowBounds()
     {
-        if (window is null || window.IsDisposed)
+        if (window is null || window.IsDisposed || boundsPin.Value is null)
             return;
 
         var position = window.DesktopLocation;

@@ -6,9 +6,21 @@ using VST3.Hosting;
 
 namespace VL.Audio.VST;
 
-public record PluginState(Guid Id, ImmutableArray<byte> Component, ImmutableArray<byte> Controller)
+public sealed record PluginState(Guid Id, ImmutableArray<byte> Component, ImmutableArray<byte> Controller)
 {
     public static readonly PluginState Default = new PluginState(default, ImmutableArray<byte>.Empty, ImmutableArray<byte>.Empty);
+
+    public bool Equals(PluginState? other)
+    {
+        if (other is null)
+            return false;
+
+        return Id == other.Id
+            && Component.SequenceEqual(other.Component)
+            && Controller.SequenceEqual(other.Controller);
+    }
+
+    public override int GetHashCode() => Id.GetHashCode();
 
     internal bool HasComponentData => Component.Length > 0;
     internal bool HasControllerData => Controller.Length > 0;

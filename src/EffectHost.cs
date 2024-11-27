@@ -60,6 +60,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly Pin<bool> applyPin;
 
     private PluginState? state;
+    private bool stateIsBeingSet;
     private RectangleF bounds;
     private AudioPin audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
@@ -81,6 +82,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private readonly ProcessSetup processSetup;
     private readonly AudioOutput audioOutput;
+    private readonly StatePin statePin;
 
     public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info) : base(nodeContext)
     {
@@ -132,7 +134,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
         var i = 0; var o = 0;
 
-        Inputs[i] = new StatePin();
+        Inputs[i] = statePin = new StatePin();
         i++;
         Inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
         Inputs[i++] = audioInputPin = new AudioPin();
@@ -195,10 +197,17 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     private void SavePluginState()
     {
-        var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
-        var statePin = (StatePin)Inputs[0];
+        if (stateIsBeingSet)
+            return;
+
         var channel = statePin.Value;
-        SaveToChannelOrPin(channel, StateInputPinName, state);
+        if (channel is null)
+            return;
+
+        // Acknowledge the new state, we don't want to trigger a SetState on the controller in the next update
+        var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
+        if (Acknowledge(ref this.state, state))
+            SaveToChannelOrPin(channel, StateInputPinName, state);
     }
 
     private static bool Acknowledge<T>(ref T current, T value)
@@ -219,17 +228,25 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         for (int i = 0; i < inputAudioSignals.Length; i++)
             inputAudioSignals[i] = aduioInputSignals[i];
 
-        if (Acknowledge(ref state, ((StatePin)Inputs[0]).Value?.Value))
+        if (Acknowledge(ref state, statePin.Value?.Value))
         {
-            if (state != null && state.Id == plugProvider.ClassInfo.ID)
+            stateIsBeingSet = true;
+            try
             {
-                if (state.HasComponentData)
+                if (state != null && state.Id == plugProvider.ClassInfo.ID)
                 {
-                    component.IgnoreNotImplementedException(c => c.setState(state.GetComponentStream()));
-                    controller?.IgnoreNotImplementedException(c => c.setComponentState(state.GetComponentStream()));
+                    if (state.HasComponentData)
+                    {
+                        component.IgnoreNotImplementedException(c => c.setState(state.GetComponentStream()));
+                        controller?.IgnoreNotImplementedException(c => c.setComponentState(state.GetComponentStream()));
+                    }
+                    if (state.HasControllerData)
+                        controller?.IgnoreNotImplementedException(c => c.setState(state.GetControllerStream()));
                 }
-                if (state.HasControllerData)
-                    controller?.IgnoreNotImplementedException(c => c.setState(state.GetControllerStream()));
+            }
+            finally
+            {
+                stateIsBeingSet = false;
             }
         }
 
@@ -592,16 +609,16 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         logger.LogTrace("Finishing group edit");
     }
 
-    private void SaveToChannelOrPin<T>(IChannel<T>? channel, string pinName, T value)
+    private void SaveToChannelOrPin<T>(IChannel<T> channel, string pinName, T value)
     {
         // Only write changes to the channel. Avoids document marked as dirty on open.
-        if (channel != null && Equals(channel.Value, value))
+        if (Equals(channel.Value, value))
             return;
 
-        if (channel is null || channel.IsSystemGenerated())
+        channel.Value = value;
+
+        if (channel.IsSystemGenerated())
             SaveToPin(pinName, value);
-        else
-            channel.Value = value;
     }
 
     private void SaveToPin<T>(string pinName, T value)

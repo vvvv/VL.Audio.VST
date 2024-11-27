@@ -25,7 +25,7 @@ using StatePin = Pin<IChannel<PluginState>>;
 using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
 
 [GeneratedComClass]
-internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable 
+public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable 
 {
     public const string StateInputPinName = "State";
     public const string BoundsInputPinName = "Bounds";
@@ -39,6 +39,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private int editCount;
 
     private readonly NodeContext nodeContext;
+    private readonly EffectNodeInfo info;
     private readonly ILogger logger;
     private readonly Module module;
     private readonly PlugProvider plugProvider;
@@ -84,16 +85,15 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
     private readonly AudioOutput audioOutput;
     private readonly StatePin statePin;
 
-    public EffectHost(NodeContext nodeContext, IVLNodeDescription nodeDescription, string modulePath, ClassInfo info) : base(nodeContext)
+    internal EffectHost(NodeContext nodeContext, EffectNodeInfo info) : base(nodeContext)
     {
         this.nodeContext = nodeContext;
+        this.info = info;
         this.logger = nodeContext.GetLogger();
         this.synchronizationContext = SynchronizationContext.Current;
 
-        NodeDescription = nodeDescription;
-
-        module = Module.Create(modulePath);
-        plugProvider = PlugProvider.Create(module.Factory, info, s_context)!;
+        module = Module.Create(info.ModulePath);
+        plugProvider = PlugProvider.Create(module.Factory, info.ClassInfo, s_context)!;
         component = plugProvider.Component;
         processor = (IAudioProcessor)component;
         controller = plugProvider.Controller;
@@ -129,8 +129,8 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         component.setActive(true);
         processor.SetProcessing_IgnoreNotImplementedException(true);
 
-        Inputs = new IVLPin[nodeDescription.Inputs.Count];
-        Outputs = new IVLPin[nodeDescription.Outputs.Count];
+        Inputs = new IVLPin[info.NodeDescription.Inputs.Count];
+        Outputs = new IVLPin[info.NodeDescription.Outputs.Count];
 
         var i = 0; var o = 0;
 
@@ -144,6 +144,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
 
+        Outputs[o++] = new Pin<EffectHost>() { Value = this };
         Outputs[o++] = audioOutputPin = new AudioPin();
         Outputs[o++] = midiOutputPin = new Pin<IObservable<IMidiMessage>>() 
         { 
@@ -162,7 +163,7 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
         }
     }
 
-    public IVLNodeDescription NodeDescription { get; }
+    public IVLNodeDescription NodeDescription => info.NodeDescription;
 
     public IVLPin[] Inputs { get; }
 

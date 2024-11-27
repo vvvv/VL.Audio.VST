@@ -8,6 +8,7 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <OutputPath>..\lib</OutputPath>
     <PackageRepositories>$([System.IO.Path]::GetFullPath($(MsBuildThisFileDirectory)..\..));$([System.IO.Path]::GetFullPath($(MsBuildThisFileDirectory)..\..\VL.Audio))</PackageRepositories>
+    <RestoreAdditionalProjectSources>https://teamcity.vvvv.org/guestAuth/app/nuget/feed/_Root/default/v3/index.json</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="VL.Audio" Version="1.9.2" />
-    <PackageReference Include="VL.CoreLib" Version="2024.6.6" />
+    <PackageReference Include="VL.CoreLib" Version="2024.6.7-0236-g33a4a9999e" />
     <PackageReference Include="VL.IO.Midi" Version="1.1.1" />
   </ItemGroup>
 

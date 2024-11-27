@@ -106,7 +106,8 @@ public sealed class Startup : AssemblyInitializer<Startup>
             };
             var outputs = new List<IVLPinDescription>()
             {
-                new PinDescription("Output", typeof(IReadOnlyList<AudioSignal>)),
+                new PinDescription("Output", typeof(EffectHost)),
+                new PinDescription("Audio Out", typeof(IReadOnlyList<AudioSignal>)),
                 new PinDescription("Midi Out", typeof(IObservable<IMidiMessage>)),
                 //ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>))
             };
@@ -114,7 +115,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
             return ctx.Node(inputs, outputs, summary: $"By {info.Vendor}, Version {info.Version}, Sdk {info.SdkVersion}",
                 newNode: c =>
             {
-                return new EffectHost(c.NodeContext, c.NodeDescription, modulePath, info);
+                return new EffectHost(c.NodeContext, new(c.NodeDescription, modulePath, info));
             });
         });
     }

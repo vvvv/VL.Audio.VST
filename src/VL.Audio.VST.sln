@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{05EC4CAB-1E18-4BA4-BB68-E5EB7D76B77A}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
+		..\deployment\VL.Audio.VST.nuspec = ..\deployment\VL.Audio.VST.nuspec
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSTHost", "..\sandbox\VSTHost\VSTHost.csproj", "{ABF12C76-AD6A-4E0B-9B93-488BABA29A38}"

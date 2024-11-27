@@ -571,11 +571,15 @@ internal partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandl
 
     void IComponentHandler.performEdit(uint id, double valueNormalized)
     {
-        if (!channels.TryGetValue(id, out var x))
-            return;
-
-        var (parameter, channel) = x;
-        channel.Object = parameter.GetValueAsObject(valueNormalized);
+        if (channels.TryGetValue(id, out var x))
+        {
+            var (parameter, channel) = x;
+            channel.Object = parameter.GetValueAsObject(valueNormalized);
+        }
+        else
+        {
+            SetParameter(id, valueNormalized);
+        }
     }
 
     void IComponentHandler.restartComponent(RestartFlags flags)

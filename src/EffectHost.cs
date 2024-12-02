@@ -4,6 +4,7 @@ using Sanford.Multimedia.Midi;
 using Stride.Core.Mathematics;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
@@ -23,9 +24,10 @@ namespace VL.Audio.VST;
 
 using StatePin = Pin<IChannel<PluginState>>;
 using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
+using IComponent = VST3.IComponent;
 
 [GeneratedComClass]
-public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable 
+public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable
 {
     public const string StateInputPinName = "State";
     public const string BoundsInputPinName = "Bounds";
@@ -69,18 +71,19 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private bool showUI;
     private bool apply;
 
-    private readonly ParameterInfo? byPassParameter;
+    private ParameterInfo? byPassParameter;
 
     private ParameterChanges? upcomingChanges;
     private ParameterChanges? committedChanges;
     private ParameterChanges? pendingOutputChanges, acknowledgedOutputChanges;
 
     private readonly Dictionary<uint, (ParameterInfo parameter, IChannel channel)> channels = new();
+    private readonly Dictionary<uint, ParameterInfo> parameters = new();
+    private readonly Dictionary<int, UnitInfo> units = new();
 
     private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
     private float[] leftInput = [];
     private float[] rightInput = [];
-
     private readonly ProcessSetup processSetup;
     private readonly AudioOutput audioOutput;
     private readonly StatePin statePin;
@@ -155,11 +158,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         {
             controller.setComponentHandler(this);
 
-            foreach (var p in controller.GetParameters())
-            {
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
-                    byPassParameter = p;
-            }
+            ReloadParameters();
         }
     }
 
@@ -296,7 +295,10 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
                 if (queue is null)
                     continue;
                 queue.getPoint(0, out _, out var value);
-                controller?.setParamNormalized(queue.getParameterId(), value);
+
+                var id = queue.getParameterId();
+                controller?.setParamNormalized(id, value);
+                OnParameterChanged(id, value);
             }
 
             Interlocked.Exchange(ref this.committedChanges, inputChanges);
@@ -312,14 +314,47 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
                 if (queue is null)
                     continue;
                 queue.getPoint(0, out _, out var value);
-                controller?.setParamNormalized(queue.getParameterId(), value);
-                if (channels.TryGetValue(queue.getParameterId(), out var x))
+
+                var id = queue.getParameterId();
+                controller?.setParamNormalized(id, value);
+                if (channels.TryGetValue(id, out var x))
                     x.channel.Object = x.parameter.GetValueAsObject(value);
+                OnParameterChanged(id, value);
             }
             ParameterChangesPool.Default.Return(outputChanges);
         }
 
         audioOutputPin.Value = audioOutput.Outputs;
+    }
+
+    private readonly Subject<(ParameterInfo parameter, double normalizedValue)> ParameterChanged = new();
+
+    private void OnParameterChanged(uint id, double normalizedValue)
+    {
+        if (parameters.TryGetValue(id, out var parameter))
+        {
+            ParameterChanged.OnNext((parameter, normalizedValue));
+        }
+    }
+
+    private void ReloadParameters()
+    {
+        if (controller is null) return;
+
+        parameters.Clear();
+        foreach (var p in controller.GetParameters())
+        {
+            if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
+                byPassParameter = p;
+            parameters[p.ID] = p;
+        }
+
+        units.Clear();
+        if (controller is IUnitInfo unitInfo)
+        {
+            foreach (var u in unitInfo.GetUnitInfos())
+                units[u.Id] = u;
+        }
     }
 
     private void HandleMidiMessage(IMidiMessage message)
@@ -586,6 +621,9 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     void IComponentHandler.restartComponent(RestartFlags flags)
     {
         logger.LogTrace("Restarting component with flags {flags}", flags);
+
+        if (flags.HasFlag(RestartFlags.kParamTitlesChanged))
+            ReloadParameters();
 
         if (flags.HasFlag(RestartFlags.kParamValuesChanged))
             SavePluginState();

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using VL.Core;
 using VL.Core.Reactive;
 using VL.Lib.Collections;
@@ -9,18 +12,21 @@ using VST3;
 
 namespace VL.Audio.VST;
 
-partial class EffectHost : IVLObject
+partial class EffectHost : IVLObject, INotifyPropertyChanged
 {
-    private TypeInfo? type;
+    private DynamicTypeInfo? type;
+    private IDisposable? propertyChangedSubscription;
 
-    IVLTypeInfo IVLObject.Type => type ??= new TypeInfo()
+    IVLTypeInfo IVLObject.Type => type ??= new DynamicTypeInfo()
     {
         Name = info.NodeDescription.Name, 
         Category = info.NodeDescription.Category, 
         LoadProperties = typeInfo => LoadProperties(typeInfo, this)
     };
 
-    private IEnumerable<IVLPropertyInfo> LoadProperties(TypeInfo typeInfo, EffectHost effectHost)
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private IEnumerable<IVLPropertyInfo> LoadProperties(DynamicTypeInfo typeInfo, EffectHost effectHost)
     {
         var controller = effectHost.controller;
         if (controller is null)
@@ -28,48 +34,52 @@ partial class EffectHost : IVLObject
 
         var typeRegistry = effectHost.nodeContext.AppHost.TypeRegistry;
 
-        var unitController = controller as IUnitInfo;
-        var units = unitController?.GetUnitInfos().ToImmutableArray() ?? ImmutableArray<UnitInfo>.Empty;
-        foreach (var p in LoadPropertiesForUnit(Constants.kRootUnitId, units))
+        var hasRootUnit = units.Any(x => x.Value.Id == Constants.kRootUnitId);
+        foreach (var p in LoadPropertiesForUnit(typeInfo, Constants.kRootUnitId, exposeParameters: !hasRootUnit))
             yield return p;
 
-        IEnumerable<IVLPropertyInfo> LoadPropertiesForUnit(int unitId, ImmutableArray<UnitInfo> units)
+        if (!hasRootUnit)
         {
-            foreach (var unitInfo in units)
+            propertyChangedSubscription = ParameterChanged
+                .Where(x => x.parameter.UnitId == Constants.kRootUnitId && ExposeAsProperty(in x.parameter))
+                .Subscribe(x => PropertyChanged?.Invoke(effectHost, new PropertyChangedEventArgs(x.parameter.Title)));
+        }
+
+        IEnumerable<IVLPropertyInfo> LoadPropertiesForUnit(IVLTypeInfo declaringType, int unitId, bool exposeParameters = true)
+        {
+            foreach (var unitInfo in units.Values)
             {
                 if (unitInfo.ParentUnitId != unitId)
                     continue;
 
-                var unitTypeInfo = new TypeInfo()
+                var unitTypeInfo = new DynamicTypeInfo()
                 {
                     Name = unitInfo.Name,
-                    Category = typeInfo.FullName,
-                    LoadProperties = unitTypeInfo => LoadPropertiesForUnit(unitInfo.Id, units)
+                    Category = declaringType.FullName,
+                    LoadProperties = unitTypeInfo => LoadPropertiesForUnit(unitTypeInfo, unitInfo.Id)
                 };
                 var unit = new DynamicObject()
                 {
                     Type = unitTypeInfo,
+                    PropertyChangedSource = effectHost.ParameterChanged
+                        .Where(e => e.parameter.UnitId == unitId && ExposeAsProperty(in e.parameter))
+                        .Select(e => new PropertyChangedEventArgs(e.parameter.Title))
                 };
-                yield return new PropertyInfo()
+                yield return new DynamicPropertyInfo()
                 {
-                    DeclaringType = typeInfo,
+                    DeclaringType = declaringType,
                     Name = unitInfo.Name,
                     Type = unitTypeInfo,
                     GetValue = _ => unit,
                 };
             }
 
+            if (!exposeParameters)
+                yield break;
+
             foreach (var p in controller.GetParameters())
             {
-                if (p.UnitId != unitId)
-                    continue;
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
-                    continue;
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsHidden))
-                    continue;
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsList))
-                    continue;
-                if (!p.Flags.HasFlag(ParameterInfo.ParameterFlags.kCanAutomate))
+                if (p.UnitId != unitId || !ExposeAsProperty(in p))
                     continue;
 
                 var attributes = Spread<Attribute>.Empty;
@@ -77,9 +87,9 @@ partial class EffectHost : IVLObject
                     attributes = attributes.Add(new System.ComponentModel.ReadOnlyAttribute(isReadOnly: true));
                 attributes = attributes.Add(new System.ComponentModel.DefaultValueAttribute(p.GetDefaultValue()));
 
-                yield return new PropertyInfo()
+                yield return new DynamicPropertyInfo()
                 {
-                    DeclaringType = typeInfo,
+                    DeclaringType = declaringType,
                     Name = p.Title,
                     Type = typeRegistry.GetTypeInfo(p.GetPinType()),
                     GetValue = i =>
@@ -98,101 +108,135 @@ partial class EffectHost : IVLObject
         }
     }
 
-    sealed class DynamicObject : IVLObject
+    static bool ExposeAsProperty(in ParameterInfo p)
     {
-        public required IVLTypeInfo Type { get; init; }
-        public AppHost AppHost { get; init; } = AppHost.Current;
-        public NodeContext Context { get; init; } = NodeContext.CurrentRoot;
-        public uint Identity { get; init; }
+        return
+            !p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsHidden) &&
+            !p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsList) &&
+            !p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass);
+    }
+}
 
-        IVLObject IVLObject.With(IReadOnlyDictionary<string, object> values)
+// TODO: vvvv crashes if not public
+public sealed class DynamicObject : IVLObject, INotifyPropertyChanged
+{
+    private PropertyChangedEventHandler? propertyChangedEventHandler;
+    private IDisposable? propertyChangedSubscription;
+    private int refCount;
+
+    public required IVLTypeInfo Type { get; init; }
+    public AppHost AppHost { get; init; } = AppHost.Current;
+    public NodeContext Context { get; init; } = NodeContext.CurrentRoot;
+    public uint Identity { get; init; }
+    public IObservable<PropertyChangedEventArgs>? PropertyChangedSource { get; init; }
+
+    // Needs to be a public event - using explicit implementation crashes Observable.FromEventPattern
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
         {
-            IVLObject that = this;
-            foreach (var (key, value) in values)
-            {
-                var property = Type.GetProperty(key);
-                if (property is null)
-                    throw new Exception($"Property '{key}' not found on type '{Type}'");
-                that = property.WithValue(that, value);
-            }
-            return that;
+            propertyChangedEventHandler += value;
+
+            if (Interlocked.Increment(ref refCount) == 1)
+                propertyChangedSubscription = PropertyChangedSource?.Subscribe(e => propertyChangedEventHandler?.Invoke(this, e));
         }
 
-        object IVLObject.ReadProperty(string key)
+        remove
+        {
+            propertyChangedEventHandler -= value;
+
+            if (Interlocked.Decrement(ref refCount) == 0)
+                propertyChangedSubscription?.Dispose();
+        }
+    }
+
+    IVLObject IVLObject.With(IReadOnlyDictionary<string, object> values)
+    {
+        IVLObject that = this;
+        foreach (var (key, value) in values)
         {
             var property = Type.GetProperty(key);
             if (property is null)
                 throw new Exception($"Property '{key}' not found on type '{Type}'");
-            return property.GetValue(this);
+            that = property.WithValue(that, value);
         }
+        return that;
     }
 
-    sealed class TypeInfo : IVLTypeInfo
+    object IVLObject.ReadProperty(string key)
     {
-        private Spread<IVLPropertyInfo>? properties;
-
-        public required string Name { get; init; }
-        public required string Category { get; init; }
-        public required Func<TypeInfo, IEnumerable<IVLPropertyInfo>> LoadProperties { get; init; }
-
-        public Func<NodeContext, object>? CreateInstance { get; init; }
-
-        public Func<object>? GetDefaultValue { get; init; }
-
-        public string FullName => $"{Category}.{Name}";
-
-        public UniqueId Id => default;
-
-        public Type ClrType { get; init; } = typeof(object);
-
-        public bool IsPatched => false;
-
-        public bool IsClass => true;
-
-        public bool IsRecord => false;
-
-        public bool IsImmutable => false;
-
-        public bool IsInterface => false;
-
-        public Spread<IVLPropertyInfo> Properties => properties ??= LoadProperties(this).ToSpread();
-
-        Spread<IVLPropertyInfo> IVLTypeInfo.AllProperties => Properties;
-
-        object? IVLTypeInfo.CreateInstance(NodeContext context) => CreateInstance?.Invoke(context);
-
-        public Spread<Attribute> Attributes { get; init; } = Spread<Attribute>.Empty;
-
-        object? IVLTypeInfo.GetDefaultValue() => GetDefaultValue?.Invoke();
-
-        public IVLPropertyInfo? GetProperty(string name)
-        {
-            return Properties.FirstOrDefault(p => p.OriginalName == name);
-        }
-
-        public IVLTypeInfo MakeGenericType(IReadOnlyList<IVLTypeInfo> arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ToString(bool includeCategory) => includeCategory ? FullName : Name;
+        var property = Type.GetProperty(key);
+        if (property is null)
+            throw new Exception($"Property '{key}' not found on type '{Type}'");
+        return property.GetValue(this);
     }
+}
 
-    sealed class PropertyInfo : IVLPropertyInfo
+public sealed class DynamicTypeInfo : IVLTypeInfo
+{
+    private Spread<IVLPropertyInfo>? properties;
+
+    public required string Name { get; init; }
+    public required string Category { get; init; }
+    public required Func<DynamicTypeInfo, IEnumerable<IVLPropertyInfo>> LoadProperties { get; init; }
+
+    public Func<NodeContext, object>? CreateInstance { get; init; }
+
+    public Func<object>? GetDefaultValue { get; init; }
+
+    public string FullName => $"{Category}.{Name}";
+
+    public UniqueId Id => default;
+
+    public Type ClrType { get; init; } = typeof(object);
+
+    public bool IsPatched => false;
+
+    public bool IsClass => true;
+
+    public bool IsRecord => false;
+
+    public bool IsImmutable => false;
+
+    public bool IsInterface => false;
+
+    public Spread<IVLPropertyInfo> Properties => properties ??= LoadProperties(this).ToSpread();
+
+    Spread<IVLPropertyInfo> IVLTypeInfo.AllProperties => Properties;
+
+    object? IVLTypeInfo.CreateInstance(NodeContext context) => CreateInstance?.Invoke(context);
+
+    public Spread<Attribute> Attributes { get; init; } = Spread<Attribute>.Empty;
+
+    object? IVLTypeInfo.GetDefaultValue() => GetDefaultValue?.Invoke();
+
+    public IVLPropertyInfo? GetProperty(string name)
     {
-        public required IVLTypeInfo DeclaringType { get; init; }
-        public required string Name { get; init; }
-        public required IVLTypeInfo Type { get; init; }
-        public required Func<IVLObject, object> GetValue { get; init; }
-        public Func<IVLObject, object, IVLObject>? WithValue { get; init; }
-
-        public uint Id { get; init; }
-        public string NameForTextualCode => Name;
-        public string OriginalName => Name;
-        public bool IsManaged { get; init; }
-        public bool ShouldBeSerialized { get; init; }
-        public Spread<Attribute> Attributes { get; init; } = Spread<Attribute>.Empty;
-        object IVLPropertyInfo.GetValue(IVLObject instance) => GetValue(instance);
-        IVLObject IVLPropertyInfo.WithValue(IVLObject instance, object value) => WithValue?.Invoke(instance, value) ?? instance;
+        return Properties.FirstOrDefault(p => p.OriginalName == name);
     }
+
+    public IVLTypeInfo MakeGenericType(IReadOnlyList<IVLTypeInfo> arguments)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string ToString(bool includeCategory) => includeCategory ? FullName : Name;
+}
+
+public sealed class DynamicPropertyInfo : IVLPropertyInfo
+{
+    public required IVLTypeInfo DeclaringType { get; init; }
+    public required string Name { get; init; }
+    public required IVLTypeInfo Type { get; init; }
+    public required Func<IVLObject, object> GetValue { get; init; }
+    public Func<IVLObject, object, IVLObject>? WithValue { get; init; }
+
+    public uint Id { get; init; }
+    public string NameForTextualCode => Name;
+    public string OriginalName => Name;
+    public bool IsManaged { get; init; }
+    public bool ShouldBeSerialized { get; init; }
+    public Spread<Attribute> Attributes { get; init; } = Spread<Attribute>.Empty;
+    object IVLPropertyInfo.GetValue(IVLObject instance) => GetValue(instance);
+    IVLObject IVLPropertyInfo.WithValue(IVLObject instance, object value) => WithValue?.Invoke(instance, value) ?? instance;
 }

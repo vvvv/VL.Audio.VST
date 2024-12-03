@@ -29,7 +29,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 {
     public const string StateInputPinName = "State";
     public const string BoundsInputPinName = "Bounds";
-    private const Model.SolutionUpdateKind JustWriteToThePin = Model.SolutionUpdateKind.DontCompile | Model.SolutionUpdateKind.TweakLast;
+    private const Model.SolutionUpdateKind JustWriteToThePin = Model.SolutionUpdateKind.Default & ~Model.SolutionUpdateKind.AffectCompilation & ~Model.SolutionUpdateKind.AddToHistory;
 
     private static readonly ParameterChanges s_noChanges = new();
 
@@ -58,10 +58,10 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private readonly Pin<IChannel<RectangleF>> boundsPin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
     private readonly Pin<Dictionary<string, object>> parametersPin;
-    private readonly Pin<bool> learnParametersPin;
     //private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
+    private readonly IChannel<bool> learnMode = Channel.Create(false);
 
     private PluginState? state;
     private bool stateIsBeingSet;
@@ -147,7 +147,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         Inputs[i++] = audioInputPin = new AudioPin();
         Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
         Inputs[i++] = parametersPin = new Pin<Dictionary<string, object>>();
-        Inputs[i++] = learnParametersPin = new Pin<bool>();
         //Inputs[i++] = channelPrefixPin = new Pin<string>();
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
@@ -169,6 +168,8 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     public IVLPin[] Inputs { get; }
 
     public IVLPin[] Outputs { get; }
+
+    public IChannel<bool>? LearnMode => learnMode;
 
     private bool HasMainAudioIn => audioInputBusses.Length > 0 && audioInputBusses[0].BusType == BusTypes.kMain;
     private bool HasMainAudioOut => audioOutputBusses.Length > 0 && audioOutputBusses[0].BusType == BusTypes.kMain;
@@ -504,7 +505,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
                 var isNew = false;
 
                 // In learn mode add the parameter to the pin group
-                if (learnParametersPin.Value && solution != null)
+                if (learnMode.Value && solution != null)
                 {
                     var s = ModifyParametersPinGroup(solution, p);
                     if (s != solution)

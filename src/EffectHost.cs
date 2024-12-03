@@ -516,47 +516,4 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             .SetPinValue(nodeContext.Path.Stack, pinName, value);
         solution?.Confirm(Model.SolutionUpdateKind.DontCompile | Model.SolutionUpdateKind.TweakLast);
     }
-
-    sealed class ParametersInput : IVLPin<IReadOnlyDictionary<string, float>>
-    {
-        private readonly EffectHost host;
-        private readonly Dictionary<string, float> currentValues = new();
-        private IReadOnlyDictionary<string, float>? value;
-
-        public ParametersInput(EffectHost host)
-        {
-            this.host = host;
-        }
-
-        public IReadOnlyDictionary<string, float>? Value
-        {
-            get => value;
-            set
-            {
-                if (value is null)
-                    return;
-
-                if (host.controller is null)
-                    return;
-
-                foreach (var (k, v) in value)
-                {
-                    if (currentValues.TryGetValue(k, out var c) && c == v)
-                        continue;
-
-                    var parameter = host.controller.GetParameters().FirstOrDefault(p => string.Equals(p.Title, k, StringComparison.OrdinalIgnoreCase));
-                    if (parameter.Title is null)
-                        continue;
-
-                    host.SetParameter(parameter.ID, v);
-                }
-
-                currentValues.Clear();
-                foreach (var (k, v) in value)
-                    currentValues.Add(k, v);
-            }
-        }
-
-        object? IVLPin.Value { get => Value; set => Value = (IReadOnlyDictionary<string, float>?)value; }
-    }
 }

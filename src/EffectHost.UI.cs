@@ -7,6 +7,7 @@ using System.Runtime.InteropServices.Marshalling;
 using System.Reactive.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using VL.Lang.PublicAPI;
 
 namespace VL.Audio.VST;
 partial class EffectHost
@@ -77,7 +78,7 @@ partial class EffectHost
 
         var position = window.DesktopLocation;
         var bounds = new Stride.Core.Mathematics.RectangleF(position.X, position.Y, window.ClientSize.Width, window.ClientSize.Height);
-        SaveToChannelOrPin(boundsPin.Value, BoundsInputPinName, bounds);
+        SaveToChannelOrPin(boundsPin.Value, IDevSession.Current?.CurrentSolution, BoundsInputPinName, bounds)?.Confirm(JustWriteToThePin);
     }
 
     private void SetWindowBounds(Stride.Core.Mathematics.RectangleF bounds)

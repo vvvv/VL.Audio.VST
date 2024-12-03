@@ -11,6 +11,7 @@ using VL.Audio.VST;
 using VL.Core;
 using VL.Core.CompilerServices;
 using VL.Lib.Reactive;
+using VL.Model;
 using VST3;
 using VST3.Hosting;
 
@@ -98,8 +99,9 @@ public sealed class Startup : AssemblyInitializer<Startup>
                 new PinDescription(EffectHost.BoundsInputPinName, typeof(IChannel<RectangleF>)) { IsVisible = false },
                 new PinDescription("Input", typeof(IEnumerable<AudioSignal>)),
                 new PinDescription("Midi In", typeof(IObservable<IMidiMessage>)),
-                // TODO: Bring parameters back via "learn", bring channels back via interface and built-in system in vvvv
-                //new PinDescription("Parameters", typeof(IReadOnlyDictionary<string, float>)),
+                new PinDescription("Parameters", typeof(Dictionary<string, object>)) { PinGroupKind = PinGroupKind.Dictionary },
+                new PinDescription("Learn", typeof(bool)),
+                // TODO: Bring channels back via interface and built-in system in vvvv
                 //new PinDescription("Channel Prefix", typeof(string), null),
                 new PinDescription("Show Editor", typeof(bool)),
                 new PinDescription("Apply", typeof(bool), defaultValue: true)
@@ -140,5 +142,9 @@ public sealed class Startup : AssemblyInitializer<Startup>
         public string? Summary { get; init; }
 
         public string? Remarks { get; init; }
+
+        public PinGroupKind PinGroupKind { get; init; }
+
+        public int PinGroupDefaultCount { get; init; }
     }
 }

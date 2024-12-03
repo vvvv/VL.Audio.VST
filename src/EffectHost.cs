@@ -4,7 +4,6 @@ using Sanford.Multimedia.Midi;
 using Stride.Core.Mathematics;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
@@ -15,7 +14,6 @@ using VL.Core;
 using VL.Core.Reactive;
 using VL.Lang.PublicAPI;
 using VL.Lib.Collections;
-using VL.Lib.IO.Midi;
 using VL.Lib.Reactive;
 using VST3;
 using VST3.Hosting;
@@ -31,6 +29,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 {
     public const string StateInputPinName = "State";
     public const string BoundsInputPinName = "Bounds";
+    private const Model.SolutionUpdateKind JustWriteToThePin = Model.SolutionUpdateKind.DontCompile | Model.SolutionUpdateKind.TweakLast;
 
     private static readonly ParameterChanges s_noChanges = new();
 
@@ -58,6 +57,8 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 
     private readonly Pin<IChannel<RectangleF>> boundsPin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
+    private readonly Pin<Dictionary<string, object>> parametersPin;
+    private readonly Pin<bool> learnParametersPin;
     //private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
@@ -67,6 +68,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private RectangleF bounds;
     private AudioPin audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
+    private readonly Dictionary<string, object> parameterValues = new();
     private string? channelPrefix;
     private bool showUI;
     private bool apply;
@@ -79,6 +81,8 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 
     private readonly Dictionary<uint, (ParameterInfo parameter, IChannel channel)> channels = new();
     private readonly Dictionary<uint, ParameterInfo> parameters = new();
+    private readonly Dictionary<uint, double> edits = new();
+    private ILookup<string, ParameterInfo> parameterLookup;
     private readonly Dictionary<int, UnitInfo> units = new();
 
     private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
@@ -142,7 +146,8 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         Inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
         Inputs[i++] = audioInputPin = new AudioPin();
         Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
-        //Inputs[i++] = new ParametersInput(this);
+        Inputs[i++] = parametersPin = new Pin<Dictionary<string, object>>();
+        Inputs[i++] = learnParametersPin = new Pin<bool>();
         //Inputs[i++] = channelPrefixPin = new Pin<string>();
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
@@ -154,12 +159,9 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             Value = outputEvents.ObserveOn(Scheduler.Default).SelectMany(e => TryTranslateToMidi(in e, out var m) ? new[] { m } : [])
         };
 
-        if (controller != null)
-        {
-            controller.setComponentHandler(this);
+        ReloadParameters();
 
-            ReloadParameters();
-        }
+        controller?.setComponentHandler(this);
     }
 
     public IVLNodeDescription NodeDescription => info.NodeDescription;
@@ -197,17 +199,24 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 
     private void SavePluginState()
     {
+        SavePluginState(IDevSession.Current?.CurrentSolution)?.Confirm(JustWriteToThePin);
+    }
+
+    private ISolution? SavePluginState(ISolution? solution)
+    {
         if (stateIsBeingSet)
-            return;
+            return solution;
 
         var channel = statePin.Value;
         if (channel is null)
-            return;
+            return solution;
 
         // Acknowledge the new state, we don't want to trigger a SetState on the controller in the next update
         var state = PluginState.From(plugProvider.ClassInfo.ID, component, controller);
         if (Acknowledge(ref this.state, state))
-            SaveToChannelOrPin(channel, StateInputPinName, state);
+            return SaveToChannelOrPin(channel, solution, StateInputPinName, state);
+
+        return solution;
     }
 
     private static bool Acknowledge<T>(ref T current, T value)
@@ -254,6 +263,21 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         {
             midiInputSubscription.Disposable = null;
             midiInputSubscription.Disposable = midiInput?.Subscribe(HandleMidiMessage);
+        }
+
+        // Collect changed input parameters
+        if (parametersPin.Value != null && controller != null)
+        {
+            foreach (var (k, v) in parametersPin.Value)
+            {
+                if (parameterValues.TryGetValue(k, out var c) && Equals(c, v))
+                    continue;
+
+                parameterValues[k] = v;
+
+                foreach (var p in parameterLookup[k])
+                    SetParameter(p.ID, p.Normalize(v));
+            }
         }
 
         //if (Acknowledge(ref channelPrefix, channelPrefixPin.Value))
@@ -337,16 +361,18 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         }
     }
 
+    [MemberNotNull(nameof(parameterLookup))]
     private void ReloadParameters()
     {
-        if (controller is null) return;
-
         parameters.Clear();
-        foreach (var p in controller.GetParameters())
+        if (controller != null)
         {
-            if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
-                byPassParameter = p;
-            parameters[p.ID] = p;
+            foreach (var p in controller.GetParameters())
+            {
+                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
+                    byPassParameter = p;
+                parameters[p.ID] = p;
+            }
         }
 
         units.Clear();
@@ -355,6 +381,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             foreach (var u in unitInfo.GetUnitInfos())
                 units[u.Id] = u;
         }
+        parameterLookup = parameters.Values.ToLookup(p => GetParameterFullName(in p));
     }
 
     private void LoadChannels(string prefix)
@@ -428,6 +455,25 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         }
     }
 
+    private string GetParameterFullName(in ParameterInfo p, string separator = " ")
+    {
+        var unitName = GetUnitFullName(p.UnitId, separator);
+        if (string.IsNullOrEmpty(unitName))
+            return p.Title;
+        return $"{unitName}{separator}{p.Title}";
+    }
+
+    private string GetUnitFullName(int unitId, string separator = " ")
+    {
+        if (unitId == Constants.kRootUnitId || !units.TryGetValue(unitId, out var info))
+            return string.Empty;
+
+        var parentName = GetUnitFullName(info.ParentUnitId);
+        if (!string.IsNullOrEmpty(parentName))
+            return $"{parentName}{separator}{info.Name}";
+        return info.Name;
+    }
+
     private void SetParameter(uint id, double normalizedValue)
     {
         var inputChanges = this.upcomingChanges ??= ParameterChangesPool.Default.Get();
@@ -448,11 +494,44 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 
         editCount--;
         if (editCount == 0)
-            SavePluginState();
+        {
+            var updateKind = JustWriteToThePin;
+            var solution = IDevSession.Current?.CurrentSolution;
+            solution = SavePluginState(solution);
+
+            if (parameters.TryGetValue(id, out var p))
+            {
+                var isNew = false;
+
+                // In learn mode add the parameter to the pin group
+                if (learnParametersPin.Value && solution != null)
+                {
+                    var s = ModifyParametersPinGroup(solution, p);
+                    if (s != solution)
+                    {
+                        updateKind = Model.SolutionUpdateKind.Default;
+                        solution = s;
+                        isNew = true;
+                    }
+                }
+
+                // Save the parameter value to the pin (if it exists)
+                if (solution != null && edits.TryGetValue(id, out var normalizedValue))
+                {
+                    var pinName = GetParameterFullName(in p);
+                    if (isNew || parameterValues.ContainsKey(pinName))
+                        solution = SaveToPin(solution, pinName, p.GetValueAsObject(normalizedValue));
+                }
+            }
+
+            solution?.Confirm(updateKind);
+        }
     }
 
     void IComponentHandler.performEdit(uint id, double valueNormalized)
     {
+        edits[id] = valueNormalized;
+
         if (channels.TryGetValue(id, out var x))
         {
             var (parameter, channel) = x;
@@ -498,22 +577,38 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         logger.LogTrace("Finishing group edit");
     }
 
-    private void SaveToChannelOrPin<T>(IChannel<T> channel, string pinName, T value)
+    private ISolution? SaveToChannelOrPin<T>(IChannel<T> channel, ISolution? solution, string pinName, T value)
     {
         // Only write changes to the channel. Avoids document marked as dirty on open.
-        if (Equals(channel.Value, value))
-            return;
+        if (!Equals(channel.Value, value))
+        {
+            channel.Value = value;
 
-        channel.Value = value;
-
-        if (channel.IsSystemGenerated())
-            SaveToPin(pinName, value);
+            if (channel.IsSystemGenerated() && solution != null)
+            {
+                return SaveToPin(solution, pinName, value);
+            }
+        }
+        return solution;
     }
 
-    private void SaveToPin<T>(string pinName, T value)
+    private ISolution SaveToPin<T>(ISolution solution, string pinName, T value)
     {
-        var solution = IDevSession.Current?.CurrentSolution
-            .SetPinValue(nodeContext.Path.Stack, pinName, value);
-        solution?.Confirm(Model.SolutionUpdateKind.DontCompile | Model.SolutionUpdateKind.TweakLast);
+        return solution.SetPinValue(nodeContext.Path.Stack, pinName, value);
+    }
+
+    private ISolution? ModifyParametersPinGroup(ISolution solution, in ParameterInfo parameter)
+    {
+        var typeRegistry = AppHost.Global.TypeRegistry;
+        var current = parametersPin.Value ?? new();
+        var nodeId = nodeContext.Path.Stack.Peek();
+        var builder = solution.ModifyPinGroup(nodeId, "Parameters", isInput: true);
+        foreach (var p in controller!.GetParameters())
+        {
+            var pinName = GetParameterFullName(in p);
+            if (current.ContainsKey(pinName) || parameter.ID == p.ID)
+                builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
+        }
+        return builder.Commit();
     }
 }

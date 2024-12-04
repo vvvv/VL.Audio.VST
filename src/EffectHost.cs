@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Sanford.Multimedia.Midi;
 using Stride.Core.Mathematics;
 using System.Collections.Concurrent;
@@ -67,25 +66,23 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private RectangleF bounds;
     private AudioPin audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
-    private readonly Dictionary<string, object> parameterValues = new();
+    private readonly Dictionary<string, object> inputValues = new();
     private string? channelPrefix;
     private bool showUI;
     private bool apply;
 
     private ParameterInfo? byPassParameter;
 
-    private ParameterChanges? upcomingChanges;
-    private ParameterChanges? committedChanges;
-    private ParameterChanges? pendingOutputChanges, acknowledgedOutputChanges;
+    private readonly BlockingCollection<ParameterChanges> inputParameterChangesQueue = new(boundedCapacity: 1);
+    private readonly BlockingCollection<ParameterChanges> outputParameterChangesQueue = new(boundedCapacity: 1);
+    private ParameterChanges? accumulatedInputParameterChanges, accumulatedOutputParameterChanges;
 
     private readonly Dictionary<uint, ParameterInfo> parameters = new();
-    private readonly Dictionary<uint, double> edits = new();
-    private ILookup<string, ParameterInfo> parameterLookup;
+    private readonly Dictionary<uint, double> parameterValues = new();
+    private readonly Dictionary<string, uint> parameterLookup = new();
     private readonly Dictionary<int, UnitInfo> units = new();
 
     private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
-    private float[] leftInput = [];
-    private float[] rightInput = [];
     private readonly ProcessSetup processSetup;
     private readonly AudioOutput audioOutput;
     private readonly StatePin statePin;
@@ -263,18 +260,19 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             midiInputSubscription.Disposable = midiInput?.Subscribe(HandleMidiMessage);
         }
 
-        // Collect changed input parameters
-        if (parametersPin.Value != null && controller != null)
+        // Check for changes on our input pins
+        if (parametersPin.Value != null)
         {
             foreach (var (k, v) in parametersPin.Value)
             {
-                if (parameterValues.TryGetValue(k, out var c) && Equals(c, v))
+                if (inputValues.TryGetValue(k, out var e) && Equals(e, v))
                     continue;
 
-                parameterValues[k] = v;
+                if (!parameterLookup.TryGetValue(k, out var id) || !parameters.TryGetValue(id, out var p))
+                    continue;
 
-                foreach (var p in parameterLookup[k])
-                    SetParameter(p.ID, p.Normalize(v));
+                inputValues[k] = v;
+                SetParameter(id, p.Normalize(v));
             }
         }
 
@@ -299,30 +297,13 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         }
 
 
-        // Move upcoming changes to audio thread and notify UI
-        var inputChanges = this.upcomingChanges;
-        if (inputChanges != null && this.committedChanges is null)
-        {
-            upcomingChanges = null;
-
-            for (int i = 0; i < inputChanges.GetParameterCount(); i++)
-            {
-                var queue = inputChanges.GetParameterData(i);
-                if (queue is null)
-                    continue;
-                queue.getPoint(0, out _, out var value);
-
-                var id = queue.getParameterId();
-                controller?.setParamNormalized(id, value);
-                OnParameterChanged(id, value);
-            }
-
-            Interlocked.Exchange(ref this.committedChanges, inputChanges);
-        }
+        // Move upcoming changes to audio thread
+        var inputChanges = accumulatedInputParameterChanges;
+        if (inputChanges != null && inputParameterChangesQueue.TryAdd(inputChanges))
+            accumulatedInputParameterChanges = null;
 
         // Move output changes from audio thread and notify UI
-        var outputChanges = Interlocked.Exchange(ref this.acknowledgedOutputChanges, null);
-        if (outputChanges != null)
+        if (outputParameterChangesQueue.TryTake(out var outputChanges))
         {
             for (int i = 0; i < outputChanges.GetParameterCount(); i++)
             {
@@ -351,10 +332,19 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         }
     }
 
-    [MemberNotNull(nameof(parameterLookup))]
     private void ReloadParameters()
     {
+        // Load units first as we need them to compute pin name
+        units.Clear();
+        if (controller is IUnitInfo unitInfo)
+        {
+            foreach (var u in unitInfo.GetUnitInfos())
+                units[u.Id] = u;
+        }
+
+        // Now that units are known, load the parameters
         parameters.Clear();
+        parameterLookup.Clear();
         if (controller != null)
         {
             foreach (var p in controller.GetParameters())
@@ -362,16 +352,9 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
                 if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
                     byPassParameter = p;
                 parameters[p.ID] = p;
+                parameterLookup[GetParameterFullName(p)] = p.ID;
             }
         }
-
-        units.Clear();
-        if (controller is IUnitInfo unitInfo)
-        {
-            foreach (var u in unitInfo.GetUnitInfos())
-                units[u.Id] = u;
-        }
-        parameterLookup = parameters.Values.ToLookup(p => GetParameterFullName(in p));
     }
 
     private string GetParameterFullName(in ParameterInfo p, string separator = " ")
@@ -395,9 +378,16 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 
     private void SetParameter(uint id, double normalizedValue)
     {
-        var inputChanges = this.upcomingChanges ??= ParameterChangesPool.Default.Get();
+        if (parameterValues.TryGetValue(id, out var c) && c == normalizedValue)
+            return;
+
+        parameterValues[id] = normalizedValue;
+        var inputChanges = accumulatedInputParameterChanges ??= ParameterChangesPool.Default.Get();
         var queue = inputChanges.AddParameterData(in id, out _);
         queue.addPoint(0, normalizedValue);
+
+        controller?.setParamNormalized(id, normalizedValue);
+        OnParameterChanged(id, normalizedValue);
     }
 
     void IComponentHandler.beginEdit(uint id)
@@ -405,6 +395,9 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         logger.LogTrace("Begin edit for parameter {id}", id);
 
         editCount++;
+
+        if (learnMode.Value)
+            AddToPinGroup(id);
     }
 
     void IComponentHandler.endEdit(uint id)
@@ -417,39 +410,12 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             var updateKind = JustWriteToThePin;
             var solution = IDevSession.Current?.CurrentSolution;
             solution = SavePluginState(solution);
-
-            if (parameters.TryGetValue(id, out var p))
-            {
-                var isNew = false;
-
-                // In learn mode add the parameter to the pin group
-                if (learnMode.Value && solution != null)
-                {
-                    var s = ModifyParametersPinGroup(solution, p);
-                    if (s != solution)
-                    {
-                        updateKind = Model.SolutionUpdateKind.Default;
-                        solution = s;
-                        isNew = true;
-                    }
-                }
-
-                // Save the parameter value to the pin (if it exists)
-                if (solution != null && edits.TryGetValue(id, out var normalizedValue))
-                {
-                    var pinName = GetParameterFullName(in p);
-                    if (isNew || parameterValues.ContainsKey(pinName))
-                        solution = SaveToPin(solution, pinName, p.GetValueAsObject(normalizedValue));
-                }
-            }
-
             solution?.Confirm(updateKind);
         }
     }
 
     void IComponentHandler.performEdit(uint id, double valueNormalized)
     {
-        edits[id] = valueNormalized;
         SetParameter(id, valueNormalized);
     }
 
@@ -507,8 +473,15 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         return solution.SetPinValue(nodeContext.Path.Stack, pinName, value);
     }
 
-    private ISolution? ModifyParametersPinGroup(ISolution solution, in ParameterInfo parameter)
+    private void AddToPinGroup(uint id)
     {
+        if (controller is null || !parameters.TryGetValue(id, out var parameter))
+            return;
+
+        var solution = IDevSession.Current?.CurrentSolution;
+        if (solution is null)
+            return;
+
         var typeRegistry = AppHost.Global.TypeRegistry;
         var current = parametersPin.Value ?? new();
         var nodeId = nodeContext.Path.Stack.Peek();
@@ -516,9 +489,17 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         foreach (var p in controller!.GetParameters())
         {
             var pinName = GetParameterFullName(in p);
-            if (current.ContainsKey(pinName) || parameter.ID == p.ID)
+            if (current.ContainsKey(pinName) || id == p.ID)
                 builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
         }
-        return builder.Commit();
+
+        var s = builder.Commit();
+        if (s != solution)
+        {
+            var pinName = GetParameterFullName(in parameter);
+            var normalizedValue = controller.getParamNormalized(parameter.ID);
+            s = SaveToPin(s, pinName, parameter.GetValueAsObject(normalizedValue));
+            s.Confirm();
+        }
     }
 }

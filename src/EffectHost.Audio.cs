@@ -31,8 +31,8 @@ partial class EffectHost
         }
 
 
-        var inputParameterChanges = Interlocked.Exchange(ref this.committedChanges, null);
-        var outputParameterChanges = pendingOutputChanges ??= ParameterChangesPool.Default.Get();
+        inputParameterChangesQueue.TryTake(out var inputParameterChanges);
+        var outputParameterChanges = accumulatedOutputParameterChanges ??= ParameterChangesPool.Default.Get();
 
         // Read inputs
         var arrayPool = ArrayPool<float>.Shared;
@@ -140,8 +140,8 @@ partial class EffectHost
         if (inputParameterChanges != null)
             ParameterChangesPool.Default.Return(inputParameterChanges);
 
-        if (Interlocked.CompareExchange(ref acknowledgedOutputChanges, outputParameterChanges, null) is null)
-            pendingOutputChanges = null;
+        if (outputParameterChangesQueue.TryAdd(outputParameterChanges))
+            accumulatedOutputParameterChanges = null;
 
         // Translate output events to MIDI (if possible) and send them out on background thread
         try

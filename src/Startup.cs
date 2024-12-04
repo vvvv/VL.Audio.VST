@@ -100,8 +100,6 @@ public sealed class Startup : AssemblyInitializer<Startup>
                 new PinDescription("Input", typeof(IEnumerable<AudioSignal>)),
                 new PinDescription("Midi In", typeof(IObservable<IMidiMessage>)),
                 new PinDescription("Parameters", typeof(Dictionary<string, object>)) { PinGroupKind = PinGroupKind.Dictionary },
-                // TODO: Bring channels back via interface and built-in system in vvvv
-                //new PinDescription("Channel Prefix", typeof(string), null),
                 new PinDescription("Show Editor", typeof(bool)),
                 new PinDescription("Apply", typeof(bool), defaultValue: true)
             };

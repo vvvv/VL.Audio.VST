@@ -58,7 +58,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private readonly Pin<IChannel<RectangleF>> boundsPin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
     private readonly Pin<Dictionary<string, object>> parametersPin;
-    //private readonly Pin<string> channelPrefixPin;
     private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
     private readonly IChannel<bool> learnMode = Channel.Create(false);
@@ -79,7 +78,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private ParameterChanges? committedChanges;
     private ParameterChanges? pendingOutputChanges, acknowledgedOutputChanges;
 
-    private readonly Dictionary<uint, (ParameterInfo parameter, IChannel channel)> channels = new();
     private readonly Dictionary<uint, ParameterInfo> parameters = new();
     private readonly Dictionary<uint, double> edits = new();
     private ILookup<string, ParameterInfo> parameterLookup;
@@ -147,7 +145,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         Inputs[i++] = audioInputPin = new AudioPin();
         Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
         Inputs[i++] = parametersPin = new Pin<Dictionary<string, object>>();
-        //Inputs[i++] = channelPrefixPin = new Pin<string>();
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
 
@@ -281,12 +278,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             }
         }
 
-        //if (Acknowledge(ref channelPrefix, channelPrefixPin.Value))
-        //{
-        //    if (!string.IsNullOrEmpty(channelPrefix))
-        //        LoadChannels(channelPrefix);
-        //}
-
         if (Acknowledge(ref showUI, showUiPin.Value))
         {
             if (showUI)
@@ -342,8 +333,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
 
                 var id = queue.getParameterId();
                 controller?.setParamNormalized(id, value);
-                if (channels.TryGetValue(id, out var x))
-                    x.channel.Object = x.parameter.GetValueAsObject(value);
                 OnParameterChanged(id, value);
             }
             ParameterChangesPool.Default.Return(outputChanges);
@@ -383,77 +372,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
                 units[u.Id] = u;
         }
         parameterLookup = parameters.Values.ToLookup(p => GetParameterFullName(in p));
-    }
-
-    private void LoadChannels(string prefix)
-    {
-        channels.Clear();
-
-        if (controller is null)
-            return;
-
-        var channelHub = nodeContext.AppHost.Services.GetService<IChannelHub>();
-        if (channelHub is null)
-            return;
-
-        var unitController = controller as IUnitInfo;
-        var units = unitController?.GetUnitInfos().ToDictionary(u => u.Id);
-
-        channelHub.BatchUpdate(channelHub =>
-        {
-            foreach (var p in controller.GetParameters())
-            {
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsBypass))
-                    continue;
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsHidden))
-                    continue;
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsList))
-                    continue;
-                if (!p.Flags.HasFlag(ParameterInfo.ParameterFlags.kCanAutomate))
-                    continue;
-
-                var unitName = units != null ? GetUnitFullName(units, p.UnitId) : null;
-                var localPrefix = string.IsNullOrEmpty(unitName) ? prefix : $"{prefix}.{unitName}";
-                var key = $"{localPrefix}.{p.Title}";
-                if (channelHub.TryGetChannel(key) != null)
-                    continue;
-
-                var channel = channelHub.TryAddChannel(key, p.GetPinType());
-                if (channel is null) 
-                    continue;
-
-                var attributes = channel.Attributes().Value;
-                if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsReadOnly))
-                    attributes = attributes.Add(new System.ComponentModel.ReadOnlyAttribute(isReadOnly: true));
-                attributes = attributes.Add(new System.ComponentModel.DefaultValueAttribute(p.GetDefaultValue()));
-                channel.Attributes().Value = attributes;
-                channel.Value = p.GetCurrentValue(controller);
-
-                if (!p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsReadOnly))
-                {
-                    channel.Subscribe(v =>
-                    {
-                        var normalized = p.Normalize(v);
-                        SetParameter(p.ID, normalized);
-                    });
-                }
-
-                channels.Add(p.ID, (p, channel));
-            }
-        });
-
-        string GetUnitFullName(Dictionary<int, UnitInfo> units, int infoId)
-        {
-            if (infoId == Constants.kRootUnitId)
-                return string.Empty;
-
-            var info = units[infoId];
-            var parentName = GetUnitFullName(units, info.ParentUnitId);
-            if (!string.IsNullOrEmpty(parentName))
-                return $"{parentName}.{info.Name}";
-
-            return info.Name;
-        }
     }
 
     private string GetParameterFullName(in ParameterInfo p, string separator = " ")
@@ -532,16 +450,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     void IComponentHandler.performEdit(uint id, double valueNormalized)
     {
         edits[id] = valueNormalized;
-
-        if (channels.TryGetValue(id, out var x))
-        {
-            var (parameter, channel) = x;
-            channel.Object = parameter.GetValueAsObject(valueNormalized);
-        }
-        else
-        {
-            SetParameter(id, valueNormalized);
-        }
+        SetParameter(id, valueNormalized);
     }
 
     void IComponentHandler.restartComponent(RestartFlags flags)

@@ -33,19 +33,14 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
             yield break;
 
         var typeRegistry = effectHost.nodeContext.AppHost.TypeRegistry;
-
-        var hasRootUnit = units.Any(x => x.Value.Id == Constants.kRootUnitId);
-        foreach (var p in LoadPropertiesForUnit(typeInfo, Constants.kRootUnitId, exposeParameters: !hasRootUnit))
+        foreach (var p in LoadPropertiesForUnit(typeInfo, Constants.kRootUnitId))
             yield return p;
 
-        if (!hasRootUnit)
-        {
-            propertyChangedSubscription = ParameterChanged
-                .Where(x => x.parameter.UnitId == Constants.kRootUnitId && ExposeAsProperty(in x.parameter))
-                .Subscribe(x => PropertyChanged?.Invoke(effectHost, new PropertyChangedEventArgs(x.parameter.Title)));
-        }
+        propertyChangedSubscription = ParameterChanged
+            .Where(x => x.parameter.UnitId == Constants.kRootUnitId && ExposeAsProperty(in x.parameter))
+            .Subscribe(x => PropertyChanged?.Invoke(effectHost, new PropertyChangedEventArgs(x.parameter.Title)));
 
-        IEnumerable<IVLPropertyInfo> LoadPropertiesForUnit(IVLTypeInfo declaringType, int unitId, bool exposeParameters = true)
+        IEnumerable<IVLPropertyInfo> LoadPropertiesForUnit(IVLTypeInfo declaringType, int unitId)
         {
             foreach (var unitInfo in units.Values)
             {
@@ -62,7 +57,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                 {
                     Type = unitTypeInfo,
                     PropertyChangedSource = effectHost.ParameterChanged
-                        .Where(e => e.parameter.UnitId == unitId && ExposeAsProperty(in e.parameter))
+                        .Where(e => e.parameter.UnitId == unitInfo.Id && ExposeAsProperty(in e.parameter))
                         .Select(e => new PropertyChangedEventArgs(e.parameter.Title))
                 };
                 yield return new DynamicPropertyInfo()
@@ -73,9 +68,6 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                     GetValue = _ => unit,
                 };
             }
-
-            if (!exposeParameters)
-                yield break;
 
             foreach (var p in controller.GetParameters())
             {

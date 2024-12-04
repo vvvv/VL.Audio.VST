@@ -151,7 +151,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         Inputs[i++] = showUiPin = new Pin<bool>();
         Inputs[i++] = applyPin = new Pin<bool>();
 
-        //Outputs[o++] = new Pin<EffectHost>() { Value = this };
+        Outputs[o++] = new Pin<EffectHost>() { Value = this };
         Outputs[o++] = audioOutputPin = new AudioPin();
         Outputs[o++] = midiOutputPin = new Pin<IObservable<IMidiMessage>>() 
         { 

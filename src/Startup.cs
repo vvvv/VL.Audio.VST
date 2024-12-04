@@ -107,7 +107,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
             };
             var outputs = new List<IVLPinDescription>()
             {
-                //new PinDescription("Output", typeof(EffectHost)),
+                new PinDescription("Output", typeof(EffectHost)) { IsVisible = false },
                 new PinDescription("Audio Out", typeof(IReadOnlyList<AudioSignal>)),
                 new PinDescription("Midi Out", typeof(IObservable<IMidiMessage>)),
                 //ctx.Pin("Parameters", typeof(IReadOnlyDictionary<string, float>))

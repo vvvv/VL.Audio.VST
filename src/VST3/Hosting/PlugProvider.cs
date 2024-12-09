@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using VL.Audio.VST;
+using VL.Audio.VST.Internal;
 
 namespace VST3.Hosting;
 

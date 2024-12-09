@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VL.Audio.VST.Internal;
 using VL.Lib.IO.Midi;
 using VST3;
 

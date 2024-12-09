@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Runtime.InteropServices;
+using VL.Audio.VST.Internal;
 using VST3;
 
 namespace VL.Audio.VST;

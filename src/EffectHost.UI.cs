@@ -1,20 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Drawing;
 using System.Windows.Forms;
-using VST3.Hosting;
 using VST3;
 using System.Runtime.InteropServices.Marshalling;
 using System.Reactive.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using VL.Lang.PublicAPI;
+using VL.Audio.VST.Internal;
+using VST3.Hosting;
 
 namespace VL.Audio.VST;
+
 partial class EffectHost
 {
     private Form? window;
 
-    private void ShowEditor()
+    public void ShowUI()
     {
         if (controller is null)
             return;
@@ -71,6 +72,13 @@ partial class EffectHost
         window.Activate();
     }
 
+    public void HideUI()
+    {
+        window?.Close();
+        window?.Dispose();
+        window = null;
+    }
+
     void SaveCurrentWindowBounds()
     {
         if (window is null || window.IsDisposed || boundsPin.Value is null)
@@ -88,13 +96,6 @@ partial class EffectHost
 
         window.Location = new Point((int)bounds.X, (int)bounds.Y);
         window.ClientSize = new Size((int)bounds.Width, (int)bounds.Height);
-    }
-
-    private void HideEditor()
-    {
-        window?.Close();
-        window?.Dispose();
-        window = null;
     }
 
     [GeneratedComClass]

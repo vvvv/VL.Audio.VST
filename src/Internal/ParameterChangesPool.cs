@@ -2,7 +2,7 @@
 using VL.Lib.Reactive;
 using VST3.Hosting;
 
-namespace VL.Audio.VST;
+namespace VL.Audio.VST.Internal;
 
 sealed class ParameterChangesPool : DefaultObjectPool<ParameterChanges>
 {

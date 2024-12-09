@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using VL.Audio.VST;
+using VL.Audio.VST.Internal;
 
 namespace VST3.Hosting;
 

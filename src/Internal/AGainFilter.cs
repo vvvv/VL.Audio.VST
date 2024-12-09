@@ -8,7 +8,7 @@ using VST3;
 using VST3.Hosting;
 using IComponent = VST3.IComponent;
 
-namespace VL.Audio.VST;
+namespace VL.Audio.VST.Internal;
 
 // Test class to see if we can host a VST3 plugin
 [ProcessNode]
@@ -90,10 +90,10 @@ internal unsafe partial class AGainFilter : IDisposable
             });
 
         component.activateBus(MediaTypes.kAudio, BusDirections.kInput, 0, true);
-        component.activateBus(MediaTypes.kAudio, BusDirections.kOutput, 0, true);;
+        component.activateBus(MediaTypes.kAudio, BusDirections.kOutput, 0, true); ;
 
         component.setActive(true);
-        processor.SetProcessing_IgnoreNotImplementedException(true);
+        processor.setProcessing(true);
     }
 
     public void Dispose()
@@ -106,7 +106,7 @@ internal unsafe partial class AGainFilter : IDisposable
 
         window.Dispose();
         outputSignal.Dispose();
-        processor.SetProcessing_IgnoreNotImplementedException(false);
+        processor.setProcessing(false);
         component.setActive(false);
         component.terminate();
         component.ReleaseComObject();

@@ -61,7 +61,7 @@ partial interface IAudioProcessor
 	/** Called in disable state (setActive not called with true) before setProcessing is called and processing will begin. */
 	void setupProcessing(in ProcessSetup setup);
 
-	/** Informs the plug-in about the processing state. This will be called before any process calls
+    /** Informs the plug-in about the processing state. This will be called before any process calls
 	   start with true and after with false.
 	   Note that setProcessing (false) may be called after setProcessing (true) without any process
 	   calls.
@@ -70,7 +70,8 @@ partial interface IAudioProcessor
 	   this could be used to reset some buffers (like Delay line or Reverb).
 	   The host has to be sure that it is called only when the plug-in is enable (setActive (true)
 	   was called). */
-	void setProcessing([MarshalAs(UnmanagedType.U1)] bool state);
+    // https://forums.steinberg.net/t/iaudioprocessor-setprocessing-fails-in-many-plugins/785558
+    [PreserveSig] [return: MarshalAs(UnmanagedType.Error)] int setProcessing([MarshalAs(UnmanagedType.U1)] bool state);
 
 	/** The Process call, where all information (parameter changes, event, audio buffer) are passed. */
 	void process(in ProcessData data);

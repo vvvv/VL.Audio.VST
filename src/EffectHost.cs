@@ -9,7 +9,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices.Marshalling;
+using VL.Audio.VST.Internal;
 using VL.Core;
+using VL.Core.Commands;
 using VL.Core.Reactive;
 using VL.Lang.PublicAPI;
 using VL.Lib.Collections;
@@ -24,10 +26,10 @@ using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
 using IComponent = VST3.IComponent;
 
 [GeneratedComClass]
-public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler, IComponentHandler2, IDisposable
+public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHasLearnMode, IComponentHandler, IComponentHandler2, IDisposable
 {
-    public const string StateInputPinName = "State";
-    public const string BoundsInputPinName = "Bounds";
+    internal const string StateInputPinName = "State";
+    internal const string BoundsInputPinName = "Bounds";
     private const Model.SolutionUpdateKind JustWriteToThePin = Model.SolutionUpdateKind.Default & ~Model.SolutionUpdateKind.AffectCompilation & ~Model.SolutionUpdateKind.AddToHistory;
 
     private static readonly ParameterChanges s_noChanges = new();
@@ -47,6 +49,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private readonly IAudioProcessor processor;
     private readonly IEditController? controller;
     private readonly SynchronizationContext? synchronizationContext;
+    private readonly IDisposable? nodeRegistration;
 
     private readonly EventList inputEventList = new();
     private readonly EventList outputEventList = new();
@@ -54,10 +57,10 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private readonly BlockingCollection<Event> inputEventQueue = new(boundedCapacity: 1024);
     private readonly Subject<Event> outputEvents = new();
 
+    private readonly IVLPin[] inputs, outputs;
     private readonly Pin<IChannel<RectangleF>> boundsPin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
     private readonly Pin<Dictionary<string, object>> parametersPin;
-    private readonly Pin<bool> showUiPin;
     private readonly Pin<bool> applyPin;
     private readonly IChannel<bool> learnMode = Channel.Create(false);
 
@@ -67,8 +70,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     private AudioPin audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
     private readonly Dictionary<string, object> inputValues = new();
-    private string? channelPrefix;
-    private bool showUI;
     private bool apply;
 
     private ParameterInfo? byPassParameter;
@@ -129,25 +130,24 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             component.activateBus(MediaTypes.kEvent, BusDirections.kOutput, 0, true);
 
         component.setActive(true);
-        processor.SetProcessing_IgnoreNotImplementedException(true);
+        processor.setProcessing(true);
 
-        Inputs = new IVLPin[info.NodeDescription.Inputs.Count];
-        Outputs = new IVLPin[info.NodeDescription.Outputs.Count];
+        inputs = new IVLPin[info.NodeDescription.Inputs.Count];
+        outputs = new IVLPin[info.NodeDescription.Outputs.Count];
 
         var i = 0; var o = 0;
 
-        Inputs[i] = statePin = new StatePin();
+        inputs[i] = statePin = new StatePin();
         i++;
-        Inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
-        Inputs[i++] = audioInputPin = new AudioPin();
-        Inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
-        Inputs[i++] = parametersPin = new Pin<Dictionary<string, object>>();
-        Inputs[i++] = showUiPin = new Pin<bool>();
-        Inputs[i++] = applyPin = new Pin<bool>();
+        inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
+        inputs[i++] = audioInputPin = new AudioPin();
+        inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
+        inputs[i++] = parametersPin = new Pin<Dictionary<string, object>>();
+        inputs[i++] = applyPin = new Pin<bool>();
 
-        Outputs[o++] = new Pin<EffectHost>() { Value = this };
-        Outputs[o++] = audioOutputPin = new AudioPin();
-        Outputs[o++] = midiOutputPin = new Pin<IObservable<IMidiMessage>>() 
+        outputs[o++] = new Pin<EffectHost>() { Value = this };
+        outputs[o++] = audioOutputPin = new AudioPin();
+        outputs[o++] = midiOutputPin = new Pin<IObservable<IMidiMessage>>() 
         { 
             Value = outputEvents.ObserveOn(Scheduler.Default).SelectMany(e => TryTranslateToMidi(in e, out var m) ? new[] { m } : [])
         };
@@ -155,22 +155,24 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         ReloadParameters();
 
         controller?.setComponentHandler(this);
+
+        nodeRegistration = IDevSession.Current?.RegisterNode(this);
     }
 
-    public IVLNodeDescription NodeDescription => info.NodeDescription;
+    IVLNodeDescription IVLNode.NodeDescription => info.NodeDescription;
 
-    public IVLPin[] Inputs { get; }
+    IVLPin[] IVLNode.Inputs => inputs;
 
-    public IVLPin[] Outputs { get; }
+    IVLPin[] IVLNode.Outputs => outputs;
 
-    public IChannel<bool>? LearnMode => learnMode;
+    IChannel<bool> IHasLearnMode.LearnMode => learnMode;
 
     private bool HasMainAudioIn => audioInputBusses.Length > 0 && audioInputBusses[0].BusType == BusTypes.kMain;
     private bool HasMainAudioOut => audioOutputBusses.Length > 0 && audioOutputBusses[0].BusType == BusTypes.kMain;
     private bool HasEventInput => eventInputBusses.Length > 0;
     private bool HasEventOutput => eventOutputBusses.Length > 0;
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         if (isDisposed)
             return;
@@ -180,11 +182,12 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         // Ensure we're not processing any audio currently
         lock (processingLock)
         {
+            nodeRegistration?.Dispose();
             midiInputSubscription.Dispose();
-            HideEditor();
+            HideUI();
             audioOutput.Dispose();
 
-            processor.SetProcessing_IgnoreNotImplementedException(false);
+            processor.setProcessing(false);
             component.setActive(false);
 
             plugProvider.Dispose();
@@ -224,7 +227,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
         return false;
     }
 
-    public void Update()
+    void IVLNode.Update()
     {
         // TODO: Make thread safe!
         var aduioInputSignals = audioInputPin.Value ?? Array.Empty<AudioSignal>();
@@ -274,14 +277,6 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
                 inputValues[k] = v;
                 SetParameter(id, p.Normalize(v));
             }
-        }
-
-        if (Acknowledge(ref showUI, showUiPin.Value))
-        {
-            if (showUI)
-                ShowEditor();
-            else
-                HideEditor();
         }
 
         if (Acknowledge(ref bounds, boundsPin.Value?.Value ?? RectangleF.Empty))
@@ -410,6 +405,14 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
             var updateKind = JustWriteToThePin;
             var solution = IDevSession.Current?.CurrentSolution;
             solution = SavePluginState(solution);
+
+            // Save the parameter value to the pin as well (if it exists)
+            if (solution != null && parameters.TryGetValue(id, out var p) && parameterValues.TryGetValue(id, out var normalizedValue))
+            {
+                var pinName = GetParameterFullName(in p);
+                solution = SaveToPin(solution, pinName, p.GetValueAsObject(normalizedValue));
+            }
+
             solution?.Confirm(updateKind);
         }
     }
@@ -451,6 +454,14 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IComponentHandler
     void IComponentHandler2.finishGroupEdit()
     {
         logger.LogTrace("Finishing group edit");
+    }
+
+    IEnumerable<(string Name, ICommand Command)> IHasCommands.Commands
+    {
+        get
+        {
+            yield return ("Show UI", Command.Create(ShowUI).ExecuteOn(AppHost.SynchronizationContext));
+        }
     }
 
     private ISolution? SaveToChannelOrPin<T>(IChannel<T> channel, ISolution? solution, string pinName, T value)

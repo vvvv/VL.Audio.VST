@@ -16,7 +16,7 @@
     <readme>docs\README.md</readme>
 	<dependencies>
 		<group targetFramework="net8.0-windows7.0">
-		<dependency id="VL.Audio" version="1.9.2" />
+		<dependency id="VL.Audio" version="1.9.3" />
 		</group>
     </dependencies>
   </metadata>

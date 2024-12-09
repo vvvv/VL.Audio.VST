@@ -1,9 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using NAudio.Wave;
 using Sanford.Multimedia.Midi;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
 using VL.Lib.Reactive;
 using VST3;
 
@@ -11,42 +8,6 @@ namespace VL.Audio.VST;
 
 static class Utils
 {
-    public static void ReleaseComObject(this object obj)
-    {
-        if (obj is ComObject com && IsUniqueInstance(com))
-        {
-            // See https://github.com/dotnet/runtime/issues/96901
-            GC.SuppressFinalize(com);
-            com.FinalRelease();
-        }
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_UniqueInstance")]
-        extern static bool IsUniqueInstance(ComObject comObject);
-    }
-
-    public static nint GetComPtr(this object? obj, in Guid guid)
-    {
-        if (obj is null)
-            return default;
-
-        var pUnk = VstWrappers.Instance.GetOrCreateComInterfaceForObject(obj, CreateComInterfaceFlags.None);
-        Marshal.QueryInterface(pUnk, in guid, out var pInt);
-        Marshal.Release(pUnk);
-        return pInt;
-    }
-
-    public static void SetProcessing_IgnoreNotImplementedException(this IAudioProcessor processor, bool state)
-    {
-        try
-        {
-            processor.setProcessing(state);
-        }
-        catch (NotImplementedException)
-        {
-            // https://forums.steinberg.net/t/iaudioprocessor-setprocessing-fails-in-many-plugins/785558
-        }
-    }
-
     public static void IgnoreNotImplementedException<T>(this T obj, Action<T> action)
     {
         try
@@ -88,7 +49,7 @@ static class Utils
         };
     }
 
-    public static object GetDefaultValue(this ParameterInfo parameterInfo) => GetValueAsObject(parameterInfo, parameterInfo.DefaultNormalizedValue);
+    public static object GetDefaultValue(this ParameterInfo parameterInfo) => parameterInfo.GetValueAsObject(parameterInfo.DefaultNormalizedValue);
 
     public static object GetCurrentValue(this ParameterInfo parameterInfo, IEditController controller)
     {

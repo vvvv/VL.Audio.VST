@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VL.Audio.VST;
+using VL.Audio.VST.Internal;
 using VL.Core;
 using VL.Core.CompilerServices;
 using VL.Lib.Reactive;
@@ -15,9 +15,9 @@ using VL.Model;
 using VST3;
 using VST3.Hosting;
 
-[assembly:AssemblyInitializer(typeof(Startup))]
+[assembly: AssemblyInitializer(typeof(Startup))]
 
-namespace VL.Audio.VST;
+namespace VL.Audio.VST.Internal;
 
 public sealed class Startup : AssemblyInitializer<Startup>
 {
@@ -97,10 +97,9 @@ public sealed class Startup : AssemblyInitializer<Startup>
             {
                 new PinDescription(EffectHost.StateInputPinName, typeof(IChannel<PluginState>)) { IsVisible = false },
                 new PinDescription(EffectHost.BoundsInputPinName, typeof(IChannel<RectangleF>)) { IsVisible = false },
-                new PinDescription("Input", typeof(IEnumerable<AudioSignal>)),
+                new PinDescription("Audio In", typeof(IEnumerable<AudioSignal>)),
                 new PinDescription("Midi In", typeof(IObservable<IMidiMessage>)),
                 new PinDescription("Parameters", typeof(Dictionary<string, object>)) { PinGroupKind = PinGroupKind.Dictionary },
-                new PinDescription("Show Editor", typeof(bool)),
                 new PinDescription("Apply", typeof(bool), defaultValue: true)
             };
             var outputs = new List<IVLPinDescription>()

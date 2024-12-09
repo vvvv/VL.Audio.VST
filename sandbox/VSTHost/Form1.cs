@@ -1,13 +1,6 @@
-using Microsoft.VisualBasic.Devices;
-using NAudio.Wave;
-using Sanford.Multimedia.Midi;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
-using VL.Audio;
 using VL.Audio.VST;
-using VL.Core;
+using VL.Audio.VST.Internal;
 using VST3;
 using VST3.Hosting;
 using Utils = VL.Audio.VST.Utils;
@@ -62,7 +55,7 @@ namespace VSTHost
                 var processor = (IAudioProcessor)component;
                 var controller = plugProvider.Controller;
 
-                var outputSignal = new BufferCallerSignal()
+                var outputSignal = new VL.Audio.BufferCallerSignal()
                 {
                 };
 
@@ -78,8 +71,8 @@ namespace VSTHost
                     {
                         ProcessMode = ProcessModes.Realtime,
                         SymbolicSampleSize = Utils.GetSymbolicSampleSizes(outputSignal.WaveFormat),
-                        MaxSamplesPerBlock = Math.Max(AudioService.Engine.Settings.BufferSize, 4096),
-                        SampleRate = AudioService.Engine.Settings.SampleRate
+                        MaxSamplesPerBlock = Math.Max(VL.Audio.AudioService.Engine.Settings.BufferSize, 4096),
+                        SampleRate = VL.Audio.AudioService.Engine.Settings.SampleRate
                     });
 
 
@@ -88,7 +81,7 @@ namespace VSTHost
                 component.activateBus(MediaTypes.kEvent, BusDirections.kInput, 0, true);
 
                 component.setActive(true);
-                processor.SetProcessing_IgnoreNotImplementedException(true);
+                processor.setProcessing(true);
 
                
                 if (controller != null)

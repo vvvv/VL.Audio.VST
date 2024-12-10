@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using VL.Audio.VST.Internal;
 using VL.Core;
+using VL.Core.CompilerServices;
 using VL.Core.Reactive;
 using VL.Lib.Collections;
 using VST3;
@@ -26,8 +27,8 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
         LoadProperties = typeInfo => LoadProperties(typeInfo, this)
     };
 
-
-    event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
+    [Smell(SymbolSmell.Internal)]
+    public event PropertyChangedEventHandler? PropertyChanged
     {
         add => propertyChanged += value;
         remove => propertyChanged -= value;

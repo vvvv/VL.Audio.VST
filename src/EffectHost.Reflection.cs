@@ -27,6 +27,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
         LoadProperties = typeInfo => LoadProperties(typeInfo, this)
     };
 
+    // Needs to be a public event - using explicit implementation crashes Observable.FromEventPattern
     [Smell(SymbolSmell.Internal)]
     public event PropertyChangedEventHandler? PropertyChanged
     {

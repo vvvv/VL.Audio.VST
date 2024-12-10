@@ -16,7 +16,7 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 | Implemented Interfaces | Status  |
 | ------------- | ------------- |
 | IAttributeList | done |
-| IComponentHandler | parameter editing yes, restart calls ignored |
+| IComponentHandler | parameter editing yes, restart calls some |
 | IEventList | done |
 | IUnitHandler | done |
 | IHostApplication | done |
@@ -28,10 +28,10 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 | Consumed Interfaces (from the plugin) | Status  |
 | ------------- | ------------- |
 | IComponent | state yes, bus count and info only main, IO mode no |
-| IAudioProcessor | assuming stereo only |
+| IAudioProcessor | only stereo tested so far |
 | IEditController | done |
 | IConnectionPoint | yes, using a connection proxy which ensures any notifications are done on main thread |
-| IUnitInfo | only to read hierachy when creating channels for parameters |
+| IUnitInfo | used to build display name of pins, also used in case of dynamic reflection |
 | IProgramListData | no |
 | IUnitData | no |
 | IPlugView | sizing yes, keyboard handling no |
@@ -41,9 +41,9 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 | Multiple Dynamic I/O Support | no |
 | Silence flags | no |
 | Parameter MIDI Mapping | yes |
-| Parameter Finder | no |
+| Parameter Finder | no - did have a look but found no plugin implementing it |
 | Audio Presentation Latency | no |
-| Dirty State, Open Editor Request and UI Group Editing Support | no |
+| Dirty State, Open Editor Request and UI Group Editing Support | dirty state yes, rest no |
 | KnobMode, Open Help & Open Aboutbox | no |
 | Note Expression | no |
 | Key Switch | no |
@@ -60,9 +60,9 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 | Request Bus Activation | no |
 | UI Snapshots | no |
 | NoteExpression Physical UI Mapping | no |
-| Legacy MIDI CC Out Event | no |
+| Legacy MIDI CC Out Event | yes |
 | MIDI Learn | yes |
-| Host Query Interface support | no |
+| Host Query Interface support | yes |
 | MPE support for Wrappers | no |
 | Parameter Function Name | no |
 | Progress display | no |

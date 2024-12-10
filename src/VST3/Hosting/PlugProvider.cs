@@ -1,8 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
-using VL.Audio.VST.Internal;
-
-namespace VST3.Hosting;
+﻿namespace VST3.Hosting;
 
 internal class PlugProvider : IDisposable
 {

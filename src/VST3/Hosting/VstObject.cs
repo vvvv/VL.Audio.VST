@@ -1,6 +1,4 @@
-﻿using VL.Audio.VST.Internal;
-
-namespace VST3.Hosting;
+﻿namespace VST3.Hosting;
 
 internal abstract class VstObject<TComInterface>
 {

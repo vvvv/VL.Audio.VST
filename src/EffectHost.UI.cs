@@ -1,24 +1,44 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Drawing;
 using System.Windows.Forms;
 using VST3;
 using System.Runtime.InteropServices.Marshalling;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using VL.Lang.PublicAPI;
-using VL.Audio.VST.Internal;
 using VST3.Hosting;
+using System.Drawing;
+using RectangleF = Stride.Core.Mathematics.RectangleF;
+using VL.Core;
 
 namespace VL.Audio.VST;
 
 partial class EffectHost
 {
-    private Form? window;
+    private Window? window;
 
-    public void ShowUI()
+    /// <summary>
+    /// Shows the UI of the plugin (if available).
+    /// </summary>
+    /// <remarks>
+    /// In case the window was already created via the context menu, it will get re-created to ensure that its bounds are no longer saved to the pin.
+    /// </remarks>
+    /// <param name="bounds">The bounds of the window in pixel. Width and height will only get applied if the plugin allows it.</param>
+    public void ShowUI(Optional<RectangleF> bounds)
+    {
+        // Called from user code, don't track window state
+        ShowUI(bounds.ToNullable(), formWindowState: FormWindowState.Normal, trackWindowState: false);
+    }
+
+    private void ShowUI(RectangleF? bounds, FormWindowState? formWindowState, bool trackWindowState)
     {
         if (controller is null)
             return;
+
+        // Ensure tracking state matches the requested state
+        if (window != null && window.IsTracking != trackWindowState)
+        {
+            HideUI();
+        }
 
         if (window is null || window.IsDisposed)
         {
@@ -26,7 +46,7 @@ partial class EffectHost
             if (view is null || view.isPlatformTypeSupported("HWND") != 0)
                 return;
 
-            window = new Window(this, view);
+            window = new Window(this, view, trackWindowState);
 
             // High DPI support
             var scaleSupport = view as IPlugViewContentScaleSupport;
@@ -35,23 +55,14 @@ partial class EffectHost
                 scaleSupport?.setContentScaleFactor(e.DeviceDpiNew / 96f);
             };
 
-            bounds = boundsPin.Value?.Value ?? default;
-            if (!bounds.IsEmpty)
+            try
             {
-                window.StartPosition = FormStartPosition.Manual;
-                SetWindowBounds(bounds);
+                var plugViewSize = view.getSize();
+                window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
             }
-            else
+            catch (Exception e)
             {
-                try
-                {
-                    var plugViewSize = view.getSize();
-                    window.ClientSize = new Size(plugViewSize.Width, plugViewSize.Height);
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Failed to get initial view size");
-                }
+                logger.LogError(e, "Failed to get initial view size");
             }
 
             try
@@ -68,34 +79,42 @@ partial class EffectHost
             }
         }
 
+        if (bounds.HasValue)
+        {
+            var b = bounds.Value;
+            window.StartPosition = FormStartPosition.Manual;
+            window.Location = new Point((int)b.X, (int)b.Y);
+            if (window.View.canResize() && b.Width > 0 && b.Height > 0)
+                window.Size = new Size((int)b.Width, (int)b.Height);
+        }
+
+        if (formWindowState.HasValue)
+            window.WindowState = formWindowState.Value;
+
         window.Visible = true;
-        window.Activate();
+
+        if (formWindowState != FormWindowState.Minimized)
+            window.Activate();
     }
 
+    /// <summary>
+    /// Hides the UI of the plugin.
+    /// </summary>
     public void HideUI()
     {
-        window?.Close();
         window?.Dispose();
         window = null;
     }
 
-    void SaveCurrentWindowBounds()
+    void SaveWindowState(WindowState windowState)
     {
-        if (window is null || window.IsDisposed || boundsPin.Value is null)
+        // Save in a field to ensure that an upcoming call to ShowUI will use the previous bounds
+        this.windowState = windowState;
+
+        if (windowStatePin.Value is null)
             return;
 
-        var position = window.DesktopLocation;
-        var bounds = new Stride.Core.Mathematics.RectangleF(position.X, position.Y, window.ClientSize.Width, window.ClientSize.Height);
-        SaveToChannelOrPin(boundsPin.Value, IDevSession.Current?.CurrentSolution, BoundsInputPinName, bounds)?.Confirm(JustWriteToThePin);
-    }
-
-    private void SetWindowBounds(Stride.Core.Mathematics.RectangleF bounds)
-    {
-        if (window is null || window.IsDisposed)
-            return;
-
-        window.Location = new Point((int)bounds.X, (int)bounds.Y);
-        window.ClientSize = new Size((int)bounds.Width, (int)bounds.Height);
+        SaveToChannelOrPin(windowStatePin.Value, IDevSession.Current?.CurrentSolution, WindowStatePinName, windowState)?.Confirm(JustWriteToThePin);
     }
 
     [GeneratedComClass]
@@ -105,12 +124,24 @@ partial class EffectHost
         private readonly IPlugView view;
         private readonly IPlugViewContentScaleSupport? scaleSupport;
         private readonly SingleAssignmentDisposable boundsSubscription = new();
+        private readonly bool trackWindowState;
 
-        public Window(EffectHost effectHost, IPlugView view)
+        public Window(EffectHost effectHost, IPlugView view, bool trackWindowState)
         {
             this.effectHost = effectHost;
             this.view = view;
+            this.trackWindowState = trackWindowState;
             this.scaleSupport = view as IPlugViewContentScaleSupport;
+        }
+
+        public IPlugView View => view;
+
+        public bool IsTracking => trackWindowState;
+
+        public WindowState GetWindowState()
+        {
+            var r = WindowState == FormWindowState.Normal ? new Rectangle(Location, Size) : RestoreBounds;
+            return new WindowState(WindowState.ToWindowVisibility(), new RectangleF(r.X, r.Y, r.Width, r.Height));
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -119,12 +150,18 @@ partial class EffectHost
             view.attached(Handle, "HWND");
             scaleSupport?.setContentScaleFactor(DeviceDpi / 96f);
 
-            boundsSubscription.Disposable = Observable.Merge(
-                Observable.FromEventPattern(this, nameof(ClientSizeChanged)),
-                Observable.FromEventPattern(this, nameof(LocationChanged)))
-                .Throttle(TimeSpan.FromSeconds(0.25))
-                .ObserveOn(SynchronizationContext.Current!)
-                .Subscribe(_ => effectHost.SaveCurrentWindowBounds());
+            if (trackWindowState)
+            {
+                var windowState = GetWindowState();
+                effectHost.SaveWindowState(windowState);
+
+                boundsSubscription.Disposable = Observable.Merge(
+                    Observable.FromEventPattern(this, nameof(ClientSizeChanged)),
+                    Observable.FromEventPattern(this, nameof(LocationChanged)))
+                    .Throttle(TimeSpan.FromSeconds(0.25))
+                    .ObserveOn(SynchronizationContext.Current!)
+                    .Subscribe(_ => effectHost.SaveWindowState(GetWindowState()));
+            }
 
             base.OnHandleCreated(e);
         }
@@ -138,6 +175,17 @@ partial class EffectHost
             base.OnHandleDestroyed(e);
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            if (trackWindowState)
+            {
+                var windowState = GetWindowState();
+                effectHost.SaveWindowState(windowState with { Visibility = WindowVisibility.Hidden });
+            }
+
+            base.OnClosed(e);
+        }
+
         protected override void OnDpiChanged(DpiChangedEventArgs e)
         {
             scaleSupport?.setContentScaleFactor(e.DeviceDpiNew / 96f);
@@ -147,8 +195,10 @@ partial class EffectHost
 
         protected override void OnClientSizeChanged(EventArgs e)
         {
-            var r = ClientRectangle;
-            view.onSize(new ViewRect() { Left = r.Left, Right = r.Right, Top = r.Top, Bottom = r.Bottom });
+            // Client size is empty when the window is minimized. Don't send that to the view, as it breaks some.
+            var clientSize = ClientSize;
+            if (!clientSize.IsEmpty)
+                view.onSize(new ViewRect() { Left = 0, Right = clientSize.Width, Top = 0, Bottom = clientSize.Height });
 
             base.OnClientSizeChanged(e);
         }

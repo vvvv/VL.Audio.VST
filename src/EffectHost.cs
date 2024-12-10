@@ -12,6 +12,7 @@ using System.Runtime.InteropServices.Marshalling;
 using VL.Audio.VST.Internal;
 using VL.Core;
 using VL.Core.Commands;
+using VL.Core.CompilerServices;
 using VL.Core.Reactive;
 using VL.Lang.PublicAPI;
 using VL.Lib.Collections;
@@ -21,15 +22,14 @@ using VST3.Hosting;
 
 namespace VL.Audio.VST;
 
-using StatePin = Pin<IChannel<PluginState>>;
-using AudioPin = Pin<IReadOnlyList<AudioSignal>>;
 using IComponent = VST3.IComponent;
 
 [GeneratedComClass]
+[Smell(SymbolSmell.Advanced)]
 public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHasLearnMode, IComponentHandler, IComponentHandler2, IDisposable
 {
     internal const string StateInputPinName = "State";
-    internal const string BoundsInputPinName = "Bounds";
+    internal const string WindowStatePinName = "Window State";
     private const Model.SolutionUpdateKind JustWriteToThePin = Model.SolutionUpdateKind.Default & ~Model.SolutionUpdateKind.AffectCompilation & ~Model.SolutionUpdateKind.AddToHistory;
 
     private static readonly ParameterChanges s_noChanges = new();
@@ -58,7 +58,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
     private readonly Subject<Event> outputEvents = new();
 
     private readonly IVLPin[] inputs, outputs;
-    private readonly Pin<IChannel<RectangleF>> boundsPin;
+    private readonly Pin<IChannel<WindowState>> windowStatePin;
     private readonly Pin<IObservable<IMidiMessage>> midiInputPin, midiOutputPin;
     private readonly Pin<Dictionary<string, object>> parametersPin;
     private readonly Pin<bool> applyPin;
@@ -66,8 +66,8 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
 
     private PluginState? state;
     private bool stateIsBeingSet;
-    private RectangleF bounds;
-    private AudioPin audioInputPin, audioOutputPin;
+    private WindowState? windowState;
+    private Pin<IReadOnlyList<AudioSignal>> audioInputPin, audioOutputPin;
     private IObservable<IMidiMessage>? midiInput;
     private readonly Dictionary<string, object> inputValues = new();
     private bool apply;
@@ -86,7 +86,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
     private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
     private readonly ProcessSetup processSetup;
     private readonly AudioOutput audioOutput;
-    private readonly StatePin statePin;
+    private readonly Pin<IChannel<PluginState>> statePin;
 
     internal EffectHost(NodeContext nodeContext, EffectNodeInfo info) : base(nodeContext)
     {
@@ -137,16 +137,15 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
 
         var i = 0; var o = 0;
 
-        inputs[i] = statePin = new StatePin();
-        i++;
-        inputs[i++] = boundsPin = new Pin<IChannel<RectangleF>>();
-        inputs[i++] = audioInputPin = new AudioPin();
+        inputs[i++] = statePin = new Pin<IChannel<PluginState>>();
+        inputs[i++] = windowStatePin = new Pin<IChannel<WindowState>>();
+        inputs[i++] = audioInputPin = new Pin<IReadOnlyList<AudioSignal>>();
         inputs[i++] = midiInputPin = new Pin<IObservable<IMidiMessage>>();
         inputs[i++] = parametersPin = new Pin<Dictionary<string, object>>();
         inputs[i++] = applyPin = new Pin<bool>();
 
         outputs[o++] = new Pin<EffectHost>() { Value = this };
-        outputs[o++] = audioOutputPin = new AudioPin();
+        outputs[o++] = audioOutputPin = new Pin<IReadOnlyList<AudioSignal>>();
         outputs[o++] = midiOutputPin = new Pin<IObservable<IMidiMessage>>() 
         { 
             Value = outputEvents.ObserveOn(Scheduler.Default).SelectMany(e => TryTranslateToMidi(in e, out var m) ? new[] { m } : [])
@@ -279,10 +278,12 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
             }
         }
 
-        if (Acknowledge(ref bounds, boundsPin.Value?.Value ?? RectangleF.Empty))
+        if (Acknowledge(ref windowState, windowStatePin.Value?.Value))
         {
-            if (!bounds.IsEmpty)
-                SetWindowBounds(bounds);
+            if (windowState is null || windowState.IsVisible)
+                ShowUI(windowState?.Bounds, windowState?.Visibility.ToFormWindowState(), trackWindowState: true);
+            else
+                HideUI();
         }
 
         if (Acknowledge(ref apply, applyPin.Value))
@@ -460,7 +461,15 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
     {
         get
         {
-            yield return ("Show UI", Command.Create(ShowUI).ExecuteOn(AppHost.SynchronizationContext));
+            yield return ("Show UI", Command.Create(
+                () =>
+                {
+                    var formWindowState = System.Windows.Forms.FormWindowState.Normal;
+                    if (windowState != null && windowState.Visibility >= WindowVisibility.Normal)
+                        formWindowState = windowState.Visibility.ToFormWindowState();
+                    ShowUI(windowState?.Bounds, formWindowState, trackWindowState: true);
+                })
+                .ExecuteOn(AppHost.SynchronizationContext));
         }
     }
 

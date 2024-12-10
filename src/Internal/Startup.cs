@@ -96,7 +96,7 @@ public sealed class Startup : AssemblyInitializer<Startup>
             var inputs = new List<IVLPinDescription>()
             {
                 new PinDescription(EffectHost.StateInputPinName, typeof(IChannel<PluginState>)) { IsVisible = false },
-                new PinDescription(EffectHost.BoundsInputPinName, typeof(IChannel<RectangleF>)) { IsVisible = false },
+                new PinDescription(EffectHost.WindowStatePinName, typeof(IChannel<WindowState>)) { IsVisible = false },
                 new PinDescription("Audio In", typeof(IEnumerable<AudioSignal>)),
                 new PinDescription("Midi In", typeof(IObservable<IMidiMessage>)),
                 new PinDescription("Parameters", typeof(Dictionary<string, object>)) { PinGroupKind = PinGroupKind.Dictionary },

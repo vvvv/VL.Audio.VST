@@ -1,11 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using VL.Core;
+using VL.Core.CompilerServices;
 using VST3;
 using VST3.Hosting;
 
 namespace VL.Audio.VST;
 
+[Smell(SymbolSmell.Advanced)]
 public sealed record PluginState(Guid Id, ImmutableArray<byte> Component, ImmutableArray<byte> Controller)
 {
     public static readonly PluginState Default = new PluginState(default, ImmutableArray<byte>.Empty, ImmutableArray<byte>.Empty);

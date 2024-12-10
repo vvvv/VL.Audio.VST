@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0235-g5172ef47fd" Version="0.128">
-  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0235-g5172ef47fd" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0282-gb45ecfaff4" Version="0.128">
+  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0282-gb45ecfaff4" />
   <Patch Id="CFe1SfU8rEqMBzf3eex8lJ">
     <Canvas Id="IWnwJeVuV0BMZ4mkWFxTqK" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
     <!--
@@ -15,7 +15,7 @@
       </p:NodeReference>
       <Patch Id="GHR2cakm6KiN4ZJrtFz2US">
         <Canvas Id="DHqZui6J5unLAs9Ji1m2gm" CanvasType="Group">
-          <Node Bounds="536,394,105,19" Id="OMQRb77cF3qPfhTMR5E8po">
+          <Node Bounds="556,877,105,19" Id="OMQRb77cF3qPfhTMR5E8po">
             <p:NodeReference LastCategoryFullName="Audio" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessAppFlag" Name="TimingSettings" />
@@ -30,13 +30,13 @@
             <Pin Id="A4qHuiRFHGXQUyHDyIrRYX" Name="Time" Kind="OutputPin" />
             <Pin Id="TNCqgyglIjbPvjPAt8NnJE" Name="Beat" Kind="OutputPin" />
           </Node>
-          <Pad Id="DU0NhLucJsZPjV0i21PWGb" Comment="Tempo" Bounds="538,348,41,15" ShowValueBox="true" isIOBox="true" Value="120">
+          <Pad Id="DU0NhLucJsZPjV0i21PWGb" Comment="Tempo" Bounds="558,831,41,15" ShowValueBox="true" isIOBox="true" Value="120">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="Float32" />
             </p:TypeAnnotation>
           </Pad>
-          <Pad Id="Qgp5TrymVdhPktAvXd8v8U" Comment="Time" Bounds="538,454,47,15" ShowValueBox="true" isIOBox="true" />
-          <Pad Id="JqAW2zWQhLgPoo08cSxGH6" Comment="Beat" Bounds="638,454,47,15" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="Qgp5TrymVdhPktAvXd8v8U" Comment="Time" Bounds="558,922,47,15" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="JqAW2zWQhLgPoo08cSxGH6" Comment="Beat" Bounds="658,922,47,15" ShowValueBox="true" isIOBox="true" />
           <Pad Id="KDa4GD8pLOaOfu9NQyJw6C" Bounds="50,54,96,103" ShowValueBox="true" isIOBox="true" Value="🎶">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
@@ -46,7 +46,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="PvJViFpo5G4PsXJLEo1sCF" Bounds="148,54,400,145" ShowValueBox="true" isIOBox="true" Value="In the Nodebrowser you'll find all VST3s that you have installed in the default location (Program Files\Common Files\VST3) or in a folder \VST3 next to your document.&#xD;&#xA;&#xD;&#xA;The plugins are sorted into the categories:&#xD;&#xA;- Audio.VST.Effects&#xD;&#xA;- Audio.VST.Instruments">
+          <Pad Id="PvJViFpo5G4PsXJLEo1sCF" Bounds="148,54,403,158" ShowValueBox="true" isIOBox="true" Value="In the Nodebrowser you'll find all VST3s that you have installed in either of the following locations: &#xD;&#xA;- Program Files\Common Files\VST3 (default VST3 plugin location)&#xD;&#xA;- in a folder \VST3 next to your document&#xD;&#xA;&#xD;&#xA;The plugins are sorted into the categories:&#xD;&#xA;- Audio.VST.Effects&#xD;&#xA;- Audio.VST.Instruments">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -55,7 +55,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="148,238,302,228" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on a plugins node. &#xD;&#xA;&#xD;&#xA;⚠️ VST3 only understands Note and Controller messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and wiggle the according knob in the UI to map the two.">
+          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="148,268,292,209" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on a plugins node. &#xD;&#xA;&#xD;&#xA;Currently supported are Note, Controller and Program Change messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and wiggle the according knob in the UI to map the two.">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -64,7 +64,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="FUpacmzA89kLmDyrVLyyIb" Bounds="148,204,122,29" ShowValueBox="true" isIOBox="true" Value="MIDI to VST">
+          <Pad Id="FUpacmzA89kLmDyrVLyyIb" Bounds="148,234,86,29" ShowValueBox="true" isIOBox="true" Value="MIDI In">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -73,7 +73,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="HueiFgIqpNIPbzMYr2tKmT" Bounds="524,204,102,29" ShowValueBox="true" isIOBox="true" Value="Timing">
+          <Pad Id="HueiFgIqpNIPbzMYr2tKmT" Bounds="514,717,102,29" ShowValueBox="true" isIOBox="true" Value="Timing">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -82,7 +82,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="QHSdkgdUZ6hMEhYfVZsIVa" Bounds="524,239,254,73" ShowValueBox="true" isIOBox="true" Value="To configure looping and bpm infos globally for the audio engine, use the TimingSettings node.">
+          <Pad Id="QHSdkgdUZ6hMEhYfVZsIVa" Bounds="514,752,254,73" ShowValueBox="true" isIOBox="true" Value="To configure looping and bpm infos globally for the audio engine, use the TimingSettings node.">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -91,7 +91,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="FlshZSOpSUMNSl8XL6Fg1y" Bounds="38,476,109,236" ShowValueBox="true" isIOBox="true" Value="⚖️&#xD;&#xA;⚠️">
+          <Pad Id="FlshZSOpSUMNSl8XL6Fg1y" Bounds="50,646,94,236" ShowValueBox="true" isIOBox="true" Value="⚖️&#xD;&#xA;⚠️">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -100,7 +100,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="CyD1J17tmiTOeoDQdZlgXL" Bounds="148,530,233,81" ShowValueBox="true" isIOBox="true" Value="While this package itself is published under the LGPL-3.0, when releasing an app using it, you also must comply with VST 3 licensing!">
+          <Pad Id="CyD1J17tmiTOeoDQdZlgXL" Bounds="148,700,233,81" ShowValueBox="true" isIOBox="true" Value="While this package itself is published under the LGPL-3.0, when releasing an app using it, you also must comply with VST 3 licensing!">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -109,7 +109,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="VWqsKJqxWnNNt6e9WVe1g7" Bounds="148,622,237,19" ShowValueBox="true" isIOBox="true" Value="https://steinbergmedia.github.io/vst3_dev_portal/pages/VST+3+Licensing/What+are+the+licensing+options.html">
+          <Pad Id="VWqsKJqxWnNNt6e9WVe1g7" Bounds="148,792,237,19" ShowValueBox="true" isIOBox="true" Value="https://steinbergmedia.github.io/vst3_dev_portal/pages/VST+3+Licensing/What+are+the+licensing+options.html">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -118,7 +118,99 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="TeZektWaYxdL3pABePdBKJ" Bounds="148,491,156,29" ShowValueBox="true" isIOBox="true" Value="VST3 Licensing">
+          <Pad Id="TeZektWaYxdL3pABePdBKJ" Bounds="148,661,156,29" ShowValueBox="true" isIOBox="true" Value="VST3 Licensing">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">14</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="DOH5lPvrWONOjN3a7jSe4w" Bounds="514,136,185,29" ShowValueBox="true" isIOBox="true" Value="Show/Hide VST UI">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">14</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="Ur8UKR7sSJaMwHbHXYypOt" Bounds="514,171,331,102" ShowValueBox="true" isIOBox="true" Value="Most VST plugins come with a UI to tweak its parameters. &#xD;&#xA;- Show the UI: rightclick a plugin node -&gt; Show UI&#xD;&#xA;- Hide the UI: press the X in the plugin windows top-right corner">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="PCLUFquBDFmPJUy7yDiD3U" Bounds="514,517,275,29" ShowValueBox="true" isIOBox="true" Value="Exposing Parameters as Pins">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">14</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="Dk8qO8tBgxeNfRvVzRbBTo" Bounds="514,552,333,137" ShowValueBox="true" isIOBox="true" Value="Select a VST plugin node in the Inspector (Ctrl+I) and enable the Learn switch. Any parameter that you now click in the plugins UI will be added as an input pin on the node.&#xD;&#xA;&#xD;&#xA;To remove a pin again, press the X button next to its entry in the Inspector.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Node Bounds="572,266,309,210" Id="Qo2GXicahNzLZ1hyaE8kym">
+            <p:NodeReference LastCategoryFullName="Control" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="StatefulRegion" Name="Region (Stateful)" Fixed="true" />
+              <CategoryReference Kind="Category" Name="Control" />
+              <Choice Kind="ProcessAppFlag" Name="Comment" />
+            </p:NodeReference>
+            <Patch Id="J2fdTz4wmkePCjIqLdUpkM" ManuallySortedPins="true">
+              <Patch Id="M1crPdJZoqOQGAMEu1bwYE" Name="Create" ManuallySortedPins="true" />
+              <Patch Id="MUBjIlzeFplNGM6xHgT1g4" Name="Update" ManuallySortedPins="true" />
+              <Patch Id="KncVyDBLIwtMTdnyrqovGM" Name="Dispose" ManuallySortedPins="true" />
+              <Node Bounds="616,429,53,26" Id="K38n2Jv3vi6PXDPSzZNdmj">
+                <p:NodeReference LastCategoryFullName="Audio.VST.EffectHost" LastDependency="VL.Audio.VST.vl">
+                  <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+                  <Choice Kind="OperationCallFlag" Name="ShowUI" />
+                </p:NodeReference>
+                <Pin Id="KBiQcwlPCagNASLZJ0N75I" Name="Input" Kind="StateInputPin" />
+                <Pin Id="H4PrNqLtzLIO41bGEvOX6C" Name="Output" Kind="StateOutputPin" />
+              </Node>
+              <Node Bounds="680,429,53,26" Id="JTwHJn82OllQR6jGcRbcKF">
+                <p:NodeReference LastCategoryFullName="Audio.VST.EffectHost" LastDependency="VL.Audio.VST.vl">
+                  <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+                  <Choice Kind="OperationCallFlag" Name="HideUI" />
+                </p:NodeReference>
+                <Pin Id="BAMKy9ycIlMQThslnaX1qD" Name="Input" Kind="StateInputPin" />
+                <Pin Id="FT8ZoE8ctsHNvublfeUHbG" Name="Output" Kind="StateOutputPin" />
+              </Node>
+              <Pad Id="SKCuJj4D5M0PlME2tk45kY" Bounds="577,293,285,136" ShowValueBox="true" isIOBox="true" Value="To programmatically show/hide a plugins UI, select the plugin in the Inspector and click the eye symbol next to its output labeled &quot;Output&quot; to show its optional state output.&#xD;&#xA;&#xD;&#xA;Then use the following nodes connected to this output.">
+                <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+                  <Choice Kind="TypeFlag" Name="String" />
+                </p:TypeAnnotation>
+                <p:ValueBoxSettings>
+                  <p:fontsize p:Type="Int32">9</p:fontsize>
+                  <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+                </p:ValueBoxSettings>
+              </Pad>
+            </Patch>
+            <Pin Id="SYofhWNsyAOP69mUEurnUA" Name="Node Context" Kind="InputPin" IsHidden="true" />
+          </Node>
+          <Pad Id="EaxhndJbpBHMWsgbZdQNKt" Bounds="148,542,280,87" ShowValueBox="true" isIOBox="true" Value="sdf">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="H2n8dQnXrfaLm4dd0yhtmA" Bounds="148,508,100,29" ShowValueBox="true" isIOBox="true" Value="MIDI Out">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>

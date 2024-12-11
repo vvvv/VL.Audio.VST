@@ -85,13 +85,22 @@ public sealed class Startup : AssemblyInitializer<Startup>
     IVLNodeDescription GetNodeDescription(IVLNodeDescriptionFactory nodeDescriptionFactory, string modulePath, ClassInfo info)
     {
         const string mainCategory = "Audio.VST";
+        const string effectCategoryName = "Effect";
+        const string instrumentCategoryName = "Instrument";
 
-        var subCategory =
-            info.SubCategories.Contains("Fx", StringComparer.OrdinalIgnoreCase) ? "Effect" :
-            info.SubCategories.Contains("Instrument", StringComparer.OrdinalIgnoreCase) ? "Instrument" :
-            "Other";
-
+        var subCategory = "Other";
         var tags = info.SubCategories;
+        if (info.SubCategories.Contains("Fx", StringComparer.OrdinalIgnoreCase))
+        {
+            subCategory = effectCategoryName;
+            tags = tags.Remove("Fx", StringComparer.OrdinalIgnoreCase);
+        }
+        else if (info.SubCategories.Contains("Instrument", StringComparer.OrdinalIgnoreCase))
+        {
+            subCategory = instrumentCategoryName;
+            tags = tags.Remove("Instrument", StringComparer.OrdinalIgnoreCase);
+        }
+
         if (!string.IsNullOrEmpty(info.Vendor) && !tags.Contains(info.Vendor))
             tags = tags.Add(info.Vendor);
 

@@ -91,7 +91,11 @@ public sealed class Startup : AssemblyInitializer<Startup>
             info.SubCategories.Contains("Instrument", StringComparer.OrdinalIgnoreCase) ? "Instrument" :
             "Other";
 
-        return nodeDescriptionFactory.NewNodeDescription(info.Name, $"{mainCategory}.{subCategory}", fragmented: false, invalidated: null, tags: string.Join(',', info.SubCategories), init: ctx =>
+        var tags = info.SubCategories;
+        if (!string.IsNullOrEmpty(info.Vendor) && !tags.Contains(info.Vendor))
+            tags = tags.Add(info.Vendor);
+
+        return nodeDescriptionFactory.NewNodeDescription(info.Name, $"{mainCategory}.{subCategory}", fragmented: false, invalidated: null, tags: string.Join(',', tags), init: ctx =>
         {
             var inputs = new List<IVLPinDescription>()
             {

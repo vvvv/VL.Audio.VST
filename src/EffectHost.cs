@@ -510,7 +510,10 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
         {
             var pinName = GetParameterFullName(in p);
             if (current.ContainsKey(pinName) || id == p.ID)
+            {
                 builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
+                this.type = null;
+            }
         }
 
         var s = builder.Commit();

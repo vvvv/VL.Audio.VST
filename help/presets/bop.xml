@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE ROOT PUBLIC "" ""[]>
+<PresetModel xmlns:r="reflection" r:Version="2">
+  <ChannelValues>
+    <Item Key="TAL-NoiseMaker.Osc 1 Fine Tune">
+      <Value r:Type="Float32 [Primitive]">0.4916999</Value>
+    </Item>
+    <Item Key="TAL-NoiseMaker.Osc 1 Tune">
+      <Value r:Type="Float32 [Primitive]">0.06632977</Value>
+    </Item>
+  </ChannelValues>
+</PresetModel>

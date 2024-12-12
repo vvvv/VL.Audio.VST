@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using VL.Audio.VST.Internal;
 using VL.Core;
 using VL.Core.CompilerServices;
+using VL.Core.EditorAttributes;
 using VL.Core.Reactive;
 using VL.Lib.Collections;
 using VST3;
@@ -87,6 +88,8 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                 if (p.Flags.HasFlag(ParameterInfo.ParameterFlags.kIsReadOnly))
                     attributes = attributes.Add(new System.ComponentModel.ReadOnlyAttribute(isReadOnly: true));
                 attributes = attributes.Add(new System.ComponentModel.DefaultValueAttribute(p.GetDefaultValue()));
+                if (parametersPin.Value.Keys.Contains(p.Title))
+                    attributes = attributes.Add(new ExposedAttribute());
 
                 yield return new DynamicPropertyInfo()
                 {

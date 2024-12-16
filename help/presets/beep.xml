@@ -2,7 +2,6 @@
 <!DOCTYPE ROOT PUBLIC "" ""[]>
 <PresetModel xmlns:r="reflection" r:Version="2">
   <ChannelValues>
-    <Item Key="TAL-NoiseMaker" />
     <Item Key="TAL-NoiseMaker.Osc 1 Fine Tune">
       <Value r:Type="Float32 [Primitive]">0.5305054</Value>
     </Item>
@@ -17,9 +16,6 @@
     </Item>
     <Item Key="TAL-NoiseMaker.Osc 2 Phase">
       <Value r:Type="Float32 [Primitive]">0.16542746</Value>
-    </Item>
-    <Item Key="TAL-NoiseMaker.Osc 2 Tune">
-      <Value r:Type="Float32 [Primitive]">0.4661051</Value>
     </Item>
   </ChannelValues>
 </PresetModel>

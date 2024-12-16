@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0282-gb45ecfaff4" Version="0.128">
+<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0289-g081154e57c" Version="0.128">
   <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0282-gb45ecfaff4" />
   <Patch Id="CFe1SfU8rEqMBzf3eex8lJ">
     <Canvas Id="IWnwJeVuV0BMZ4mkWFxTqK" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
@@ -15,7 +15,7 @@
       </p:NodeReference>
       <Patch Id="GHR2cakm6KiN4ZJrtFz2US">
         <Canvas Id="DHqZui6J5unLAs9Ji1m2gm" CanvasType="Group">
-          <Node Bounds="630,361,185,19" Id="PRKEXQBf7zuPqeqmFtjwJM">
+          <Node Bounds="656,483,185,19" Id="PRKEXQBf7zuPqeqmFtjwJM">
             <p:NodeReference LastCategoryFullName="Audio.VST.Instrument" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <CategoryReference Kind="Category" Name="Audio" />
@@ -36,7 +36,7 @@
                 <Choice Kind="TypeFlag" Name="Float32" />
               </p:TypeAnnotation>
             </Pin>
-            <Pin Id="I8gXhVgMGKJQBsMlvTv9Sn" Name="Osc 1 Fine Tune" Kind="InputPin" PinGroupName="Parameters">
+            <Pin Id="I8gXhVgMGKJQBsMlvTv9Sn" Name="Osc 1 Fine Tune" Kind="InputPin" DefaultValue="0" PinGroupName="Parameters">
               <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
                 <Choice Kind="TypeFlag" Name="Float32" />
               </p:TypeAnnotation>
@@ -66,8 +66,8 @@
             <Pin Id="JRYiwpQnBjlPiJnzUjSY85" Name="Audio Out" Kind="OutputPin" />
             <Pin Id="GpIDP0LtMhMQPfAaK7Ajgy" Name="Midi Out" Kind="OutputPin" />
           </Node>
-          <Pad Id="IaGiAjben7BON5zOadjfCo" Comment="Audio Out" Bounds="773,421,282,95" ShowValueBox="true" isIOBox="true" />
-          <Node Bounds="771,550,60,19" Id="DKL3sQmzdroQY5tEpa7txt">
+          <Pad Id="IaGiAjben7BON5zOadjfCo" Comment="Audio Out" Bounds="799,543,282,95" ShowValueBox="true" isIOBox="true" />
+          <Node Bounds="797,672,60,19" Id="DKL3sQmzdroQY5tEpa7txt">
             <p:NodeReference LastCategoryFullName="Audio.Sink" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <FullNameCategoryReference ID="Audio.Sink" />
@@ -77,7 +77,7 @@
             <Pin Id="NFKieKUBICsNGcXnf0EgwO" Name="Input" Kind="InputPin" />
             <Pin Id="CYIIKdRt41RMQSmi1rLgNO" Name="Channel Offset" Kind="InputPin" />
           </Node>
-          <Node Bounds="364,627,75,19" Id="L6Ct3bBx9o8PqKdRVf46to">
+          <Node Bounds="293,657,75,19" Id="L6Ct3bBx9o8PqKdRVf46to">
             <p:NodeReference LastCategoryFullName="Reactive.ChannelHub.Modules.SubChannels" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessAppFlag" Name="SubChannels" />
@@ -87,7 +87,7 @@
             <Pin Id="LfXnqrvkIbsPfpVwUq2Kgs" Name="Exposed Only" Kind="InputPin" DefaultValue="True" />
             <Pin Id="Bq2pp6xmiFkOCHvaM0MyKi" Name="SubChannels" Kind="OutputPin" />
           </Node>
-          <Node Bounds="364,572,82,19" Id="VRabRHD6XbnMA0Eg0r0psF">
+          <Node Bounds="293,602,82,19" Id="VRabRHD6XbnMA0Eg0r0psF">
             <p:NodeReference LastCategoryFullName="Reactive.ChannelHub" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessAppFlag" Name="GlobalChannel" />
@@ -99,8 +99,8 @@
             <Pin Id="Qb3tbN171zFOfijyQkwLOI" Name="Value" Kind="OutputPin" />
             <Pin Id="JZCdtjxjhSKOksMlelLWM2" Name="Path" Kind="OutputPin" IsHidden="true" />
           </Node>
-          <Pad Id="Jojzv0XZNPJLtTHXvDJA4p" Comment="" Bounds="366,681,250,208" ShowValueBox="true" isIOBox="true" />
-          <Pad Id="CkgGgrwDnt5NVL8RmrxzTl" Comment="Note Number" Bounds="677,157,35,15" ShowValueBox="true" isIOBox="true" Value="54">
+          <Pad Id="Jojzv0XZNPJLtTHXvDJA4p" Comment="" Bounds="295,756,250,314" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="CkgGgrwDnt5NVL8RmrxzTl" Comment="Note Number" Bounds="731,287,35,15" ShowValueBox="true" isIOBox="true" Value="54">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="Integer32" />
             </p:TypeAnnotation>
@@ -108,7 +108,7 @@
               <p:minimum p:Type="Int32">0</p:minimum>
             </p:ValueBoxSettings>
           </Pad>
-          <Node Bounds="652,255,79,19" Id="SUWMpGg2G7cLVPYPxhotCi">
+          <Node Bounds="706,385,79,19" Id="SUWMpGg2G7cLVPYPxhotCi">
             <p:NodeReference LastCategoryFullName="Reactive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <FullNameCategoryReference ID="Reactive" />
@@ -119,7 +119,7 @@
             <Pin Id="G4ov3SGRyPCLWgRlQL6ZUm" Name="Send" Kind="InputPin" />
             <Pin Id="H3lKGEMglMMLiBf9VS1WJj" Name="Result" Kind="OutputPin" />
           </Node>
-          <Node Bounds="652,201,51,19" Id="EFomvOk9a73Pod8tN8isxz">
+          <Node Bounds="706,331,51,19" Id="EFomvOk9a73Pod8tN8isxz">
             <p:NodeReference LastCategoryFullName="IO.Midi.Messages" LastDependency="VL.IO.Midi.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <FullNameCategoryReference ID="IO.Midi.Messages" />
@@ -130,7 +130,7 @@
             <Pin Id="K5rUk6SRXOrOlqRNXv3y1O" Name="Velocity" Kind="InputPin" DefaultValue="1" />
             <Pin Id="SmGF5TN8XniNBOTWnwiwAs" Name="Result" Kind="OutputPin" />
           </Node>
-          <Node Bounds="735,201,57,19" Id="NqD9SlYbEAvO9rPDWKhMAS">
+          <Node Bounds="789,331,57,19" Id="NqD9SlYbEAvO9rPDWKhMAS">
             <p:NodeReference LastCategoryFullName="Control" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <FullNameCategoryReference ID="Control" />
@@ -142,7 +142,7 @@
             <Pin Id="INTMcz5j426NHOMQ82qbwh" Name="Result" Kind="OutputPin" />
             <Pin Id="JW9E1feC2mOPopIv5HWKSG" Name="Unchanged" Kind="OutputPin" />
           </Node>
-          <Pad Id="TbVQHl5YecTPY7H2tL6Vuk" Bounds="437,617,173,57" ShowValueBox="true" isIOBox="true" Value="exposed only: only those that show up as Pins show up as Channels">
+          <Pad Id="TbVQHl5YecTPY7H2tL6Vuk" Bounds="390,654,249,82" ShowValueBox="true" isIOBox="true" Value="Exposed Only: only those that are of interest to you.&#xD;&#xA;&#xD;&#xA;Use Learn mode in Inspector">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -151,8 +151,8 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="ErlNsPwB09eOl09tYMqKDH" Bounds="443,421" />
-          <Pad Id="MJ80MxF8KLkN6rsGaDxTbl" Bounds="498,355,108,40" ShowValueBox="true" isIOBox="true" Value="Configure node: show Output!">
+          <Pad Id="ErlNsPwB09eOl09tYMqKDH" SlotId="F4NIt43neidQMyy0sJmAdJ" Bounds="372,556" />
+          <Pad Id="MJ80MxF8KLkN6rsGaDxTbl" Bounds="528,474,108,40" ShowValueBox="true" isIOBox="true" Value="Configure node: show Output!">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -161,7 +161,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="RpkjJB5BhnmNXXqVKdtSCy" Bounds="674,337,318,19" ShowValueBox="true" isIOBox="true" Value="https://tal-software.com/products/tal-noisemaker">
+          <Pad Id="RpkjJB5BhnmNXXqVKdtSCy" Bounds="700,459,318,19" ShowValueBox="true" isIOBox="true" Value="https://tal-software.com/products/tal-noisemaker">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -170,7 +170,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="Haqez83aGNxODtAPgNibSo" Comment="" Bounds="835,708,35,49" ShowValueBox="true" isIOBox="true">
+          <Pad Id="Haqez83aGNxODtAPgNibSo" Comment="" Bounds="840,811,35,49" ShowValueBox="true" isIOBox="true">
             <p:TypeAnnotation LastCategoryFullName="Collections" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="Spread" />
               <p:TypeArguments>
@@ -184,7 +184,7 @@
               <Item>bop</Item>
             </p:Value>
           </Pad>
-          <Node Bounds="830,777,120,86" Id="Ga2BqgEQkcwQdK5P6hgDYl">
+          <Node Bounds="835,879,102,86" Id="Ga2BqgEQkcwQdK5P6hgDYl">
             <p:NodeReference LastCategoryFullName="Primitive" LastDependency="Builtin">
               <Choice Kind="StatefulRegion" Name="Region (Stateful)" Fixed="true" />
               <CategoryReference Kind="Category" Name="Primitive" />
@@ -195,7 +195,7 @@
               <Patch Id="KyIT1g5ZdNoN69Q16pWzgL" Name="Create" ManuallySortedPins="true" />
               <Patch Id="GaGfQLVm7pvLI7p6s6GT7k" Name="Update" ManuallySortedPins="true" />
               <Patch Id="UmhK0B9TI16LctJ5DSEMjs" Name="Dispose" ManuallySortedPins="true" />
-              <Node Bounds="861,820,77,19" Id="JrsPlJ95lpeOXxH69kMcbp">
+              <Node Bounds="848,912,77,19" Id="JrsPlJ95lpeOXxH69kMcbp">
                 <p:NodeReference LastCategoryFullName="Application" LastDependency="VL.CoreLib.vl">
                   <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
                   <Choice Kind="ProcessAppFlag" Name="TriggerPreset" />
@@ -209,10 +209,10 @@
                 <Pin Id="QDC73yfrjI4P72BTAkRoi6" Name="Presets" Kind="InputPin" IsHidden="true" />
               </Node>
             </Patch>
-            <ControlPoint Id="TZrLMzqOPoRPJbPWImkoIx" Bounds="844,783" Alignment="Top" />
-            <ControlPoint Id="CHaxLtW5bGwO7Cczlqlaw0" Bounds="931,783" Alignment="Top" />
+            <ControlPoint Id="TZrLMzqOPoRPJbPWImkoIx" Bounds="849,885" Alignment="Top" />
+            <ControlPoint Id="CHaxLtW5bGwO7Cczlqlaw0" Bounds="909,885" Alignment="Top" />
           </Node>
-          <Pad Id="FQduDTMDGVTPoou1lZbnIs" Comment="" Bounds="901,707,35,49" ShowValueBox="true" isIOBox="true" Value="False, False">
+          <Pad Id="FQduDTMDGVTPoou1lZbnIs" Comment="" Bounds="906,810,35,49" ShowValueBox="true" isIOBox="true" Value="False, False">
             <p:TypeAnnotation LastCategoryFullName="Collections" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="Spread" />
               <p:TypeArguments>
@@ -225,7 +225,7 @@
               <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Bang</p:buttonmode>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="BKtSL0tE93NODfXiwwpsaB" Bounds="215,135,304,178" ShowValueBox="true" isIOBox="true" Value="This this patch we're showing how to expose an instruments parameters to the world of global channels &amp; transitions in a direct manner.&#xD;&#xA;We are treating the instrument as a dynamic object with properties. &#xD;&#xA;In other words: YOU don't need to introduce the properties. The instrument already comes with them.">
+          <Pad Id="BKtSL0tE93NODfXiwwpsaB" Bounds="248,354,399,123" ShowValueBox="true" isIOBox="true" Value="Here is how to expose an instruments parameters to the world of global channels &amp; transitions directly.&#xD;&#xA;&#xD;&#xA;You don't need to introduce the properties to your patch. The instrument already comes with them. ">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -234,7 +234,49 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="HQ6NS7e7ktuOxssGqQWqoI" Bounds="813,676,130,19" ShowValueBox="true" isIOBox="true" Value="Trigger Transisitons:">
+          <Pad Id="HQ6NS7e7ktuOxssGqQWqoI" Bounds="818,779,130,19" ShowValueBox="true" isIOBox="true" Value="Trigger Transisitons:">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="EJUPN6tYLW7NZiDDLzRf6V" Bounds="222,105,478,35" ShowValueBox="true" isIOBox="true" Value="Using vvvv Presets for any VST instrument">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">16</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="DeEtLr2AH9rMMlD6MRF26L" Bounds="240,151,375,76" ShowValueBox="true" isIOBox="true" Value="Many VST instruments already have their own idea of presets. &#xD;&#xA;However, vvvv also already has this capability. This patch shows how to make VST parameters part of a vvvv preset.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Overlay Id="IRlao0Mu4nhN1btLvj1UQu" Name="Setup" Bounds="243,299,426,770">
+            <p:ColorIndex p:Type="Int32">11</p:ColorIndex>
+          </Overlay>
+          <Overlay Id="DPomx1TEl92LZTtEewDbee" Name="Play" Bounds="757,731,373,333">
+            <p:ColorIndex p:Type="Int32">11</p:ColorIndex>
+          </Overlay>
+          <Pad Id="LoHS73O8qsTPbefyf8jRLd" Bounds="781,998,284,57" ShowValueBox="true" isIOBox="true" Value="A parameter can get changed via input pin, via VST UI and via global channel. The latest set value wins.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="G30rRrjc4byOCuzmr4DpMk" Bounds="394,592,220,39" ShowValueBox="true" isIOBox="true" Value="The Path up to you. Put your parameters where you like.">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -265,6 +307,7 @@
         <Link Id="Ec1Z1DU3KFBNMSVCMaczJc" Ids="TZrLMzqOPoRPJbPWImkoIx,TpcRIm99PJ9P1zD12GrTLo" />
         <Link Id="IdrnWkQoBIaM3QBZ2GuWGV" Ids="CHaxLtW5bGwO7Cczlqlaw0,Dc6LQWo20UIP2e98dXFNZG" />
         <Link Id="HpMiss1mmIeOJsIgRXHCEb" Ids="FQduDTMDGVTPoou1lZbnIs,CHaxLtW5bGwO7Cczlqlaw0" />
+        <Slot Id="F4NIt43neidQMyy0sJmAdJ" Name="The Instrument" />
       </Patch>
     </Node>
   </Patch>

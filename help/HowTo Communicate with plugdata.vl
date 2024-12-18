@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="OnXF9yLfAZIPqB6wawElgi" LanguageVersion="2024.6.7-0282-gb45ecfaff4" Version="0.128">
-  <NugetDependency Id="CHswwmNmtDBPmXczjA9iAE" Location="VL.CoreLib" Version="2024.6.7-0282-gb45ecfaff4" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="OnXF9yLfAZIPqB6wawElgi" LanguageVersion="2024.6.7-0285-gd926bad09e" Version="0.128">
+  <NugetDependency Id="CHswwmNmtDBPmXczjA9iAE" Location="VL.CoreLib" Version="2024.6.7-0285-gd926bad09e" />
   <Patch Id="Qc9cLciQ1fPPe0n0HzGZLc">
     <Canvas Id="PtNOGIkJYWYO7l4QWxUmyp" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
     <!--
@@ -240,25 +240,6 @@
           </Pad>
           <Overlay Id="AbIfAvEcGdtPHgdT8Isvyf" Name="Send OSC to plugdata" Bounds="772,43,437,338" />
           <Overlay Id="H08avr5o5XoMtDv0c8Vsl4" Name="Receive OSC from plugdata" Bounds="775,640,365,291" />
-          <Overlay Id="VTBZhfedQqJN5sSRguCORm" Name="Receive MIDI from plugdata" Bounds="158,652,294,129" />
-          <Pad Id="VtFWbODrEefQZflmQlCW7n" Bounds="174,709,174,19" ShowValueBox="true" isIOBox="true" Value="This seems not yet possible:">
-            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
-              <Choice Kind="TypeFlag" Name="String" />
-            </p:TypeAnnotation>
-            <p:ValueBoxSettings>
-              <p:fontsize p:Type="Int32">9</p:fontsize>
-              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
-            </p:ValueBoxSettings>
-          </Pad>
-          <Pad Id="EKm6GioIyQmMIo9j1bYFXn" Bounds="174,736,140,19" ShowValueBox="true" isIOBox="true" Value="https://github.com/plugdata-team/plugdata/issues/1248">
-            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
-              <Choice Kind="TypeFlag" Name="String" />
-            </p:TypeAnnotation>
-            <p:ValueBoxSettings>
-              <p:fontsize p:Type="Int32">9</p:fontsize>
-              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
-            </p:ValueBoxSettings>
-          </Pad>
           <Overlay Id="R7q0mhzSwa3PE0MJplV4Lw" Name="Send MIDI to plugdata" Bounds="382,88,255,287" />
           <Overlay Id="KrzM1g0mCMDMqFGDbtXP4X" Name="Audio to plugdata" Bounds="64,286,244,165" />
           <Node Bounds="394,343,45,19" Id="R7lhd8gznlMOzeKgzEB29H">
@@ -371,6 +352,19 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
+          <Node Bounds="418,667,65,19" Id="OVU2hc6vh5HLbaR9FYgn2q">
+            <p:NodeReference LastCategoryFullName="IO.Midi" LastDependency="VL.IO.Midi.vl">
+              <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+              <Choice Kind="ProcessAppFlag" Name="Monitor" />
+            </p:NodeReference>
+            <Pin Id="UvWhmvqCWZzOPjBbyug7lD" Name="Node Context" Kind="InputPin" IsHidden="true" />
+            <Pin Id="F21cXkM7irqQJECLUa8Axt" Name="Input" Kind="InputPin" />
+            <Pin Id="F7qh5fr3qPoQQKtbmvVhVp" Name="Channel Message" Kind="OutputPin" />
+            <Pin Id="BvSmxHEIeSNNRNgwBVWC9k" Name="Common Messages" Kind="OutputPin" />
+            <Pin Id="QxuNk26po8MQQOAkHTutL7" Name="Realtime Messages" Kind="OutputPin" />
+            <Pin Id="KzFdIgt3gE8Lk83WESVGRk" Name="Sys Ex Messages" Kind="OutputPin" />
+          </Node>
+          <Pad Id="AUYIQIRl1fJLCpqScTGT1H" Comment="Channel Message" Bounds="420,710,163,15" ShowValueBox="true" isIOBox="true" />
         </Canvas>
         <Patch Id="NujNbhChMUFPluMTWqgNRi" Name="Create" />
         <Patch Id="EIjutxKb2WxQd4DGvarLyZ" Name="Update" />
@@ -405,6 +399,8 @@
         <Link Id="Bk66ijCp9qoMHMWQyOcuTs" Ids="IxN67JbCAAJOMqy3ydeQvM,QYoN2qWLPRnNPZDJHmDf6m" />
         <Link Id="NPu5xGTevJaNo1sMTcpr5W" Ids="EQWhuul3u8sL0oyAL5AlWH,B6aTfj7U0znQXf1CFw9r3z" />
         <Link Id="UmkP79aOh5sL7njNtydTAl" Ids="ARJlH4UIGQXLo0EneWES7e,DIK5smhQ12XP1Vl7ES8lC0" />
+        <Link Id="Nx9QDZR5zvqNu26Kzg5uAx" Ids="F7G92XsO6gyQCMjbIQlqD2,F21cXkM7irqQJECLUa8Axt" />
+        <Link Id="DWnbGFVRFlYPCtdT8aKthf" Ids="F7qh5fr3qPoQQKtbmvVhVp,AUYIQIRl1fJLCpqScTGT1H" />
       </Patch>
     </Node>
   </Patch>

@@ -23,17 +23,11 @@ jobs:
     - name: Setup Nuget.exe
       uses: nuget/setup-nuget@v2.0.0
       
-    - run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name vvvv-org-feed "https://nuget.pkg.github.com/vvvv/index.json"
-
     - name: Publish VL Nuget
       uses: vvvv/PublishVLNuget@1.0.43
       with:
         csproj: src\VL.Audio.VST.csproj
         nuspec: deployment\VL.Audio.VST.nuspec
-
-        # Fill the Icon file
         icon-src: https://raw.githubusercontent.com/vvvv/PublicContent/master/nugeticon.png
         icon-dst: ./deployment/nugeticon.png
-        
-        nuget-key: ${{ secrets.GITHUB_TOKEN }}
-        nuget-feed: vvvv-org-feed
+        nuget-key: ${{ secrets.VVVV_ORG_NUGET_KEY }}

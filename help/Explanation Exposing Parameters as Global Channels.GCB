@@ -2,7 +2,7 @@
 <!DOCTYPE ROOT PUBLIC "" ""[]>
 <ChannelBrowserState Bezier_Handles_Visible="True" Current_View=" " Transition_Duration="2">
   <Preset_Columns>
-    <Item Adhoc_Preset="__78862103-f645-474b-98c1-7bd806b81797" Preset="bop" />
+    <Item Adhoc_Preset="__78862103-f645-474b-98c1-7bd806b81797" Preset="beep" />
     <Item Adhoc_Preset="__37bb8bf8-af59-4852-a74f-5b8406c4ef8a" Index="1" Preset="bop" />
   </Preset_Columns>
   <Views>

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="RivRQBe9c75NOhOr9Lzijv" LanguageVersion="2024.6.7-0282-gb45ecfaff4" Version="0.128">
-  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0282-gb45ecfaff4" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="N8xbLeffquCNmG7Faliny8" LanguageVersion="2024.6.7-0285-gd926bad09e" Version="0.128">
+  <NugetDependency Id="IHo0dkOi2syL5snyhoYx2A" Location="VL.CoreLib" Version="2024.6.7-0285-gd926bad09e" />
   <Patch Id="CFe1SfU8rEqMBzf3eex8lJ">
     <Canvas Id="IWnwJeVuV0BMZ4mkWFxTqK" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
     <!--
@@ -55,7 +55,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="148,268,292,209" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on a plugins node. &#xD;&#xA;&#xD;&#xA;Currently supported are Note, Controller and Program Change messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and wiggle the according knob in the UI to map the two.">
+          <Pad Id="KEwmjRDu0dTPjDLJjPP8o6" Bounds="148,268,292,209" ShowValueBox="true" isIOBox="true" Value="Connect Midi nodes to the &quot;Midi In&quot; input on a plugins node. &#xD;&#xA;&#xD;&#xA;Currently supported are Note, Controller and Program Change messages.&#xD;&#xA;&#xD;&#xA;Controllers typically first need to be mapped. Activate the Midi learn/mapping feature in your plugin at hand, then send a Controller message and click the according knob in the UI to map the two.">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -136,7 +136,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="Ur8UKR7sSJaMwHbHXYypOt" Bounds="514,171,331,102" ShowValueBox="true" isIOBox="true" Value="Most VST plugins come with a UI to tweak its parameters. &#xD;&#xA;- Show the UI: rightclick a plugin node -&gt; Show UI&#xD;&#xA;- Hide the UI: press the X in the plugin windows top-right corner">
+          <Pad Id="Ur8UKR7sSJaMwHbHXYypOt" Bounds="514,171,331,102" ShowValueBox="true" isIOBox="true" Value="Most VST plugins come with a UI to tweak their parameters. &#xD;&#xA;- Show the UI: rightclick a plugin node -&gt; Show UI&#xD;&#xA;- Hide the UI: press the X in the plugin windows top-right corner">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -201,7 +201,7 @@
             </Patch>
             <Pin Id="SYofhWNsyAOP69mUEurnUA" Name="Node Context" Kind="InputPin" IsHidden="true" />
           </Node>
-          <Pad Id="EaxhndJbpBHMWsgbZdQNKt" Bounds="148,542,280,87" ShowValueBox="true" isIOBox="true" Value="sdf">
+          <Pad Id="EaxhndJbpBHMWsgbZdQNKt" Bounds="148,542,280,49" ShowValueBox="true" isIOBox="true" Value="Plugins that support MIDI out, will send their messages out the &quot;Midi Out&quot; node. ">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>

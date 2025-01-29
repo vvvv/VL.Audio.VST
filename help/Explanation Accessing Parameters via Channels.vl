@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2025.7.0-0046-g192362537b" Version="0.128">
+  <NugetDependency Id="AnAzTiHnvFcLyH8dC0i8h2" Location="VL.CoreLib" Version="2025.7.0-0046-g192362537b" />
+  <Patch Id="VK15quIFHKiNjBhZEhiGmp">
+    <Canvas Id="ULgMM2YXpPBLSofO41vhSh" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
+    <!--
+
+    ************************ Application ************************
+
+-->
+    <Node Name="Application" Bounds="100,100" Id="Au7IJCUIOAKNLXLg8Yxhle">
+      <p:NodeReference>
+        <Choice Kind="ContainerDefinition" Name="Process" />
+        <CategoryReference Kind="Category" Name="Primitive" />
+      </p:NodeReference>
+      <Patch Id="VdIlgzGU3W9MzLWoVgEd3F">
+        <Canvas Id="JOudEH0o9wRMNX25Tprh5r" CanvasType="Group">
+          <Node Bounds="194,283,69,26" Id="RNte4A9n8bxQPrH5rxE6Gj">
+            <p:NodeReference LastCategoryFullName="Audio.VST.EffectHost" LastDependency="VL.Audio.VST.vl">
+              <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+              <FullNameCategoryReference ID="Audio.VST.EffectHost" />
+              <Choice Kind="OperationCallFlag" Name="GetChannel" />
+            </p:NodeReference>
+            <Pin Id="UJV291D52WbNj5nNVjMvkX" Name="Input" Kind="StateInputPin" />
+            <Pin Id="MMVdcv0NjyuMkmLiLp0rJ1" Name="Parameter Name" Kind="InputPin" DefaultValue="Oscillator1 Tune" />
+            <Pin Id="Tg2R1BOmOoNL5gWht9Hbfu" Name="Output" Kind="StateOutputPin" />
+            <Pin Id="L5exRZnmbpIMPbIOGjtstb" Name="Result" Kind="OutputPin" />
+          </Node>
+          <Pad Id="BBAaObxyodEOAgVOYsCW3j" Comment="" Bounds="259,524,146,70" ShowValueBox="true" isIOBox="true" />
+          <Node Bounds="309,459,88,26" Id="RxtiMYZN5ykOJtAcQ761IH">
+            <p:NodeReference LastCategoryFullName="Reactive.Channel (Ungeneric)" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+              <FullNameCategoryReference ID="Reactive.Channel (Ungeneric)" />
+              <Choice Kind="OperationCallFlag" Name="SetObject" />
+            </p:NodeReference>
+            <Pin Id="GVwmkFXXDRLM4UHqR1goWs" Name="Input" Kind="StateInputPin" />
+            <Pin Id="JgXflLeYiyhN0dk4XxAFCr" Name="Value" Kind="InputPin" />
+            <Pin Id="Kr6NIb1OOEZPUL9alqU3pb" Name="Author" Kind="InputPin" IsHidden="true" />
+            <Pin Id="L018QjilkAiNxu3p9PiIKD" Name="Apply" Kind="InputPin" />
+            <Pin Id="CH4RpEawAtJPgS89kJ6rFq" Name="Output" Kind="StateOutputPin" />
+          </Node>
+          <Node Bounds="350,398,45,19" Id="FMV64qDbKUrMJRN8wWEETP">
+            <p:NodeReference LastCategoryFullName="Animation" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+              <CategoryReference Kind="Category" Name="Animation" NeedsToBeDirectParent="true" />
+              <Choice Kind="ProcessAppFlag" Name="LFO" />
+            </p:NodeReference>
+            <Pin Id="JO93EAu4mlbPeNXTi0t6Pb" Name="Node Context" Kind="InputPin" IsHidden="true" />
+            <Pin Id="AZHzw4bOGvJOy8rAzVETps" Name="Clock" Kind="InputPin" IsHidden="true" />
+            <Pin Id="BOivRxGw7otNZFViMEDe2X" Name="New Clock" Kind="InputPin" IsHidden="true" />
+            <Pin Id="R41msqFF5KRPSdy5Td5NRA" Name="Period" Kind="InputPin" />
+            <Pin Id="EDWHRWJZiD6M3yzkIZQnb0" Name="Pause" Kind="InputPin" />
+            <Pin Id="PvjC6Bra72IPYujtGuNIXn" Name="Reset" Kind="ApplyPin" />
+            <Pin Id="VlirXZ6Efh1PLGNv4KZXbB" Name="Phase" Kind="OutputPin" />
+            <Pin Id="EdfCSzD5pRCQcGwyymHiyV" Name="On New Cycle" Kind="OutputPin" />
+            <Pin Id="CHsrbLKsS9YP44igY97hUI" Name="Cycles" Kind="OutputPin" />
+          </Node>
+          <Pad Id="CZWfZm0e7tgNrfU6BRw3PR" Comment="Apply" Bounds="420,402,35,35" ShowValueBox="true" isIOBox="true" Value="False">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="ImmutableTypeFlag" Name="Boolean" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Toggle</p:buttonmode>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Node Bounds="194,167,65,19" Id="U3zndtrd3jRMvQLBWGKYxN">
+            <p:NodeReference LastCategoryFullName="Audio.VST.Instrument" LastDependency="VL.Audio.VST.vl">
+              <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
+              <Choice Kind="ProcessNode" Name="Zebralette" />
+            </p:NodeReference>
+            <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" IsHidden="true" />
+            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" IsHidden="true" />
+            <Pin Id="VzxGzhBEmAeOHrlRaStbSG" Name="Audio In" Kind="InputPin" />
+            <Pin Id="MjONKWAEse1PRD9h8A2fJf" Name="Midi In" Kind="InputPin" />
+            <Pin Id="Kl825nEDbV7M87wFmsSVlt" Name="Apply" Kind="InputPin" />
+            <Pin Id="OChuWP9zv8xP9mvRK5PVis" Name="Output" Kind="OutputPin" />
+            <Pin Id="MYHD92dSN9SLe0yZTiH3Ff" Name="Audio Out" Kind="OutputPin" />
+            <Pin Id="VrWpNJDk3wgPisDhbq8txG" Name="Midi Out" Kind="OutputPin" />
+          </Node>
+          <Pad Id="DGSPG8SiR3cN67h8PeevvY" Bounds="263,173,276,19" ShowValueBox="true" isIOBox="true" Value="&lt;- Enable the Output via Configure/Inspector">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="VpoA9hnOVDVNQAOZ0kD10A" Comment="Parameter Name" Bounds="260,247,83,15" ShowValueBox="true" isIOBox="true" Value="Oscillator1 Tune">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+          </Pad>
+          <Pad Id="StJP3HGAbMuMeYWxVLHqA2" Bounds="440,243,231,38" ShowValueBox="true" isIOBox="true" Value="&lt;- Use the learn mode of the Inspector to find parameter names">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="G2F6Kg1GEOwNusSzoEMSdA" Bounds="271,314,418,44" ShowValueBox="true" isIOBox="true" Value="&lt;- The returned channel is bound to the effect parameter. Changing the value of the channel will change the parameter and vice versa.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+        </Canvas>
+        <Patch Id="LDfKLta0G1yNpMxq0N4SqA" Name="Create" />
+        <Patch Id="Ff8bH3UfAv9PNaqsZjmWLr" Name="Update" />
+        <ProcessDefinition Id="O1Qu4fMKViqPKA8Koypxen">
+          <Fragment Id="IFFjdrVdcMkOvAW46EG5L7" Patch="LDfKLta0G1yNpMxq0N4SqA" Enabled="true" />
+          <Fragment Id="RoZKZUV1hefNUsG9dpmOAp" Patch="Ff8bH3UfAv9PNaqsZjmWLr" Enabled="true" />
+        </ProcessDefinition>
+        <Link Id="CLAmSLDSJFmL020Ux0jBDz" Ids="L5exRZnmbpIMPbIOGjtstb,BBAaObxyodEOAgVOYsCW3j" />
+        <Link Id="Bg8E6m544P9O2qoQGTA9im" Ids="L5exRZnmbpIMPbIOGjtstb,GVwmkFXXDRLM4UHqR1goWs" />
+        <Link Id="NQ6uOJaZfz3L4jSdVecqdi" Ids="VlirXZ6Efh1PLGNv4KZXbB,JgXflLeYiyhN0dk4XxAFCr" />
+        <Link Id="OAjZ4Q3Y2JOO6fKr3bE4m8" Ids="CZWfZm0e7tgNrfU6BRw3PR,L018QjilkAiNxu3p9PiIKD" />
+        <Link Id="Ll2zaGmDF4cLQ2mYeDFzVL" Ids="OChuWP9zv8xP9mvRK5PVis,UJV291D52WbNj5nNVjMvkX" />
+        <Link Id="B5HuCS22owWPNUliuo4KLN" Ids="VpoA9hnOVDVNQAOZ0kD10A,MMVdcv0NjyuMkmLiLp0rJ1" />
+      </Patch>
+    </Node>
+  </Patch>
+  <NugetDependency Id="C6j5n6bh0PyP3pQ2rGuqqs" Location="VL.Audio.VST" Version="0.1.1-alpha" />
+</Document>

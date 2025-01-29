@@ -351,6 +351,10 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
                 parameterLookup[GetParameterFullName(p)] = p.ID;
             }
         }
+
+        // Invalidate parameter names and channels
+        parameterNames = null;
+        channels.Clear();
     }
 
     private string GetParameterFullName(in ParameterInfo p, string separator = " ")

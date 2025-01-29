@@ -57,7 +57,7 @@ static class Utils
         return parameterInfo.GetValueAsObject(normalized);
     }
 
-    public static double Normalize(this ParameterInfo parameterInfo, object value)
+    public static double Normalize(this ParameterInfo parameterInfo, object? value)
     {
         return parameterInfo.StepCount switch
         {

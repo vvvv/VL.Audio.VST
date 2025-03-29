@@ -2,10 +2,10 @@
 
 internal class PlugProvider : IDisposable
 {
-    public static PlugProvider? Create(PluginFactory factory, ClassInfo classInfo, IHostApplication context)
+    public static PlugProvider? Create(PluginFactory factory, Guid id, IHostApplication context)
     {
         // TODO: 2nd call on user thread never returns for plugdata
-        var component = factory.CreateInstance<IComponent>(classInfo.ID);
+        var component = factory.CreateInstance<IComponent>(id);
         if (component is null)
             return null;
 
@@ -20,30 +20,30 @@ internal class PlugProvider : IDisposable
             controller?.initialize(context);
         }
 
-        var provider = new PlugProvider(factory, classInfo, component, controller);
+        var provider = new PlugProvider(factory, id, component, controller);
         if (component != controller)
             provider.ConnectComponents();
         return provider;
     }
 
     private readonly PluginFactory factory;
-    private readonly ClassInfo classInfo;
+    private readonly Guid id;
     private ConnectionProxy? componentCP;
     private ConnectionProxy? controllerCP;
     private IComponent component;
     private IEditController? controller;
 
-    private PlugProvider(PluginFactory factory, ClassInfo classInfo, IComponent component, IEditController? controller)
+    private PlugProvider(PluginFactory factory, Guid id, IComponent component, IEditController? controller)
     {
         this.factory = factory;
-        this.classInfo = classInfo;
+        this.id = id;
         this.component = component;
         this.controller = controller;
     }
 
     public IComponent Component => component;
     public IEditController? Controller => controller;
-    public ClassInfo ClassInfo => classInfo;
+    public Guid Id => id;
 
     public void Dispose()
     {

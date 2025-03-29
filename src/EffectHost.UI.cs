@@ -111,10 +111,10 @@ partial class EffectHost
         // Save in a field to ensure that an upcoming call to ShowUI will use the previous bounds
         this.windowState = windowState;
 
-        if (windowStatePin.Value is null)
+        if (windowStateChannel is null)
             return;
 
-        SaveToChannelOrPin(windowStatePin.Value, IDevSession.Current?.CurrentSolution, WindowStatePinName, windowState)?.Confirm(JustWriteToThePin);
+        SaveToChannelOrPin(windowStateChannel, IDevSession.Current?.CurrentSolution, WindowStatePinName, windowState)?.Confirm(JustWriteToThePin);
     }
 
     [GeneratedComClass]

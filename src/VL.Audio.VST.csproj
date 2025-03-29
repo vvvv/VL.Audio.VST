@@ -24,10 +24,10 @@
 
   <ItemGroup>
     <PackageReference Include="VL.Audio" Version="1.9.3" />
-    <PackageReference Include="VL.Core.Commands" Version="2024.6.7-0282-gb45ecfaff4" />
-    <PackageReference Include="VL.CoreLib" Version="2024.6.7-0282-gb45ecfaff4" />
+    <PackageReference Include="VL.Core.Commands" Version="2025.7.0-0287-g463342d914" />
+    <PackageReference Include="VL.CoreLib" Version="2025.7.0-0287-g463342d914" />
     <!-- TODO: Needed to place symbols in Advanced category - should be moved to core -->
-    <PackageReference Include="VL.AppServices" Version="2024.6.7-0282-gb45ecfaff4" />
+    <PackageReference Include="VL.AppServices" Version="2025.7.0-0287-g463342d914" />
     <PackageReference Include="VL.IO.Midi" Version="1.1.1" />
   </ItemGroup>
 

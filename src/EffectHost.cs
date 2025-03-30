@@ -90,6 +90,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
     private readonly AudioOutput audioOutput;
     private IChannel<PluginState>? stateChannel;
 
+    [Fragment]
     public EffectHost(NodeContext nodeContext) : this(nodeContext, EffectNodeInfo.Parse(nodeContext.PrivateData!))
     {
     }
@@ -209,6 +210,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         return false;
     }
 
+    [Fragment]
     public void Update(
         IChannel<PluginState> state, 
         IChannel<WindowState> windowState,
@@ -477,8 +479,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         {
             channel.Value = value;
 
-            // TODO: This line no longer works in recent preview. IsValid is always true!
-            if (!channel.IsValid() && solution != null)
+            if (solution != null)
             {
                 return SaveToPin(solution, pinName, value);
             }

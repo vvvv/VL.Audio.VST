@@ -88,6 +88,9 @@ sealed class EffectHostFactory : ProcessNodeFactory
             Category = effectInfo.Category,
             Tags = string.Join(',', tags),
             Summary = $"By {info.Vendor}, Version {info.Version}, Sdk {info.SdkVersion}",
+            FragmentSelection = FragmentSelection.Explicit,
+            HasStateOutput = true,
+            StateOutputNotVisibleByDefault = true,
         }, effectInfo.ToString());
     }
 }

@@ -484,7 +484,7 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
         {
             channel.Value = value;
 
-            if (channel.IsSystemGenerated() && solution != null)
+            if (solution != null)
             {
                 return SaveToPin(solution, pinName, value);
             }

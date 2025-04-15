@@ -435,7 +435,13 @@ public partial class EffectHost : FactoryBasedVLNode, IVLNode, IHasCommands, IHa
             ReloadParameters();
 
         if (flags.HasFlag(RestartFlags.kParamValuesChanged))
-            SavePluginState();
+        {
+            // Some plugins (like Kontakt8) do not report the correct state yet - post poning the call seems to do the trick
+            if (SynchronizationContext.Current != null)
+                SynchronizationContext.Current.Post(_ => SavePluginState(), null);
+            else
+                SavePluginState();
+        }
     }
 
     void IComponentHandler2.setDirty(bool state)

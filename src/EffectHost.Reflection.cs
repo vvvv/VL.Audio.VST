@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using VL.Audio.VST.Internal;
 using VL.Core;
 using VL.Core.CompilerServices;
 using VL.Core.EditorAttributes;
-using VL.Core.Reactive;
 using VL.Lib.Collections;
-using VL.Lib.Reactive;
 using VST3;
 
 namespace VL.Audio.VST;
@@ -24,8 +17,8 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
 
     IVLTypeInfo IVLObject.Type => type ??= new DynamicTypeInfo()
     {
-        Name = info.NodeDescription.Name, 
-        Category = info.NodeDescription.Category, 
+        Name = info.Name, 
+        Category = info.Category, 
         LoadProperties = typeInfo => LoadProperties(typeInfo)
     };
 
@@ -85,7 +78,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                     continue;
 
                 var attributes = GetAttributesForParameter(in p);
-                if (parametersPin.Value != null && parametersPin.Value.Keys.Contains(p.Title))
+                if (currentParameters != null && currentParameters.Keys.Contains(p.Title))
                     attributes = attributes.Add(new ExposedAttribute());
 
                 yield return new DynamicPropertyInfo()

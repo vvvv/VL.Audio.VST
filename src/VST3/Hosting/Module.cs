@@ -21,16 +21,14 @@ sealed class Module : IDisposable
 
         return paths;
 
-        void FindModules(string path)
-        {
-            if (Directory.Exists(path))
-                paths.AddRange(GetModulePaths(path));
-        }
+        void FindModules(string path) => paths.AddRange(GetModulePaths(path));
     }
 
     public static IEnumerable<string> GetModulePaths(string directory)
     {
-        return FindFilesWithExtension(new DirectoryInfo(directory), ".vst3");
+        if (Directory.Exists(directory))
+            return FindFilesWithExtension(new DirectoryInfo(directory), ".vst3");
+        return Enumerable.Empty<string>();
     }
 
     private static IEnumerable<string> FindFilesWithExtension(DirectoryInfo path, string extension, bool recursive = true, bool moduleExecutable = false)

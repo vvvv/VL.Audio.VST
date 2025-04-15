@@ -64,27 +64,4 @@ public sealed record PluginState(Guid Id, ImmutableArray<byte> Component, Immuta
             return Unsafe.As<byte[], ImmutableArray<byte>>(ref array);
         }
     }
-
-    internal sealed class Serializer : ISerializer<PluginState>
-    {
-        public static readonly Serializer Instance = new Serializer();
-
-        public PluginState Deserialize(SerializationContext context, object content, Type type)
-        {
-            return new PluginState(
-                context.Deserialize<Guid>(content, nameof(Id)),
-                context.Deserialize<ImmutableArray<byte>>(content, nameof(Component)),
-                context.Deserialize<ImmutableArray<byte>>(content, nameof(Controller)));
-        }
-
-        public object Serialize(SerializationContext context, PluginState value)
-        {
-            return new object[]
-            {
-                context.Serialize(nameof(Id), value.Id),
-                context.Serialize(nameof(Component), value.Component),
-                context.Serialize(nameof(Controller), value.Controller)
-            };
-        }
-    }
 }

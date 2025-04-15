@@ -1,10 +1,10 @@
 {
   "profiles": {
     "VL.Audio.VST": {
-      "commandName": "Executable",
-      "executablePath": "C:\\Program Files\\vvvv\\vvvv_gamma_7.0-0046-g192362537b-win-x64\\vvvv.exe",
-      "commandLineArgs": "--package-repositories $(PackageRepositories) --editable-packages VL.Audio.VST",
-      "nativeDebugging": false
+        "commandName": "Executable",
+        "executablePath": "C:\\Users\\elias\\source\\repos\\vvvv\\bin\\win-x64\\vvvv_gamma_7.0-0314-g10a099f5bf-win-x64\\vvvv.exe",
+        "commandLineArgs": "--package-repositories C:\\Users\\elias\\source\\repos --editable-packages VL.Audio.VST --export-package-sources C:\\Users\\elias\\source\\repos\\vvvv\\bin\\win-x64\\packages",
+        "nativeDebugging": false
     }
   }
 }

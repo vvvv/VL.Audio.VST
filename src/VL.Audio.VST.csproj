@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="VL.Audio" Version="1.9.3" />
+    <PackageReference Include="VL.Audio" Version="1.9.13" />
     <PackageReference Include="VL.Core.Commands" Version="2025.7.0-0314-g10a099f5bf" PrivateAssets="all" />
     <PackageReference Include="VL.CoreLib" Version="2025.7.0-0314-g10a099f5bf" PrivateAssets="all" />
     <!-- TODO: Needed to place symbols in Advanced category - should be moved to core -->

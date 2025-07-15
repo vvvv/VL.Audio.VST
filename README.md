@@ -78,7 +78,7 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 ## Getting started
 - Install as [described here](https://thegraybook.vvvv.org/reference/hde/managing-nugets.html) via commandline:
 
-    `nuget install VL.Audio.VST -pre -source https://nuget.pkg.github.com/vvvv/index.json;nuget.org`
+    `nuget install VL.Audio.VST -pre`
 
 - Install some VSTs. They will automatically show up in the nodebrowser when installed in the default location `\Program Files\Common Files\VST3\` or when found in a `\VST3` folder next to your .vl document. Adding a VST requires a restart of vvvv.
 - Usage examples and more information are included in the pack and can be found via the [Help Browser](https://thegraybook.vvvv.org/reference/hde/findinghelp.html)

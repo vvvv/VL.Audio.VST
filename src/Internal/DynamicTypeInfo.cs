@@ -12,7 +12,7 @@ public sealed class DynamicTypeInfo : IVLTypeInfo
     public required string Category { get; init; }
     public required Func<DynamicTypeInfo, IEnumerable<IVLPropertyInfo>> LoadProperties { get; init; }
 
-    public Func<NodeContext, object>? CreateInstance { get; init; }
+    public Func<NodeContext, IReadOnlyDictionary<string, object?>?, object>? CreateInstance { get; init; }
 
     public Func<object>? GetDefaultValue { get; init; }
 
@@ -36,7 +36,7 @@ public sealed class DynamicTypeInfo : IVLTypeInfo
 
     Spread<IVLPropertyInfo> IVLTypeInfo.AllProperties => Properties;
 
-    object? IVLTypeInfo.CreateInstance(NodeContext context) => CreateInstance?.Invoke(context);
+    object? IVLTypeInfo.CreateInstance(NodeContext context, IReadOnlyDictionary<string, object?>? arguments) => CreateInstance?.Invoke(context, arguments);
 
     public Spread<Attribute> Attributes { get; init; } = Spread<Attribute>.Empty;
 

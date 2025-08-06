@@ -24,11 +24,9 @@
 
   <ItemGroup>
     <PackageReference Include="VL.Audio" Version="1.9.13" />
-    <PackageReference Include="VL.Core.Commands" Version="2025.7.0-0314-g10a099f5bf" PrivateAssets="all" />
-    <PackageReference Include="VL.CoreLib" Version="2025.7.0-0314-g10a099f5bf" PrivateAssets="all" />
-    <!-- TODO: Needed to place symbols in Advanced category - should be moved to core -->
-    <PackageReference Include="VL.AppServices" Version="2025.7.0-0314-g10a099f5bf" PrivateAssets="all" />
-    <PackageReference Include="VL.IO.Midi" Version="1.1.1" />
+    <PackageReference Include="VL.Core.Commands" Version="2025.7.0-0466-gd08b05f117" PrivateAssets="all" />
+    <PackageReference Include="VL.CoreLib" Version="2025.7.0-0466-gd08b05f117" PrivateAssets="all" />
+    <PackageReference Include="VL.IO.Midi" Version="2.0.3" />
   </ItemGroup>
 
 </Project>

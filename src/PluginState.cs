@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using VL.Core;
-using VL.Core.CompilerServices;
+using VL.Core.Import;
 using VST3;
 using VST3.Hosting;
 

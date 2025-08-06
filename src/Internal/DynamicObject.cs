@@ -39,7 +39,7 @@ public sealed class DynamicObject : IVLObject, INotifyPropertyChanged
 
     IVLObject IVLObject.With(IReadOnlyDictionary<string, object> values)
     {
-        IVLObject that = this;
+        object that = this;
         foreach (var (key, value) in values)
         {
             var property = Type.GetProperty(key);
@@ -47,10 +47,10 @@ public sealed class DynamicObject : IVLObject, INotifyPropertyChanged
                 throw new Exception($"Property '{key}' not found on type '{Type}'");
             that = property.WithValue(that, value);
         }
-        return that;
+        return (IVLObject)that;
     }
 
-    object IVLObject.ReadProperty(string key)
+    object? IVLObject.ReadProperty(string key)
     {
         var property = Type.GetProperty(key);
         if (property is null)

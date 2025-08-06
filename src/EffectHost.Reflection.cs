@@ -2,8 +2,8 @@
 using System.Reactive.Linq;
 using VL.Audio.VST.Internal;
 using VL.Core;
-using VL.Core.CompilerServices;
 using VL.Core.EditorAttributes;
+using VL.Core.Import;
 using VL.Lib.Collections;
 using VST3;
 
@@ -79,7 +79,9 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
 
                 var attributes = GetAttributesForParameter(in p);
                 if (currentParameters != null && currentParameters.Keys.Contains(p.Title))
-                    attributes = attributes.Add(new ExposedAttribute());
+                    attributes = attributes.Add(new CanBePublishedAttribute(true));
+                else
+                    attributes = attributes.Add(new CanBePublishedAttribute(false));
 
                 yield return new DynamicPropertyInfo()
                 {

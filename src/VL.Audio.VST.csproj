@@ -23,10 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="VL.Audio" Version="1.9.13" />
-    <PackageReference Include="VL.Core.Commands" Version="2025.7.0-0466-gd08b05f117" PrivateAssets="all" />
-    <PackageReference Include="VL.CoreLib" Version="2025.7.0-0466-gd08b05f117" PrivateAssets="all" />
-    <PackageReference Include="VL.IO.Midi" Version="2.0.3" />
+    <PackageReference Include="VL.Audio" Version="1.9.19" />
+    <PackageReference Include="VL.Core.Commands" Version="2025.7.4" />
+    <PackageReference Include="VL.CoreLib" Version="2025.7.4" />
+    <PackageReference Include="VL.IO.Midi" Version="2.1.1" />
   </ItemGroup>
 
 </Project>

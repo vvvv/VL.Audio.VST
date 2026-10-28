@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="UgcPFn5dcR2MW546v4XLqB" LanguageVersion="2025.7.0-0313-g72316e0679" Version="0.128">
-  <NugetDependency Id="UIwWjVtDngaQQN9ruSCYBE" Location="VL.CoreLib" Version="2025.7.0-0313-g72316e0679" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="UgcPFn5dcR2MW546v4XLqB" LanguageVersion="2026.8.0-0275-g93834922e6" Version="0.128">
+  <NugetDependency Id="UIwWjVtDngaQQN9ruSCYBE" Location="VL.CoreLib" />
   <Patch Id="Qg9qJ1DPxuBMSYmlRd5fkQ">
     <Canvas Id="HUKa0nTRGahMHSYnC7lmL0" DefaultCategory="Audio.VST" CanvasType="FullCategory" />
     <!--
@@ -24,6 +24,7 @@
       </Patch>
     </Node>
   </Patch>
-  <NugetDependency Id="PtRn3YsB37lPncqYUJefPp" Location="VL.Audio" IsForward="true" Version="1.9.9" />
+  <NugetDependency Id="PtRn3YsB37lPncqYUJefPp" Location="VL.Audio" IsForward="true" Version="1.9.19" />
   <PlatformDependency Id="AFxd1LZA6evPGCWAh66A2Y" Location="./lib/net8.0-windows/VL.Audio.VST.dll" IsForward="true" />
+  <NugetDependency Id="Skfnzxvrx05PRFLlNxYiyJ" Location="VL.IO.Midi" Version="2.1.1" />
 </Document>

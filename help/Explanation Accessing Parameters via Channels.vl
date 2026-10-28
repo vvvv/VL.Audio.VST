@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2025.7.0-0046-g192362537b" Version="0.128">
-  <NugetDependency Id="AnAzTiHnvFcLyH8dC0i8h2" Location="VL.CoreLib" Version="2025.7.0-0046-g192362537b" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2026.8.0-0275-g93834922e6" Version="0.128">
+  <NugetDependency Id="AnAzTiHnvFcLyH8dC0i8h2" Location="VL.CoreLib" />
   <Patch Id="VK15quIFHKiNjBhZEhiGmp">
     <Canvas Id="ULgMM2YXpPBLSofO41vhSh" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
     <!--
@@ -23,10 +23,9 @@
             </p:NodeReference>
             <Pin Id="UJV291D52WbNj5nNVjMvkX" Name="Input" Kind="StateInputPin" />
             <Pin Id="MMVdcv0NjyuMkmLiLp0rJ1" Name="Parameter Name" Kind="InputPin" DefaultValue="Oscillator1 Tune" />
-            <Pin Id="Tg2R1BOmOoNL5gWht9Hbfu" Name="Output" Kind="StateOutputPin" />
             <Pin Id="L5exRZnmbpIMPbIOGjtstb" Name="Result" Kind="OutputPin" />
           </Node>
-          <Pad Id="BBAaObxyodEOAgVOYsCW3j" Comment="" Bounds="259,524,146,70" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="BBAaObxyodEOAgVOYsCW3j" Comment="" Bounds="196,530,146,70" ShowValueBox="true" isIOBox="true" />
           <Node Bounds="309,459,88,26" Id="RxtiMYZN5ykOJtAcQ761IH">
             <p:NodeReference LastCategoryFullName="Reactive.Channel (Ungeneric)" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
@@ -68,8 +67,9 @@
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessNode" Name="Zebralette" />
             </p:NodeReference>
-            <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" IsHidden="true" />
-            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" IsHidden="true" />
+            <Pin Id="ATJSUnYqcfDLT2cByzMaFS" Name="Node Context" Kind="InputPin" IsHidden="true" />
+            <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" />
+            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" />
             <Pin Id="VzxGzhBEmAeOHrlRaStbSG" Name="Audio In" Kind="InputPin" />
             <Pin Id="MjONKWAEse1PRD9h8A2fJf" Name="Midi In" Kind="InputPin" />
             <Pin Id="Kl825nEDbV7M87wFmsSVlt" Name="Apply" Kind="InputPin" />
@@ -86,7 +86,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="VpoA9hnOVDVNQAOZ0kD10A" Comment="Parameter Name" Bounds="260,247,83,15" ShowValueBox="true" isIOBox="true" Value="Oscillator1 Tune">
+          <Pad Id="VpoA9hnOVDVNQAOZ0kD10A" Comment="Parameter Name" Bounds="260,247,83,15" ShowValueBox="true" isIOBox="true" Value="OSC1 Tune">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -125,5 +125,5 @@
       </Patch>
     </Node>
   </Patch>
-  <NugetDependency Id="C6j5n6bh0PyP3pQ2rGuqqs" Location="VL.Audio.VST" Version="0.1.1-alpha" />
+  <NugetDependency Id="C6j5n6bh0PyP3pQ2rGuqqs" Location="VL.Audio.VST" />
 </Document>

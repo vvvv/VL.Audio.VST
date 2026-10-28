@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="MgPJC99GFA0OPj5MzGsjbL" LanguageVersion="2024.6.7-0285-gd926bad09e" Version="0.128">
-  <NugetDependency Id="CHswwmNmtDBPmXczjA9iAE" Location="VL.CoreLib" Version="2024.6.7-0285-gd926bad09e" />
+<Document xmlns:p="property" xmlns:r="reflection" Id="MgPJC99GFA0OPj5MzGsjbL" LanguageVersion="2026.8.0-0275-g93834922e6" Version="0.128">
+  <NugetDependency Id="CHswwmNmtDBPmXczjA9iAE" Location="VL.CoreLib" />
   <Patch Id="Qc9cLciQ1fPPe0n0HzGZLc">
     <Canvas Id="PtNOGIkJYWYO7l4QWxUmyp" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
     <!--
@@ -226,7 +226,6 @@
       </Patch>
     </Node>
   </Patch>
-  <NugetDependency Id="CYJN5XleuBRO7zjboM5U5k" Location="VL.Audio.VST" Version="0.0.0" />
-  <NugetDependency Id="JiZQCgq0jJVPjlPJUEqVrN" Location="VL.IO.OSC" Version="0.0.0" />
-  <NugetDependency Id="Io5YCv9ixVKQVTMGTGXjfF" Location="VL.IO.Midi" Version="0.0.0" />
+  <NugetDependency Id="CYJN5XleuBRO7zjboM5U5k" Location="VL.Audio.VST" />
+  <NugetDependency Id="Io5YCv9ixVKQVTMGTGXjfF" Location="VL.IO.Midi" />
 </Document>

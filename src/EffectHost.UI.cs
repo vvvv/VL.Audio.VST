@@ -23,7 +23,7 @@ partial class EffectHost
     /// In case the window was already created via the context menu, it will get re-created to ensure that its bounds are no longer saved to the pin.
     /// </remarks>
     /// <param name="bounds">The bounds of the window in pixel. Width and height will only get applied if the plugin allows it.</param>
-    public void ShowUI(Optional<RectangleF> bounds)
+    internal void ShowUI(Optional<RectangleF> bounds)
     {
         // Called from user code, don't track window state
         ShowUI(bounds.ToNullable(), formWindowState: FormWindowState.Normal, trackWindowState: false);
@@ -100,7 +100,7 @@ partial class EffectHost
     /// <summary>
     /// Hides the UI of the plugin.
     /// </summary>
-    public void HideUI()
+    internal void HideUI()
     {
         window?.Dispose();
         window = null;

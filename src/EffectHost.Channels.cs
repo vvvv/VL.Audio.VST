@@ -18,7 +18,7 @@ namespace VL.Audio.VST
         /// <summary>
         /// Returns the names of all parameters that can be read/controlled.
         /// </summary>
-        public Spread<string> GetParameterNames()
+        internal Spread<string> GetParameterNames()
         {
             return parameterNames ??= LoadParameterNames();
 
@@ -39,7 +39,7 @@ namespace VL.Audio.VST
         /// </summary>
         /// <param name="parameterName">The name of the parameter. Use <see cref="GetParameterNames"/> for a list of possible values.</param>
         /// <returns>A channel bound to the given parameter. Null if the parameter can't be found or can't be bound.</returns>
-        public IChannel? GetChannel(string parameterName)
+        internal IChannel? GetChannel(string parameterName)
         {
             if (!channels.TryGetValue(parameterName, out var channel))
                 channels[parameterName] = channel = CreateChannel();

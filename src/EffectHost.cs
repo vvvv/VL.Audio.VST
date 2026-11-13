@@ -83,6 +83,8 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
     private readonly Dictionary<string, uint> parameterLookup = new();
     private ImmutableDictionary<string, uint> savedIds = ImmutableDictionary<string, uint>.Empty;
     private readonly SerialDisposable pinWarning = new();
+    private HashSet<string> unresolvedPins = new();
+    private int lastPinCount = -1;
     private readonly Dictionary<int, UnitInfo> units = new();
 
     private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
@@ -273,6 +275,11 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
 
         // Check for changes on our input pins
         currentParameters = parameters;
+        if (unresolvedPins.Count > 0 && parameters.Count != lastPinCount)
+        {
+            lastPinCount = parameters.Count;
+            UpdatePinWarning(parameters.Keys);
+        }
         foreach (var (k, v) in parameters)
         {
             if (inputValues.TryGetValue(k, out var e) && Equals(e, v))
@@ -620,13 +627,26 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         var s = SaveParameterIds(builder.Commit(), kept);
         s.Confirm(SolutionUpdateKind.TweakLast);
 
-        if (unresolved.Count > 0)
+        unresolvedPins = new HashSet<string>(unresolved);
+        UpdatePinWarning(pins.Keys);
+    }
+
+    // Shows which pins have no parameter, and goes away once the pins are fixed
+    private void UpdatePinWarning(IEnumerable<string> currentPins)
+    {
+        if (unresolvedPins.Count == 0)
+            return;
+
+        var pinned = currentPins.ToHashSet();
+        unresolvedPins.RemoveWhere(n => pinned.Contains(n) && TryResolve(n, out _));
+        if (unresolvedPins.Count == 0)
         {
-            pinWarning.Disposable = nodeContext.AddPersistentMessage(MessageSeverity.Warning,
-                $"Parameter pins could not be resolved and were removed (parameters are named by dotted paths now, e.g. \"Root.Macros.M1: Speed\"): {string.Join(", ", unresolved.Select(n => $"\"{n}\""))}. Re-learn them.");
-        }
-        else
             pinWarning.Disposable = null;
+            return;
+        }
+
+        var names = string.Join(", ", unresolvedPins.Select(n => $"\"{n}\""));
+        pinWarning.Disposable = nodeContext.AddPersistentMessage(MessageSeverity.Warning, $"No parameter found for pins: {names}");
     }
 
     private PinGroupBuilder GetPinGroupBuilder(ISolution solution)

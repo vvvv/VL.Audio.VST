@@ -41,7 +41,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
 
         propertyChangedSubscription = ParameterChanged
             .Where(x => x.parameter.UnitId == Constants.kRootUnitId && ExposeAsProperty(in x.parameter))
-            .Subscribe(x => propertyChanged?.Invoke(this, new PropertyChangedEventArgs(x.parameter.Title)));
+            .Subscribe(x => propertyChanged?.Invoke(this, new PropertyChangedEventArgs(ToSegment(x.parameter.Title))));
 
         IEnumerable<IVLPropertyInfo> LoadPropertiesForUnit(IVLTypeInfo declaringType, int unitId)
         {
@@ -52,7 +52,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
 
                 var unitTypeInfo = new DynamicTypeInfo()
                 {
-                    Name = unitInfo.Name,
+                    Name = ToSegment(unitInfo.Name),
                     Category = declaringType.FullName,
                     LoadProperties = unitTypeInfo => LoadPropertiesForUnit(unitTypeInfo, unitInfo.Id)
                 };
@@ -61,12 +61,12 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                     Type = unitTypeInfo,
                     PropertyChangedSource = ParameterChanged
                         .Where(e => e.parameter.UnitId == unitInfo.Id && ExposeAsProperty(in e.parameter))
-                        .Select(e => new PropertyChangedEventArgs(e.parameter.Title))
+                        .Select(e => new PropertyChangedEventArgs(ToSegment(e.parameter.Title)))
                 };
                 yield return new DynamicPropertyInfo()
                 {
                     DeclaringType = declaringType,
-                    Name = unitInfo.Name,
+                    Name = ToSegment(unitInfo.Name),
                     Type = unitTypeInfo,
                     GetValue = _ => unit,
                 };
@@ -78,7 +78,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                     continue;
 
                 var attributes = GetAttributesForParameter(in p);
-                if (currentParameters != null && currentParameters.Keys.Contains(p.Title))
+                if (TryGetPinName(p.ID, out _))
                     attributes = attributes.Add(new CanBePublishedAttribute(true));
                 else
                     attributes = attributes.Add(new CanBePublishedAttribute(false));
@@ -86,7 +86,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                 yield return new DynamicPropertyInfo()
                 {
                     DeclaringType = declaringType,
-                    Name = p.Title,
+                    Name = ToSegment(p.Title),
                     Type = typeRegistry.GetTypeInfo(p.GetPinType()),
                     GetValue = i =>
                     {

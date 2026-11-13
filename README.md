@@ -31,7 +31,7 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 | IAudioProcessor | only stereo tested so far |
 | IEditController | done |
 | IConnectionPoint | yes, using a connection proxy which ensures any notifications are done on main thread |
-| IUnitInfo | used to build display name of pins, also used in case of dynamic reflection |
+| IUnitInfo | used to build display name of pins (dotted paths like `Root.Macros.M1: Speed`, matching `PropertyChannel`), also used in case of dynamic reflection |
 | IProgramListData | no |
 | IUnitData | no |
 | IPlugView | sizing yes, keyboard handling no |

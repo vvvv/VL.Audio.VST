@@ -29,7 +29,7 @@ partial class EffectHost
                     tuning: default,
                     velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
                     length: default,
-                    noteId: channelMessage.Data1);
+                    noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
                 inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
             }
             else if (channelMessage.IsNoteOff())
@@ -39,7 +39,16 @@ partial class EffectHost
                     pitch: (short)channelMessage.Data1,
                     tuning: default,
                     velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
-                    noteId: channelMessage.Data1);
+                    noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
+                inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
+            }
+            else if (channelMessage.Command == ChannelCommand.PolyPressure)
+            {
+                var e = new PolyPressureEvent(
+                    channel: midiChannel,
+                    pitch: (short)channelMessage.Data1,
+                    pressure: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                    noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
                 inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
             }
             else
@@ -49,6 +58,9 @@ partial class EffectHost
             }
         }
     }
+
+    // Unique per sounding note, so the same key on different MPE channels stays independent
+    private static int NoteIdOf(int channel, int key) => channel * 128 + key;
 
     private void HandleMidiMessageOnMainThread(ChannelMessage channelMessage)
     {
@@ -81,6 +93,11 @@ partial class EffectHost
                 var value = channelMessage.GetPitchWheel();
                 SetParameter(paramId, value);
             }
+        }
+        else if (channelMessage.Command == ChannelCommand.ChannelPressure)
+        {
+            if (midiMapping is not null && midiMapping.getMidiControllerAssignment(0, midiChannel, ControllerNumbers.kAfterTouch, out var paramId))
+                SetParameter(paramId, MessageUtils.MidiIntToFloat(channelMessage.Data1));
         }
         else if (channelMessage.Command == ChannelCommand.ProgramChange)
         {

@@ -13,6 +13,7 @@ using VL.Core;
 using VL.Core.Commands;
 using VL.Core.Import;
 using VL.Lang.PublicAPI;
+using MessageSeverity = VL.Lang.MessageSeverity;
 using VL.Lib.Collections;
 using VL.Lib.Reactive;
 using VL.Model;
@@ -31,6 +32,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
 {
     internal const string StateInputPinName = "State";
     internal const string WindowStatePinName = "Window State";
+    internal const string ParameterIdsPinName = "Parameter IDs";
     private const Model.SolutionUpdateKind JustWriteToThePin = Model.SolutionUpdateKind.Default & ~Model.SolutionUpdateKind.AffectCompilation & ~Model.SolutionUpdateKind.AddToHistory;
 
     private static readonly ParameterChanges s_noChanges = new();
@@ -79,6 +81,8 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
     private readonly Dictionary<uint, ParameterInfo> parameters = new();
     private readonly Dictionary<uint, double> parameterValues = new();
     private readonly Dictionary<string, uint> parameterLookup = new();
+    private ImmutableDictionary<string, uint> savedIds = ImmutableDictionary<string, uint>.Empty;
+    private readonly SerialDisposable pinWarning = new();
     private readonly Dictionary<int, UnitInfo> units = new();
 
     private ImmutableArray<BusInfo> audioInputBusses, audioOutputBusses, eventInputBusses, eventOutputBusses;
@@ -167,6 +171,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         {
             nodeRegistration?.Dispose();
             midiInputSubscription.Dispose();
+            pinWarning.Dispose();
             HideUI();
             audioOutput.Dispose();
 
@@ -214,6 +219,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
     public void Update(
         IChannel<PluginState> state, 
         IChannel<WindowState> windowState,
+        [Pin(Visibility = PinVisibility.Hidden)] ImmutableDictionary<string, uint>? parameterIds,
         IReadOnlyList<AudioSignal> audioIn,
         IObservable<IMidiMessage> midiIn,
         [Pin(PinGroupKind = PinGroupKind.Dictionary, PinGroupEditMode = PinGroupEditModes.RemoveOnly)] Dictionary<string, object> parameters,
@@ -259,7 +265,11 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         }
 
         if (currentParameters is null)
+        {
+            if (savedIds.IsEmpty && parameterIds != null)
+                savedIds = parameterIds;
             SyncPinGroup(parameters);
+        }
 
         // Check for changes on our input pins
         currentParameters = parameters;
@@ -268,7 +278,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
             if (inputValues.TryGetValue(k, out var e) && Equals(e, v))
                 continue;
 
-            if (!parameterLookup.TryGetValue(k, out var id) || !this.parameters.TryGetValue(id, out var p))
+            if (!TryResolve(k, out var id) || !this.parameters.TryGetValue(id, out var p))
                 continue;
 
             inputValues[k] = v;
@@ -358,23 +368,65 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         currentParameters = null;
     }
 
-    private string GetParameterFullName(in ParameterInfo p, string separator = " ")
+    /// <summary>
+    /// Makes a name usable as a segment of a value path (see ValuePath): "." and brackets have a special meaning there.
+    /// </summary>
+    internal static string ToSegment(string name) => name.Replace('.', '\u00B7').Replace('[', '(').Replace(']', ')');
+
+    private string GetParameterFullName(in ParameterInfo p)
     {
-        var unitName = GetUnitFullName(p.UnitId, separator);
+        var unitName = GetUnitFullName(p.UnitId);
         if (string.IsNullOrEmpty(unitName))
-            return p.Title;
-        return $"{unitName}{separator}{p.Title}";
+            return ToSegment(p.Title);
+        return $"{unitName}.{ToSegment(p.Title)}";
     }
 
-    private string GetUnitFullName(int unitId, string separator = " ")
+    private string GetUnitFullName(int unitId)
     {
         if (unitId == Constants.kRootUnitId || !units.TryGetValue(unitId, out var info))
             return string.Empty;
 
         var parentName = GetUnitFullName(info.ParentUnitId);
         if (!string.IsNullOrEmpty(parentName))
-            return $"{parentName}{separator}{info.Name}";
-        return info.Name;
+            return $"{parentName}.{ToSegment(info.Name)}";
+        return ToSegment(info.Name);
+    }
+
+    /// <summary>
+    /// Resolves the name of a pin to a parameter: by saved ID first (stable across renames), by name second.
+    /// </summary>
+    private bool TryResolve(string pinName, out uint id)
+    {
+        if (savedIds.TryGetValue(pinName, out id) && parameters.ContainsKey(id))
+            return true;
+        return parameterLookup.TryGetValue(pinName, out id);
+    }
+
+    private bool TryGetPinName(uint id, out string pinName)
+    {
+        if (currentParameters != null)
+        {
+            foreach (var k in currentParameters.Keys)
+            {
+                if (TryResolve(k, out var i) && i == id)
+                {
+                    pinName = k;
+                    return true;
+                }
+            }
+        }
+        pinName = string.Empty;
+        return false;
+    }
+
+    private ISolution SaveParameterIds(ISolution solution, IEnumerable<string> pinNames)
+    {
+        var builder = ImmutableDictionary.CreateBuilder<string, uint>();
+        foreach (var n in pinNames)
+            if (TryResolve(n, out var id))
+                builder[n] = id;
+        savedIds = builder.ToImmutable();
+        return SaveToPin(solution, ParameterIdsPinName, savedIds);
     }
 
     private void SetParameter(uint id, double normalizedValue)
@@ -413,9 +465,9 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
             solution = SavePluginState(solution);
 
             // Save the parameter value to the pin as well (if it exists)
-            if (solution != null && parameters.TryGetValue(id, out var p) && parameterValues.TryGetValue(id, out var normalizedValue))
+            if (solution != null && parameters.TryGetValue(id, out var p) && parameterValues.TryGetValue(id, out var normalizedValue)
+                && TryGetPinName(id, out var pinName))
             {
-                var pinName = GetParameterFullName(in p);
                 solution = SaveToPin(solution, pinName, p.GetValueAsObject(normalizedValue));
             }
 
@@ -514,29 +566,37 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
             return;
 
         var typeRegistry = AppHost.Global.TypeRegistry;
-        var current = currentParameters ?? new();
         var builder = GetPinGroupBuilder(solution);
-        foreach (var p in controller!.GetParameters())
+
+        // Keep the existing pins under their saved names
+        var pins = new List<(string Name, uint Id)>();
+        if (currentParameters != null)
         {
-            var pinName = GetParameterFullName(in p);
-            if (current.ContainsKey(pinName) || id == p.ID)
-            {
-                builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
-                this.type = null;
-            }
+            foreach (var k in currentParameters.Keys)
+                if (TryResolve(k, out var pid) && parameters.ContainsKey(pid))
+                    pins.Add((k, pid));
         }
+
+        var alreadyPinned = pins.Any(x => x.Id == id);
+        var newPinName = alreadyPinned ? pins.First(x => x.Id == id).Name : GetParameterFullName(in parameter);
+        if (!alreadyPinned)
+            pins.Add((newPinName, id));
+
+        foreach (var (name, pid) in pins)
+            builder.Add(name, typeRegistry.GetTypeInfo(parameters[pid].GetPinType()).Name);
+        this.type = null;
 
         var s = builder.Commit();
         if (s != solution)
         {
-            var pinName = GetParameterFullName(in parameter);
+            s = SaveParameterIds(s, pins.Select(x => x.Name));
             var normalizedValue = controller.getParamNormalized(parameter.ID);
-            s = SaveToPin(s, pinName, parameter.GetValueAsObject(normalizedValue));
+            s = SaveToPin(s, newPinName, parameter.GetValueAsObject(normalizedValue));
             s.Confirm();
         }
     }
 
-    private void SyncPinGroup(Dictionary<string, object> parameters)
+    private void SyncPinGroup(Dictionary<string, object> pins)
     {
         var solution = IDevSession.Current?.CurrentSolution;
         if (solution is null)
@@ -544,13 +604,29 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
 
         var typeRegistry = AppHost.Global.TypeRegistry;
         var builder = GetPinGroupBuilder(solution);
-        foreach (var p in controller!.GetParameters())
+        var kept = new List<string>();
+        var unresolved = new List<string>();
+        foreach (var pinName in pins.Keys)
         {
-            var pinName = GetParameterFullName(in p);
-            if (parameters.ContainsKey(pinName))
+            if (TryResolve(pinName, out var id) && parameters.TryGetValue(id, out var p))
+            {
                 builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
+                kept.Add(pinName);
+            }
+            else
+                unresolved.Add(pinName);
         }
-        builder.Commit().Confirm(SolutionUpdateKind.TweakLast);
+
+        var s = SaveParameterIds(builder.Commit(), kept);
+        s.Confirm(SolutionUpdateKind.TweakLast);
+
+        if (unresolved.Count > 0)
+        {
+            pinWarning.Disposable = nodeContext.AddPersistentMessage(MessageSeverity.Warning,
+                $"Parameter pins could not be resolved and were removed (parameters are named by dotted paths now, e.g. \"Root.Macros.M1: Speed\"): {string.Join(", ", unresolved.Select(n => $"\"{n}\""))}. Re-learn them.");
+        }
+        else
+            pinWarning.Disposable = null;
     }
 
     private PinGroupBuilder GetPinGroupBuilder(ISolution solution)

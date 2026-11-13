@@ -49,7 +49,7 @@ namespace VSTHost
                 var context = new HostApp([]);
                 // This crashes for JUCE based plugins :(
                 //var plugProvider1 = Task.Run(() => PlugProvider.Create(pluginFactory, info, context)).Result;
-                plugProvider = PlugProvider.Create(pluginFactory, info, context);
+                plugProvider = PlugProvider.Create(pluginFactory, info.ID, context);
 
                 var component = plugProvider.Component;
                 var processor = (IAudioProcessor)component;

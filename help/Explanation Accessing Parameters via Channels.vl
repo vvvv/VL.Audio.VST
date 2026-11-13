@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2026.8.0-0275-g93834922e6" Version="0.128">
+<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2026.8.0-0325-ga92cfc5db3" Version="0.128">
   <NugetDependency Id="AnAzTiHnvFcLyH8dC0i8h2" Location="VL.CoreLib" />
   <Patch Id="VK15quIFHKiNjBhZEhiGmp">
     <Canvas Id="ULgMM2YXpPBLSofO41vhSh" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
@@ -15,15 +15,22 @@
       </p:NodeReference>
       <Patch Id="VdIlgzGU3W9MzLWoVgEd3F">
         <Canvas Id="JOudEH0o9wRMNX25Tprh5r" CanvasType="Group">
-          <Node Bounds="194,283,69,26" Id="RNte4A9n8bxQPrH5rxE6Gj">
-            <p:NodeReference LastCategoryFullName="Audio.VST.EffectHost" LastDependency="VL.Audio.VST.vl">
+          <Node Bounds="194,283,91,19" Id="RNte4A9n8bxQPrH5rxE6Gj">
+            <p:NodeReference LastCategoryFullName="Reactive.Channel" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
-              <FullNameCategoryReference ID="Audio.VST.EffectHost" />
-              <Choice Kind="OperationCallFlag" Name="GetChannel" />
+              <Choice Kind="ProcessAppFlag" Name="PropertyChannel" />
+              <p:TypeArguments>
+                <TypeReference LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+                  <Choice Kind="TypeFlag" Name="Float32" />
+                </TypeReference>
+              </p:TypeArguments>
             </p:NodeReference>
+            <Pin Id="MptKYfcrSWkMxQmdj05RRo" Name="Node Context" Kind="InputPin" IsHidden="true" />
             <Pin Id="UJV291D52WbNj5nNVjMvkX" Name="Input" Kind="StateInputPin" />
-            <Pin Id="MMVdcv0NjyuMkmLiLp0rJ1" Name="Parameter Name" Kind="InputPin" DefaultValue="Oscillator1 Tune" />
-            <Pin Id="L5exRZnmbpIMPbIOGjtstb" Name="Result" Kind="OutputPin" />
+            <Pin Id="PmAfL3Bbtg1MQfN1BwI6B4" Name="Property Name" Kind="InputPin" DefaultValue="OSC1.Tune" />
+            <Pin Id="RYkyFEOaXVBNyPwRuqvu1E" Name="Value" Kind="InputPin" />
+            <Pin Id="EZ2Au6AumHsOYdW9QdQUab" Name="Output" Kind="OutputPin" />
+            <Pin Id="L9kTRKN6VarNdCQvrOm7OZ" Name="Value" Kind="OutputPin" />
           </Node>
           <Pad Id="BBAaObxyodEOAgVOYsCW3j" Comment="" Bounds="196,530,146,70" ShowValueBox="true" isIOBox="true" />
           <Node Bounds="309,459,88,26" Id="RxtiMYZN5ykOJtAcQ761IH">
@@ -62,7 +69,7 @@
               <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Toggle</p:buttonmode>
             </p:ValueBoxSettings>
           </Pad>
-          <Node Bounds="194,167,65,19" Id="U3zndtrd3jRMvQLBWGKYxN">
+          <Node Bounds="194,167,85,19" Id="U3zndtrd3jRMvQLBWGKYxN">
             <p:NodeReference LastCategoryFullName="Audio.VST.Instrument" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessNode" Name="Zebralette" />
@@ -70,6 +77,7 @@
             <Pin Id="ATJSUnYqcfDLT2cByzMaFS" Name="Node Context" Kind="InputPin" IsHidden="true" />
             <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" />
             <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" />
+            <Pin Id="F6Mb3Xd5dvDOBTOCX5FLZg" Name="Parameter Ids" Kind="InputPin" IsHidden="true" />
             <Pin Id="VzxGzhBEmAeOHrlRaStbSG" Name="Audio In" Kind="InputPin" />
             <Pin Id="MjONKWAEse1PRD9h8A2fJf" Name="Midi In" Kind="InputPin" />
             <Pin Id="Kl825nEDbV7M87wFmsSVlt" Name="Apply" Kind="InputPin" />
@@ -77,7 +85,7 @@
             <Pin Id="MYHD92dSN9SLe0yZTiH3Ff" Name="Audio Out" Kind="OutputPin" />
             <Pin Id="VrWpNJDk3wgPisDhbq8txG" Name="Midi Out" Kind="OutputPin" />
           </Node>
-          <Pad Id="DGSPG8SiR3cN67h8PeevvY" Bounds="263,173,276,19" ShowValueBox="true" isIOBox="true" Value="&lt;- Enable the Output via Configure/Inspector">
+          <Pad Id="DGSPG8SiR3cN67h8PeevvY" Bounds="271,174,276,19" ShowValueBox="true" isIOBox="true" Value="&lt;- Enable the Output via Configure/Inspector">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -86,12 +94,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="VpoA9hnOVDVNQAOZ0kD10A" Comment="Parameter Name" Bounds="260,247,83,15" ShowValueBox="true" isIOBox="true" Value="OSC1 Tune">
-            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
-              <Choice Kind="TypeFlag" Name="String" />
-            </p:TypeAnnotation>
-          </Pad>
-          <Pad Id="StJP3HGAbMuMeYWxVLHqA2" Bounds="440,243,231,38" ShowValueBox="true" isIOBox="true" Value="&lt;- Use the learn mode of the Inspector to find parameter names">
+          <Pad Id="StJP3HGAbMuMeYWxVLHqA2" Bounds="239,268,294,19" ShowValueBox="true" isIOBox="true" Value="&lt;- Right click the Path input to select parameter">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -116,12 +119,11 @@
           <Fragment Id="IFFjdrVdcMkOvAW46EG5L7" Patch="LDfKLta0G1yNpMxq0N4SqA" Enabled="true" />
           <Fragment Id="RoZKZUV1hefNUsG9dpmOAp" Patch="Ff8bH3UfAv9PNaqsZjmWLr" Enabled="true" />
         </ProcessDefinition>
-        <Link Id="CLAmSLDSJFmL020Ux0jBDz" Ids="L5exRZnmbpIMPbIOGjtstb,BBAaObxyodEOAgVOYsCW3j" />
-        <Link Id="Bg8E6m544P9O2qoQGTA9im" Ids="L5exRZnmbpIMPbIOGjtstb,GVwmkFXXDRLM4UHqR1goWs" />
         <Link Id="NQ6uOJaZfz3L4jSdVecqdi" Ids="VlirXZ6Efh1PLGNv4KZXbB,JgXflLeYiyhN0dk4XxAFCr" />
         <Link Id="OAjZ4Q3Y2JOO6fKr3bE4m8" Ids="CZWfZm0e7tgNrfU6BRw3PR,L018QjilkAiNxu3p9PiIKD" />
         <Link Id="Ll2zaGmDF4cLQ2mYeDFzVL" Ids="OChuWP9zv8xP9mvRK5PVis,UJV291D52WbNj5nNVjMvkX" />
-        <Link Id="B5HuCS22owWPNUliuo4KLN" Ids="VpoA9hnOVDVNQAOZ0kD10A,MMVdcv0NjyuMkmLiLp0rJ1" />
+        <Link Id="AFXkVNeA11ZPKGliYnIApo" Ids="EZ2Au6AumHsOYdW9QdQUab,BBAaObxyodEOAgVOYsCW3j" />
+        <Link Id="TLrosIPXBY0LSOGgmvS0HM" Ids="EZ2Au6AumHsOYdW9QdQUab,GVwmkFXXDRLM4UHqR1goWs" />
       </Patch>
     </Node>
   </Patch>

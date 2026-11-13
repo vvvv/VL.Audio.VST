@@ -219,8 +219,8 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
 
     [Fragment]
     public void Update(
-        IChannel<PluginState> state, 
-        IChannel<WindowState> windowState,
+        [Pin(Visibility = PinVisibility.Optional)] IChannel<PluginState> state,
+        [Pin(Visibility = PinVisibility.Optional)] IChannel<WindowState> windowState,
         [Pin(Visibility = PinVisibility.Hidden)] ImmutableDictionary<string, uint>? parameterIds,
         IReadOnlyList<AudioSignal> audioIn,
         IObservable<IMidiMessage> midiIn,

@@ -75,8 +75,8 @@
               <Choice Kind="ProcessNode" Name="Zebralette" />
             </p:NodeReference>
             <Pin Id="ATJSUnYqcfDLT2cByzMaFS" Name="Node Context" Kind="InputPin" IsHidden="true" />
-            <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" />
-            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" />
+            <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" IsHidden="true" />
+            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" IsHidden="true" />
             <Pin Id="F6Mb3Xd5dvDOBTOCX5FLZg" Name="Parameter Ids" Kind="InputPin" IsHidden="true" />
             <Pin Id="VzxGzhBEmAeOHrlRaStbSG" Name="Audio In" Kind="InputPin" />
             <Pin Id="MjONKWAEse1PRD9h8A2fJf" Name="Midi In" Kind="InputPin" />

@@ -3,13 +3,13 @@
 <PresetModel xmlns:r="reflection" r:Version="2">
   <ChannelValues>
     <Item Key="TAL-NoiseMaker.Osc 1 Fine Tune">
-      <Value r:Type="Float32 [Primitive]">0.5305054</Value>
+      <Value r:Type="Float32 [Primitive]">0.4916999</Value>
     </Item>
     <Item Key="TAL-NoiseMaker.Osc 1 Phase">
-      <Value r:Type="Float32 [Primitive]">0.4661051</Value>
+      <Value r:Type="Float32 [Primitive]">1</Value>
     </Item>
     <Item Key="TAL-NoiseMaker.Osc 1 Tune">
-      <Value r:Type="Float32 [Primitive]">0.221552</Value>
+      <Value r:Type="Float32 [Primitive]">1</Value>
     </Item>
     <Item Key="TAL-NoiseMaker.Osc 2 Fine Tune">
       <Value r:Type="Float32 [Primitive]">0.46691453</Value>

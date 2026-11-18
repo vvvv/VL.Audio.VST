@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="MgPJC99GFA0OPj5MzGsjbL" LanguageVersion="2026.8.0-0275-g93834922e6" Version="0.128">
+<Document xmlns:p="property" xmlns:r="reflection" Id="MgPJC99GFA0OPj5MzGsjbL" LanguageVersion="2026.8.0-0349-g53350c3d93" Version="0.128">
   <NugetDependency Id="CHswwmNmtDBPmXczjA9iAE" Location="VL.CoreLib" />
   <Patch Id="Qc9cLciQ1fPPe0n0HzGZLc">
     <Canvas Id="PtNOGIkJYWYO7l4QWxUmyp" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
@@ -86,11 +86,7 @@
             </Pin>
             <Pin Id="CmhEJmepxSUPCny2NaihpY" Name="Audio In" Kind="InputPin" />
             <Pin Id="BBEMO21RFLGP1cM0l7LAI7" Name="Midi In" Kind="InputPin" />
-            <Pin Id="L7nCTLEXRptMExIC4cXN4y" Name="Level (VCV Audio 2 [8518972980240757])" Kind="InputPin" PinGroupName="Parameters">
-              <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
-                <Choice Kind="TypeFlag" Name="Float32" />
-              </p:TypeAnnotation>
-            </Pin>
+            <Pin Id="L7nCTLEXRptMExIC4cXN4y" Name="Level (VCV Audio 2 [8518972980240757])" Kind="InputPin" PinGroupName="Parameters" />
             <Pin Id="Dgik9ui6IN2OsiaVXTxvqZ" Name="Apply" Kind="InputPin" DefaultValue="True" />
             <Pin Id="AF4DNovNm7eO0ROsToPH0o" Name="Output" Kind="OutputPin" IsHidden="true" />
             <Pin Id="GBN2Bn1wCEVOHLKX6gnXlh" Name="Audio Out" Kind="OutputPin" />

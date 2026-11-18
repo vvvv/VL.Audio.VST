@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2026.8.0-0325-ga92cfc5db3" Version="0.128">
+<Document xmlns:p="property" xmlns:r="reflection" Id="M1lo6knHlScO9Y73gdRm1O" LanguageVersion="2026.8.0-0349-g53350c3d93" Version="0.128">
   <NugetDependency Id="AnAzTiHnvFcLyH8dC0i8h2" Location="VL.CoreLib" />
   <Patch Id="VK15quIFHKiNjBhZEhiGmp">
     <Canvas Id="ULgMM2YXpPBLSofO41vhSh" DefaultCategory="Main" BordersChecked="false" CanvasType="FullCategory" />
@@ -15,10 +15,10 @@
       </p:NodeReference>
       <Patch Id="VdIlgzGU3W9MzLWoVgEd3F">
         <Canvas Id="JOudEH0o9wRMNX25Tprh5r" CanvasType="Group">
-          <Node Bounds="194,283,91,19" Id="RNte4A9n8bxQPrH5rxE6Gj">
-            <p:NodeReference LastCategoryFullName="Reactive.Channel" LastDependency="VL.CoreLib.vl">
+          <Node Bounds="194,283,54,19" Id="RNte4A9n8bxQPrH5rxE6Gj">
+            <p:NodeReference LastCategoryFullName="Reactive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
-              <Choice Kind="ProcessAppFlag" Name="PropertyChannel" />
+              <Choice Kind="ProcessAppFlag" Name="Property" />
               <p:TypeArguments>
                 <TypeReference LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
                   <Choice Kind="TypeFlag" Name="Float32" />
@@ -27,13 +27,13 @@
             </p:NodeReference>
             <Pin Id="MptKYfcrSWkMxQmdj05RRo" Name="Node Context" Kind="InputPin" IsHidden="true" />
             <Pin Id="UJV291D52WbNj5nNVjMvkX" Name="Input" Kind="StateInputPin" />
-            <Pin Id="PmAfL3Bbtg1MQfN1BwI6B4" Name="Property Name" Kind="InputPin" DefaultValue="OSC1.Tune" />
+            <Pin Id="M2g5alnXiPFQC5IwCOXikh" Name="Path" Kind="InputPin" DefaultValue="OSC1.Tune" />
             <Pin Id="RYkyFEOaXVBNyPwRuqvu1E" Name="Value" Kind="InputPin" />
             <Pin Id="EZ2Au6AumHsOYdW9QdQUab" Name="Output" Kind="OutputPin" />
             <Pin Id="L9kTRKN6VarNdCQvrOm7OZ" Name="Value" Kind="OutputPin" />
           </Node>
-          <Pad Id="BBAaObxyodEOAgVOYsCW3j" Comment="" Bounds="196,530,146,70" ShowValueBox="true" isIOBox="true" />
-          <Node Bounds="309,459,88,26" Id="RxtiMYZN5ykOJtAcQ761IH">
+          <Pad Id="BBAaObxyodEOAgVOYsCW3j" Comment="" Bounds="196,590,146,70" ShowValueBox="true" isIOBox="true" />
+          <Node Bounds="309,519,88,26" Id="RxtiMYZN5ykOJtAcQ761IH">
             <p:NodeReference LastCategoryFullName="Reactive.Channel (Ungeneric)" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <FullNameCategoryReference ID="Reactive.Channel (Ungeneric)" />
@@ -45,7 +45,7 @@
             <Pin Id="L018QjilkAiNxu3p9PiIKD" Name="Apply" Kind="InputPin" />
             <Pin Id="CH4RpEawAtJPgS89kJ6rFq" Name="Output" Kind="StateOutputPin" />
           </Node>
-          <Node Bounds="350,398,45,19" Id="FMV64qDbKUrMJRN8wWEETP">
+          <Node Bounds="350,458,45,19" Id="FMV64qDbKUrMJRN8wWEETP">
             <p:NodeReference LastCategoryFullName="Animation" LastDependency="VL.CoreLib.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <CategoryReference Kind="Category" Name="Animation" NeedsToBeDirectParent="true" />
@@ -61,7 +61,7 @@
             <Pin Id="EdfCSzD5pRCQcGwyymHiyV" Name="On New Cycle" Kind="OutputPin" />
             <Pin Id="CHsrbLKsS9YP44igY97hUI" Name="Cycles" Kind="OutputPin" />
           </Node>
-          <Pad Id="CZWfZm0e7tgNrfU6BRw3PR" Comment="Apply" Bounds="420,402,35,35" ShowValueBox="true" isIOBox="true" Value="False">
+          <Pad Id="CZWfZm0e7tgNrfU6BRw3PR" Comment="Apply" Bounds="420,462,35,35" ShowValueBox="true" isIOBox="true" Value="False">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="ImmutableTypeFlag" Name="Boolean" />
             </p:TypeAnnotation>
@@ -69,14 +69,16 @@
               <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Toggle</p:buttonmode>
             </p:ValueBoxSettings>
           </Pad>
-          <Node Bounds="194,167,85,19" Id="U3zndtrd3jRMvQLBWGKYxN">
+          <Node Bounds="194,140,62,19" Id="U3zndtrd3jRMvQLBWGKYxN">
             <p:NodeReference LastCategoryFullName="Audio.VST.Instrument" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessNode" Name="Zebralette" />
             </p:NodeReference>
             <Pin Id="ATJSUnYqcfDLT2cByzMaFS" Name="Node Context" Kind="InputPin" IsHidden="true" />
             <Pin Id="E73uvBpvlpOM07SnhbQuf4" Name="State" Kind="InputPin" IsHidden="true" />
-            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" IsHidden="true" />
+            <Pin Id="RyXIEfZlkNEPPW8iUKg169" Name="Window State" Kind="InputPin" IsHidden="true">
+              <p:DefaultValue Visibility="Normal" Bounds="1141, 167, 1172, 576" />
+            </Pin>
             <Pin Id="F6Mb3Xd5dvDOBTOCX5FLZg" Name="Parameter Ids" Kind="InputPin" IsHidden="true" />
             <Pin Id="VzxGzhBEmAeOHrlRaStbSG" Name="Audio In" Kind="InputPin" />
             <Pin Id="MjONKWAEse1PRD9h8A2fJf" Name="Midi In" Kind="InputPin" />
@@ -85,7 +87,7 @@
             <Pin Id="MYHD92dSN9SLe0yZTiH3Ff" Name="Audio Out" Kind="OutputPin" />
             <Pin Id="VrWpNJDk3wgPisDhbq8txG" Name="Midi Out" Kind="OutputPin" />
           </Node>
-          <Pad Id="DGSPG8SiR3cN67h8PeevvY" Bounds="271,174,276,19" ShowValueBox="true" isIOBox="true" Value="&lt;- Enable the Output via Configure/Inspector">
+          <Pad Id="DGSPG8SiR3cN67h8PeevvY" Bounds="213,204,332,20" ShowValueBox="true" isIOBox="true" Value="&lt; Enable the Output via Configure or Inspector (Ctrl+I)">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -94,7 +96,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="StJP3HGAbMuMeYWxVLHqA2" Bounds="239,268,294,19" ShowValueBox="true" isIOBox="true" Value="&lt;- Right click the Path input to select parameter">
+          <Pad Id="StJP3HGAbMuMeYWxVLHqA2" Bounds="270,272,181,40" ShowValueBox="true" isIOBox="true" Value="&lt; Right click the Path input to select a parameter">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -103,7 +105,34 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="G2F6Kg1GEOwNusSzoEMSdA" Bounds="271,314,418,44" ShowValueBox="true" isIOBox="true" Value="&lt;- The returned channel is bound to the effect parameter. Changing the value of the channel will change the parameter and vice versa.">
+          <Pad Id="G2F6Kg1GEOwNusSzoEMSdA" Bounds="253,326,287,61" ShowValueBox="true" isIOBox="true" Value="&lt; The returned channel is bound to the effect parameter. Changing the value of the channel will change the parameter and vice versa.">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="GwyPIHU2YC7OoAKxSpLV9L" Bounds="270,102,247,38" ShowValueBox="true" isIOBox="true" Value="⚠️ Red node? This is assuming you have Zebralette installed:">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="VdrqyRWkdA3QNqLbEoCtVh" Bounds="270,141,199,19" ShowValueBox="true" isIOBox="true" Value="https://u-he.com/products/plug-ins/zebralette3/">
+            <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
+              <Choice Kind="TypeFlag" Name="String" />
+            </p:TypeAnnotation>
+            <p:ValueBoxSettings>
+              <p:fontsize p:Type="Int32">9</p:fontsize>
+              <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
+            </p:ValueBoxSettings>
+          </Pad>
+          <Pad Id="NVor6dF8HquMoBpiwKlSs2" Bounds="270,167,112,19" ShowValueBox="true" isIOBox="true" Value="Then restart vvvv!">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>

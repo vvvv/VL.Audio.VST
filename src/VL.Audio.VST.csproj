@@ -15,7 +15,7 @@
 
     <!-- Package properties -->
     <PackageId>VL.Audio.VST</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.3.0-alpha</Version>
     <Title>VL.Audio.VST</Title>
     <Authors>vvvv</Authors>
     <Description>VST® support for vvvv</Description>

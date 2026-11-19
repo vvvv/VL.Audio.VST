@@ -13,7 +13,7 @@ namespace VST3;
 
 This interface must always be supported by audio processing plug-ins.
 */
-[GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+[GeneratedComInterface]
 [Guid("42043F99-B7DA-453C-A569-E79D9AAEC33D")]
 partial interface IAudioProcessor
 {

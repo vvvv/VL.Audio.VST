@@ -161,6 +161,14 @@ struct UnitInfo
     private String128 name;
     private ProgramListID programListId;
 
+    public UnitInfo(UnitID id, UnitID parentUnitId, string name, ProgramListID programListId = Constants.kNoProgramListId)
+    {
+        this.id = id;
+        this.parentUnitId = parentUnitId;
+        this.name = String128.From(name);
+        this.programListId = programListId;
+    }
+
     /// <summary>
     /// Unit identifier.
     /// </summary>

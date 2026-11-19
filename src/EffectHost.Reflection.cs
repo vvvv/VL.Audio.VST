@@ -41,18 +41,18 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
 
         propertyChangedSubscription = ParameterChanged
             .Where(x => x.parameter.UnitId == Constants.kRootUnitId && ExposeAsProperty(in x.parameter))
-            .Subscribe(x => propertyChanged?.Invoke(this, new PropertyChangedEventArgs(ToSegment(x.parameter.Title))));
+            .Subscribe(x => propertyChanged?.Invoke(this, new PropertyChangedEventArgs(ParameterPins.ToSegment(x.parameter.Title))));
 
         IEnumerable<IVLPropertyInfo> LoadPropertiesForUnit(IVLTypeInfo declaringType, int unitId)
         {
-            foreach (var unitInfo in units.Values)
+            foreach (var unitInfo in parameterPins.Units.Values)
             {
                 if (unitInfo.ParentUnitId != unitId)
                     continue;
 
                 var unitTypeInfo = new DynamicTypeInfo()
                 {
-                    Name = ToSegment(unitInfo.Name),
+                    Name = ParameterPins.ToSegment(unitInfo.Name),
                     Category = declaringType.FullName,
                     LoadProperties = unitTypeInfo => LoadPropertiesForUnit(unitTypeInfo, unitInfo.Id)
                 };
@@ -61,12 +61,12 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                     Type = unitTypeInfo,
                     PropertyChangedSource = ParameterChanged
                         .Where(e => e.parameter.UnitId == unitInfo.Id && ExposeAsProperty(in e.parameter))
-                        .Select(e => new PropertyChangedEventArgs(ToSegment(e.parameter.Title)))
+                        .Select(e => new PropertyChangedEventArgs(ParameterPins.ToSegment(e.parameter.Title)))
                 };
                 yield return new DynamicPropertyInfo()
                 {
                     DeclaringType = declaringType,
-                    Name = ToSegment(unitInfo.Name),
+                    Name = ParameterPins.ToSegment(unitInfo.Name),
                     Type = unitTypeInfo,
                     GetValue = _ => unit,
                 };
@@ -86,7 +86,7 @@ partial class EffectHost : IVLObject, INotifyPropertyChanged
                 yield return new DynamicPropertyInfo()
                 {
                     DeclaringType = declaringType,
-                    Name = ToSegment(p.Title),
+                    Name = ParameterPins.ToSegment(p.Title),
                     Type = typeRegistry.GetTypeInfo(p.GetPinType()),
                     GetValue = i =>
                     {

@@ -88,7 +88,7 @@
             <Pin Id="QNz6APIStaxOFbbQ86elaU" Name="Parameter Ids" Kind="InputPin" IsHidden="true" />
             <Pin Id="B6aTfj7U0znQXf1CFw9r3z" Name="Audio In" Kind="InputPin" />
             <Pin Id="BBEMO21RFLGP1cM0l7LAI7" Name="Midi In" Kind="InputPin" />
-            <Pin Id="AqmXQp7TUaxPCCwLxa9fNd" Name="MyInput" Kind="InputPin" DefaultValue="0.41" PinGroupName="Parameters">
+            <Pin Id="DIK5smhQ12XP1Vl7ES8lC0" Name="MyInput" Kind="InputPin" DefaultValue="0.142857" PinGroupName="Parameters">
               <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
                 <Choice Kind="TypeFlag" Name="Float32" />
               </p:TypeAnnotation>
@@ -403,7 +403,7 @@
         <Link Id="G8csKf0zTbsMKeMuxEpD2g" Ids="UzOBXzI76cWOCsqdons1q1,Nd9mCedpQLbL0KdUuP1H3b" />
         <Link Id="Bk66ijCp9qoMHMWQyOcuTs" Ids="IxN67JbCAAJOMqy3ydeQvM,QYoN2qWLPRnNPZDJHmDf6m" />
         <Link Id="NPu5xGTevJaNo1sMTcpr5W" Ids="EQWhuul3u8sL0oyAL5AlWH,B6aTfj7U0znQXf1CFw9r3z" />
-        <Link Id="UmkP79aOh5sL7njNtydTAl" Ids="ARJlH4UIGQXLo0EneWES7e,VtQ22j0rg0rPKhVyhTOB6I" />
+        <Link Id="UmkP79aOh5sL7njNtydTAl" Ids="ARJlH4UIGQXLo0EneWES7e,DIK5smhQ12XP1Vl7ES8lC0" />
         <Link Id="Nx9QDZR5zvqNu26Kzg5uAx" Ids="F7G92XsO6gyQCMjbIQlqD2,F21cXkM7irqQJECLUa8Axt" />
         <Link Id="DWnbGFVRFlYPCtdT8aKthf" Ids="F7qh5fr3qPoQQKtbmvVhVp,AUYIQIRl1fJLCpqScTGT1H" />
       </Patch>

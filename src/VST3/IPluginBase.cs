@@ -15,7 +15,7 @@ host that the plug-in will need to work. These interfaces can vary from category
 A list of supported host context interfaces should be included in the documentation
 of a specific category. 
 */
-[GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+[GeneratedComInterface]
 [Guid("22888DDB-156E-45AE-8358-B34808190625")]
 partial interface IPluginBase
 {

@@ -18,7 +18,7 @@ are specific to a media type are defined in a separate interface. An implementat
 component must provide both the specific interface and IComponent.
 \see IPluginBase
 */
-[GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+[GeneratedComInterface]
 [Guid("E831FF31-F2D5-4301-928E-BBEE25697802")]
 partial interface IComponent : IPluginBase
 {

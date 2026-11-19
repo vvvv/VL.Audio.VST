@@ -13,7 +13,7 @@ namespace VST3;
 The controller part of an effect or instrument with parameter handling (export, definition, conversion...).
 \see \ref IComponent::getControllerClassId, \ref IMidiMapping
 */
-[GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+[GeneratedComInterface]
 [Guid("DCD7BBE3-7742-448D-A874-AACC979C759E")]
 partial interface IEditController : IPluginBase
 {

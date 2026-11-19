@@ -1,4 +1,6 @@
 # VL.Audio.VST
+[![NuGet](https://img.shields.io/nuget/vpre/VL.Audio.VST)](https://www.nuget.org/packages/VL.Audio.VST)
+
 Adds support for [VST 3](https://steinbergmedia.github.io/vst3_dev_portal/pages/index.html) instruments and effects. Parameters can be controlled programmatically via a patch or MIDI. 
 
 For use with vvvv, the visual live-programming environment for .NET: http://vvvv.org

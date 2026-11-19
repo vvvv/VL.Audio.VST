@@ -4,12 +4,7 @@ using Fallout.Common.IO;
 using Fallout.Common.Tools.DotNet;
 using static Fallout.Common.EnvironmentInfo;
 
-[GitHubActions(
-    "main",
-    GitHubActionsImage.WindowsLatest,
-    On = [GitHubActionsTrigger.WorkflowDispatch],
-    InvokedTargets = [nameof(PushToGithub)],
-    EnableGitHubToken = true)]
+// Packages are only published to nuget.org (the GitHub package feed only holds the first, old versions)
 [GitHubActions(
     "nuget.org",
     GitHubActionsImage.WindowsLatest,
@@ -58,19 +53,6 @@ class Build : FalloutBuild
             DotNetTasks.DotNetPack(s => s
                 .SetProject(Project)
                 .SetConfiguration(Configuration));
-        });
-
-    Target PushToGithub => _ => _
-        .DependsOn(Pack)
-        .Executes(() =>
-        {
-            foreach (var file in PackageOutputDirectory.GetFiles("*.nupkg"))
-            {
-                DotNetTasks.DotNetNuGetPush(_ => _
-                    .SetTargetPath(file)
-                    .SetApiKey(GitHubActions.Instance.Token)
-                    .SetSource("https://nuget.pkg.github.com/vvvv/index.json"));
-            }
         });
 
     Target PushToNugetOrg => _ => _

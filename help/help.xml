@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Pack>
-<VLDocument link="Explanation Getting started.vl" tags="midi"/>
+	<Topic title="Basics">
+		<VLDocument link="Explanation Getting started.vl" tags="midi"/>
+		<VLDocument link="Explanation Accessing Parameters via Channels.vl" tags=""/>
+		<VLDocument link="Explanation Exposing Parameters as Public Channels.vl" tags=""/>
+		<VLDocument link="HowTo Access unexposed Parameters via Index.vl" tags=""/>
+		
+	</Topic>
+	<Topic title="Example plugins">
+		<VLDocument link="HowTo Communicate with plugdata.vl" tags=""/>
+		<VLDocument link="HowTo Use VCV Rack 2 as Instrument.vl" tags=""/>
+		<VLDocument link="Example HY-SEQ driving Zebralette.vl" tags=""/>
+	</Topic>
+	<Topic title="Links">
+		<UriItem title="Reference VST 3 Website" link="https://steinbergmedia.github.io/vst3_dev_portal/pages/index.html" mediaType="text"/>
+		<UriItem title="Reference VST 3 Licensing" link="https://steinbergmedia.github.io/vst3_dev_portal/pages/VST+3+Licensing/VST3+License.html" mediaType="text" />
+	</Topic>
 </Pack>

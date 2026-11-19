@@ -18,45 +18,57 @@ partial class EffectHost
     {
         if (message is ChannelMessage channelMessage)
         {
-            var midiChannel = (short)channelMessage.MidiChannel;
-
-            // TODO: Midi Stop All see https://forums.steinberg.net/t/vst3-velocity-clarification/908883
-            if (channelMessage.IsNoteOn())
-            {
-                var e = new NoteOnEvent(
-                    channel: (short)channelMessage.MidiChannel,
-                    pitch: (short)channelMessage.Data1,
-                    tuning: default,
-                    velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
-                    length: default,
-                    noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
-                inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
-            }
-            else if (channelMessage.IsNoteOff())
-            {
-                var e = new NoteOffEvent(
-                    channel: (short)channelMessage.MidiChannel,
-                    pitch: (short)channelMessage.Data1,
-                    tuning: default,
-                    velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
-                    noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
-                inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
-            }
-            else if (channelMessage.Command == ChannelCommand.PolyPressure)
-            {
-                var e = new PolyPressureEvent(
-                    channel: midiChannel,
-                    pitch: (short)channelMessage.Data1,
-                    pressure: MessageUtils.MidiIntToFloat(channelMessage.Data2),
-                    noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
-                inputEventQueue.Add(Event.New(e, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false));
-            }
+            if (TryTranslateToEvent(channelMessage, out var e))
+                inputEventQueue.Add(e);
             else
-            {
                 // IMidiMapping and IMidiLearn expect to be called on main thread
                 synchronizationContext?.Post(m => HandleMidiMessageOnMainThread((ChannelMessage)m!), channelMessage);
-            }
         }
+    }
+
+    /// <summary>
+    /// Translates note on, note off and poly pressure to the event the plugin receives in process; false for other messages.
+    /// </summary>
+    internal static bool TryTranslateToEvent(ChannelMessage channelMessage, out Event e)
+    {
+        var midiChannel = (short)channelMessage.MidiChannel;
+
+        // TODO: Midi Stop All see https://forums.steinberg.net/t/vst3-velocity-clarification/908883
+        if (channelMessage.IsNoteOn())
+        {
+            var noteOn = new NoteOnEvent(
+                channel: midiChannel,
+                pitch: (short)channelMessage.Data1,
+                tuning: default,
+                velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                length: default,
+                noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
+            e = Event.New(noteOn, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false);
+            return true;
+        }
+        if (channelMessage.IsNoteOff())
+        {
+            var noteOff = new NoteOffEvent(
+                channel: midiChannel,
+                pitch: (short)channelMessage.Data1,
+                tuning: default,
+                velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
+            e = Event.New(noteOff, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false);
+            return true;
+        }
+        if (channelMessage.Command == ChannelCommand.PolyPressure)
+        {
+            var polyPressure = new PolyPressureEvent(
+                channel: midiChannel,
+                pitch: (short)channelMessage.Data1,
+                pressure: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
+            e = Event.New(polyPressure, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false);
+            return true;
+        }
+        e = default;
+        return false;
     }
 
     // Unique per sounding note, so the same key on different MPE channels stays independent

@@ -18,6 +18,9 @@ name: nuget.org
 
 on: [workflow_dispatch]
 
+permissions:
+  contents: write
+
 jobs:
   windows-latest:
     name: windows-latest
@@ -41,3 +44,4 @@ jobs:
         run: dotnet fallout PushToNugetOrg
         env:
           VvvvOrgNugetKey: ${{ secrets.VVVV_ORG_NUGET_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

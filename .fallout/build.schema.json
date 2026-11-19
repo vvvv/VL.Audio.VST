@@ -25,6 +25,7 @@
       "type": "string",
       "enum": [
         "Compile",
+        "CreateGitHubRelease",
         "Pack",
         "PushToNugetOrg",
         "Test"

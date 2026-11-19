@@ -15,7 +15,7 @@
       </p:NodeReference>
       <Patch Id="LMG6xRfEOZLLrm7uQYMu8o">
         <Canvas Id="ThUQCc6VsGrPpPPOLjiPfP" CanvasType="Group">
-          <Node Bounds="168,398,60,19" Id="Jb0wtOizFyWNqkEpX5WQK2">
+          <Node Bounds="77,410,60,19" Id="Jb0wtOizFyWNqkEpX5WQK2">
             <p:NodeReference LastCategoryFullName="Audio.Sink" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessAppFlag" Name="AudioOut" />
@@ -72,7 +72,7 @@
             <Pin Id="UWzJGacbNi2QZWemH79Sfm" Name="Next Bang Countdown" Kind="OutputPin" />
             <Pin Id="NKVumMFiQHXNOIxjo3pqFQ" Name="Current Interval" Kind="OutputPin" />
           </Node>
-          <Node Bounds="168,338,85,19" Id="PrJ2koWew6MOVrbRTUP7oo">
+          <Node Bounds="77,350,85,19" Id="PrJ2koWew6MOVrbRTUP7oo">
             <p:NodeReference LastCategoryFullName="Audio.VST" LastDependency="VL.Audio.VST.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessNode" Name="VCV Rack 2" />
@@ -95,7 +95,7 @@
               <p:DefaultValue r:Type="Rectangle [2D]" xmlns:r="reflection" r:Version="2">602, 59, 1279, 861</p:DefaultValue>
             </Pin>
           </Node>
-          <Node Bounds="247,476,65,19" Id="Tkm8unoeHUnP8P9okzlctC">
+          <Node Bounds="156,488,65,19" Id="Tkm8unoeHUnP8P9okzlctC">
             <p:NodeReference LastCategoryFullName="IO.Midi" LastDependency="VL.IO.Midi.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessAppFlag" Name="Monitor" />
@@ -107,12 +107,12 @@
             <Pin Id="NhWwUxtzb0qPkPvEXKUwk5" Name="Realtime Messages" Kind="OutputPin" />
             <Pin Id="EPf26YP80o2O1McMmnUppo" Name="Sys Ex Messages" Kind="OutputPin" />
           </Node>
-          <Pad Id="ETFxMtuexPWLE6i1O8kWqZ" Comment="Channel Message" Bounds="249,534,296,29" ShowValueBox="true" isIOBox="true">
+          <Pad Id="ETFxMtuexPWLE6i1O8kWqZ" Comment="Channel Message" Bounds="158,546,296,29" ShowValueBox="true" isIOBox="true">
             <p:ValueBoxSettings>
               <p:fontsize p:Type="Int32">14</p:fontsize>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="NKxvAjV5YRdPpSi0q6mw38" Bounds="342,346,247,38" ShowValueBox="true" isIOBox="true" Value="⚠️ Red node? This is assuming you have VCV Rack 2 Pro installed:">
+          <Pad Id="NKxvAjV5YRdPpSi0q6mw38" Bounds="187,331,247,38" ShowValueBox="true" isIOBox="true" Value="⚠️ Red node? This is assuming you have VCV Rack 2 Pro installed:">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -121,7 +121,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="IQo06dZd55LQMWzd3xbLIc" Bounds="342,385,199,19" ShowValueBox="true" isIOBox="true" Value="https://vcvrack.com/Rack#get">
+          <Pad Id="IQo06dZd55LQMWzd3xbLIc" Bounds="187,370,199,19" ShowValueBox="true" isIOBox="true" Value="https://vcvrack.com/Rack#get">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -160,7 +160,7 @@
               <Choice Kind="TypeFlag" Name="Float32" />
             </p:TypeAnnotation>
           </Pad>
-          <Pad Id="HzV3gg9M0nSQcNmKbZN0Ep" Bounds="342,411,112,19" ShowValueBox="true" isIOBox="true" Value="Then restart vvvv!">
+          <Pad Id="HzV3gg9M0nSQcNmKbZN0Ep" Bounds="187,396,112,19" ShowValueBox="true" isIOBox="true" Value="Then restart vvvv!">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -169,7 +169,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="JWuXB2oCieLMLItSFKeHk2" Bounds="288,260,166,37" ShowValueBox="true" isIOBox="true" Value="For info on how to expose parameters as pins, see:">
+          <Pad Id="JWuXB2oCieLMLItSFKeHk2" Bounds="211,249,166,37" ShowValueBox="true" isIOBox="true" Value="For info on how to expose parameters as pins, see:">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -178,7 +178,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Comment</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="Q9RQWKZRpqvLjTwt5kEN9v" Bounds="290,300,212,21" ShowValueBox="true" isIOBox="true" Value=".\Explanation Getting started.vl">
+          <Pad Id="Q9RQWKZRpqvLjTwt5kEN9v" Bounds="213,289,212,21" ShowValueBox="true" isIOBox="true" Value=".\Explanation Getting started.vl">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="String" />
             </p:TypeAnnotation>
@@ -187,7 +187,7 @@
               <p:stringtype p:Assembly="VL.Core" p:Type="VL.Core.StringType">Link</p:stringtype>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="TmInI5k7PFSN3cSzOjkMwQ" Comment="Level" Bounds="208,273,35,15" ShowValueBox="true" isIOBox="true" Value="0.42">
+          <Pad Id="TmInI5k7PFSN3cSzOjkMwQ" Comment="Level" Bounds="132,290,35,15" ShowValueBox="true" isIOBox="true" Value="0.42">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="Float32" />
             </p:TypeAnnotation>

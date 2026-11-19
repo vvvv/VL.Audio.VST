@@ -83,7 +83,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
     private readonly Dictionary<string, uint> parameterLookup = new();
     private ImmutableDictionary<string, uint> savedIds = ImmutableDictionary<string, uint>.Empty;
     private readonly SerialDisposable pinWarning = new();
-    private HashSet<string> unresolvedPins = new();
+    private string? pinWarningText;
     private int lastPinCount = -1;
     private readonly Dictionary<int, UnitInfo> units = new();
 
@@ -275,7 +275,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
 
         // Check for changes on our input pins
         currentParameters = parameters;
-        if (unresolvedPins.Count > 0 && parameters.Count != lastPinCount)
+        if (parameters.Count != lastPinCount)
         {
             lastPinCount = parameters.Count;
             UpdatePinWarning(parameters.Keys);
@@ -430,8 +430,11 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
     {
         var builder = ImmutableDictionary.CreateBuilder<string, uint>();
         foreach (var n in pinNames)
-            if (TryResolve(n, out var id))
+        {
+            // An unresolved pin keeps its saved ID, the parameter may still show up later
+            if (TryResolve(n, out var id) || savedIds.TryGetValue(n, out id))
                 builder[n] = id;
+        }
         savedIds = builder.ToImmutable();
         return SaveToPin(solution, ParameterIdsPinName, savedIds);
     }
@@ -572,31 +575,19 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         if (solution is null)
             return;
 
-        var typeRegistry = AppHost.Global.TypeRegistry;
         var builder = GetPinGroupBuilder(solution);
+        var pins = currentParameters ?? new();
+        AddExistingPins(builder, pins);
 
-        // Keep the existing pins under their saved names
-        var pins = new List<(string Name, uint Id)>();
-        if (currentParameters != null)
-        {
-            foreach (var k in currentParameters.Keys)
-                if (TryResolve(k, out var pid) && parameters.ContainsKey(pid))
-                    pins.Add((k, pid));
-        }
-
-        var alreadyPinned = pins.Any(x => x.Id == id);
-        var newPinName = alreadyPinned ? pins.First(x => x.Id == id).Name : GetParameterFullName(in parameter);
-        if (!alreadyPinned)
-            pins.Add((newPinName, id));
-
-        foreach (var (name, pid) in pins)
-            builder.Add(name, typeRegistry.GetTypeInfo(parameters[pid].GetPinType()).Name);
+        var newPinName = TryGetPinName(id, out var pinName) ? pinName : GetParameterFullName(in parameter);
+        if (!pins.ContainsKey(newPinName))
+            builder.Add(newPinName, AppHost.Global.TypeRegistry.GetTypeInfo(parameter.GetPinType()).Name);
         this.type = null;
 
         var s = builder.Commit();
         if (s != solution)
         {
-            s = SaveParameterIds(s, pins.Select(x => x.Name));
+            s = SaveParameterIds(s, pins.Keys.Append(newPinName).Distinct());
             var normalizedValue = controller.getParamNormalized(parameter.ID);
             s = SaveToPin(s, newPinName, parameter.GetValueAsObject(normalizedValue));
             s.Confirm();
@@ -609,44 +600,44 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         if (solution is null)
             return;
 
-        var typeRegistry = AppHost.Global.TypeRegistry;
         var builder = GetPinGroupBuilder(solution);
-        var kept = new List<string>();
-        var unresolved = new List<string>();
-        foreach (var pinName in pins.Keys)
-        {
-            if (TryResolve(pinName, out var id) && parameters.TryGetValue(id, out var p))
-            {
-                builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
-                kept.Add(pinName);
-            }
-            else
-                unresolved.Add(pinName);
-        }
+        AddExistingPins(builder, pins);
 
-        var s = SaveParameterIds(builder.Commit(), kept);
+        var s = SaveParameterIds(builder.Commit(), pins.Keys);
         s.Confirm(SolutionUpdateKind.TweakLast);
 
-        unresolvedPins = new HashSet<string>(unresolved);
         UpdatePinWarning(pins.Keys);
     }
 
-    // Shows which pins have no parameter, and goes away once the pins are fixed
+    // Pins are only removed by the user: a pin without a parameter keeps its type and stays, as some plugins
+    // (plugdata) publish their parameters or final titles only after the first sync
+    private void AddExistingPins(PinGroupBuilder builder, Dictionary<string, object> pins)
+    {
+        var typeRegistry = AppHost.Global.TypeRegistry;
+        foreach (var (pinName, value) in pins)
+        {
+            if (TryResolve(pinName, out var id) && parameters.TryGetValue(id, out var p))
+                builder.Add(pinName, typeRegistry.GetTypeInfo(p.GetPinType()).Name);
+            else if (value is not null)
+                builder.Add(pinName, typeRegistry.GetTypeInfo(value.GetType()).Name);
+        }
+    }
+
+    // Shows which pins have no parameter, and goes away once the pins are fixed. A pin bound by ID to a parameter
+    // of another name (renamed in the plugin) is fine: it keeps working under its saved name.
     private void UpdatePinWarning(IEnumerable<string> currentPins)
     {
-        if (unresolvedPins.Count == 0)
+        var missing = currentPins
+            .Where(n => !TryResolve(n, out var id) || !parameters.ContainsKey(id))
+            .Select(n => $"\"{n}\"")
+            .ToList();
+
+        var text = missing.Count > 0 ? $"No parameter found for pins: {string.Join(", ", missing)}" : null;
+        if (text == pinWarningText)
             return;
 
-        var pinned = currentPins.ToHashSet();
-        unresolvedPins.RemoveWhere(n => pinned.Contains(n) && TryResolve(n, out _));
-        if (unresolvedPins.Count == 0)
-        {
-            pinWarning.Disposable = null;
-            return;
-        }
-
-        var names = string.Join(", ", unresolvedPins.Select(n => $"\"{n}\""));
-        pinWarning.Disposable = nodeContext.AddPersistentMessage(MessageSeverity.Warning, $"No parameter found for pins: {names}");
+        pinWarningText = text;
+        pinWarning.Disposable = text != null ? nodeContext.AddPersistentMessage(MessageSeverity.Warning, text) : null;
     }
 
     private PinGroupBuilder GetPinGroupBuilder(ISolution solution)

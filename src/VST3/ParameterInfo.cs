@@ -35,6 +35,19 @@ struct ParameterInfo
                             /// (highly recommended to export a bypass parameter for effect plug-in)
     }
 
+    public ParameterInfo(ParamID id, string title, int stepCount = 0, double defaultNormalizedValue = 0, int unitId = Constants.kRootUnitId,
+        ParameterFlags flags = ParameterFlags.kCanAutomate, string shortTitle = "", string units = "")
+    {
+        this.id = id;
+        this.title = String128.From(title);
+        this.shortTitle = String128.From(shortTitle);
+        this.units = String128.From(units);
+        this.stepCount = stepCount;
+        this.defaultNormalizedValue = defaultNormalizedValue;
+        this.unitId = unitId;
+        this.flags = flags;
+    }
+
     public ParamID ID => id;
     public string Title => title.ToString();
     public string ShortTitle => shortTitle.ToString();

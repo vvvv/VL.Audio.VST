@@ -40,7 +40,7 @@ partial class EffectHost
                 channel: midiChannel,
                 pitch: (short)channelMessage.Data1,
                 tuning: default,
-                velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                velocity: (float)MidiConvert.Midi7BitToNormalized(channelMessage.Data2),
                 length: default,
                 noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
             e = Event.New(noteOn, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false);
@@ -52,7 +52,7 @@ partial class EffectHost
                 channel: midiChannel,
                 pitch: (short)channelMessage.Data1,
                 tuning: default,
-                velocity: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                velocity: (float)MidiConvert.Midi7BitToNormalized(channelMessage.Data2),
                 noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
             e = Event.New(noteOff, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false);
             return true;
@@ -62,7 +62,7 @@ partial class EffectHost
             var polyPressure = new PolyPressureEvent(
                 channel: midiChannel,
                 pitch: (short)channelMessage.Data1,
-                pressure: MessageUtils.MidiIntToFloat(channelMessage.Data2),
+                pressure: (float)MidiConvert.Midi7BitToNormalized(channelMessage.Data2),
                 noteId: NoteIdOf(channelMessage.MidiChannel, channelMessage.Data1));
             e = Event.New(polyPressure, busIndex: 0, sampleOffset: 0, ppqPosition: 0, isLive: false);
             return true;
@@ -74,42 +74,49 @@ partial class EffectHost
     // Unique per sounding note, so the same key on different MPE channels stays independent
     private static int NoteIdOf(int channel, int key) => channel * 128 + key;
 
+    /// <summary>
+    /// Translates controller, pitch bend and channel pressure to the controller number a plugin maps to a parameter
+    /// (IMidiMapping) and the normalized value; false for other messages.
+    /// </summary>
+    internal static bool TryTranslateToController(ChannelMessage channelMessage, out ControllerNumbers controllerNumber, out double value)
+    {
+        switch (channelMessage.Command)
+        {
+            case ChannelCommand.Controller:
+                controllerNumber = (ControllerNumbers)channelMessage.Data1;
+                value = MidiConvert.Midi7BitToNormalized(channelMessage.Data2);
+                return true;
+            case ChannelCommand.PitchWheel:
+                controllerNumber = ControllerNumbers.kPitchBend;
+                value = MidiConvert.Midi14BitToNormalized(channelMessage.Data1 | channelMessage.Data2 << 7);
+                return true;
+            case ChannelCommand.ChannelPressure:
+                controllerNumber = ControllerNumbers.kAfterTouch;
+                value = MidiConvert.Midi7BitToNormalized(channelMessage.Data1);
+                return true;
+            default:
+                controllerNumber = default;
+                value = default;
+                return false;
+        }
+    }
+
     private void HandleMidiMessageOnMainThread(ChannelMessage channelMessage)
     {
         var midiChannel = (short)channelMessage.MidiChannel;
-        var midiMapping = controller as IMidiMapping;
 
-        if (channelMessage.Command == ChannelCommand.Controller)
+        if (channelMessage.Command == ChannelCommand.Controller && controller is IMidiLearn midiLearn)
         {
-            var midiLearn = controller as IMidiLearn;
-            if (midiLearn != null)
+            if (midiLearn.onLiveMIDIControllerInput(0, midiChannel, (ControllerNumbers)channelMessage.Data1))
             {
-                if (midiLearn.onLiveMIDIControllerInput(0, midiChannel, (ControllerNumbers)channelMessage.Data1))
-                {
-                    // Plugin did map the controller to one of its parameters
-                }
-            }
-            if (midiMapping != null && midiMapping.getMidiControllerAssignment(0, midiChannel, (ControllerNumbers)channelMessage.Data1, out var paramId))
-            {
-                var value = MessageUtils.MidiIntToFloat(channelMessage.Data2);
-                SetParameter(paramId, value);
+                // Plugin did map the controller to one of its parameters
             }
         }
-        else if (channelMessage.Command == ChannelCommand.PitchWheel)
-        {
-            if (midiMapping is null)
-                return;
 
-            if (midiMapping.getMidiControllerAssignment(0, midiChannel, ControllerNumbers.kPitchBend, out var paramId))
-            {
-                var value = channelMessage.GetPitchWheel();
-                SetParameter(paramId, value);
-            }
-        }
-        else if (channelMessage.Command == ChannelCommand.ChannelPressure)
+        if (TryTranslateToController(channelMessage, out var controllerNumber, out var normalizedValue))
         {
-            if (midiMapping is not null && midiMapping.getMidiControllerAssignment(0, midiChannel, ControllerNumbers.kAfterTouch, out var paramId))
-                SetParameter(paramId, MessageUtils.MidiIntToFloat(channelMessage.Data1));
+            if (controller is IMidiMapping midiMapping && midiMapping.getMidiControllerAssignment(0, midiChannel, controllerNumber, out var paramId))
+                SetParameter(paramId, normalizedValue);
         }
         else if (channelMessage.Command == ChannelCommand.ProgramChange)
         {

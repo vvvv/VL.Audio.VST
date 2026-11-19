@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Runtime.InteropServices.Marshalling;
 using System.Windows.Forms;
 using VL.Audio.VST.Internal;
-using VL.Lib.IO.Midi;
 using VL.Audio.VST.Tests.Fakes;
 using VST3;
 using VST3.Hosting;
@@ -255,14 +254,14 @@ public partial class HostInteractionTests
 
         var noteOn = received[0].GetValue<NoteOnEvent>();
         Assert.That((noteOn.Channel, noteOn.Pitch, noteOn.NoteId), Is.EqualTo(((short)2, (short)60, 2 * 128 + 60)));
-        Assert.That(noteOn.Velocity, Is.EqualTo(MessageUtils.MidiIntToFloat(100)));
+        Assert.That(noteOn.Velocity, Is.EqualTo((float)MidiConvert.Midi7BitToNormalized(100)));
 
         var otherChannel = received[1].GetValue<NoteOnEvent>();
         Assert.That((otherChannel.Channel, otherChannel.Pitch, otherChannel.NoteId), Is.EqualTo(((short)3, (short)60, 3 * 128 + 60)));
 
         var pressure = received[2].GetValue<PolyPressureEvent>();
         Assert.That((pressure.Channel, pressure.Pitch, pressure.NoteId), Is.EqualTo(((short)2, (short)60, 2 * 128 + 60)));
-        Assert.That(pressure.Pressure, Is.EqualTo(MessageUtils.MidiIntToFloat(64)));
+        Assert.That(pressure.Pressure, Is.EqualTo(0.5f));
 
         var noteOff = received[3].GetValue<NoteOffEvent>();
         Assert.That((noteOff.Channel, noteOff.Pitch, noteOff.NoteId), Is.EqualTo(((short)2, (short)60, 2 * 128 + 60)));

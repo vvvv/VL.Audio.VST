@@ -29,7 +29,7 @@ namespace VL.Audio.VST
 
                 return controller.GetParameters()
                     .Where(p => ExposeAsProperty(in p))
-                    .Select(p => GetParameterFullName(in p))
+                    .Select(p => parameterPins.GetFullName(in p))
                     .ToSpread();
             }
         }
@@ -56,7 +56,7 @@ namespace VL.Audio.VST
                     if (!ExposeAsProperty(in p))
                         continue;
 
-                    var name = GetParameterFullName(in p);
+                    var name = parameterPins.GetFullName(in p);
                     if (name != parameterName)
                         continue;
 

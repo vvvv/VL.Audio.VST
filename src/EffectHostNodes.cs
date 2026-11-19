@@ -23,7 +23,7 @@ public static class EffectHostNodes
     }
 
     /// <inheritdoc cref="EffectHost.GetChannel"/>
-    [Obsolete("Use PropertyChannel with the EffectHost as input instead.")]
+    [Obsolete("Use the Property node with the EffectHost as input instead.")]
     public static IChannel? GetChannel(this EffectHost? effectHost, string parameterName)
     {
         if (effectHost is null)
@@ -35,7 +35,6 @@ public static class EffectHostNodes
     }
 
     /// <inheritdoc cref="EffectHost.GetParameterNames"/>
-    [Obsolete("Use PropertyChannel with the EffectHost as input instead.")]
     public static Spread<string> GetParameterNames(this EffectHost? effectHost)
     {
         if (effectHost is null)

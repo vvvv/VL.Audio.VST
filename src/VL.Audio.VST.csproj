@@ -12,6 +12,20 @@
     
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591</NoWarn>
+
+    <!-- Package properties -->
+    <PackageId>VL.Audio.VST</PackageId>
+    <Version>0.2.0-alpha</Version>
+    <Title>VL.Audio.VST</Title>
+    <Authors>vvvv</Authors>
+    <Description>VST® support for vvvv</Description>
+    <PackageTags>VL;vst3;audio;effect;instrument</PackageTags>
+    <PackageProjectUrl>https://github.com/vvvv/VL.Audio.VST</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vvvv/VL.Audio.VST</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+    <PackageIcon>icon\nugeticon.png</PackageIcon>
+    <PackageReadmeFile>docs\README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,9 +38,17 @@
 
   <ItemGroup>
     <PackageReference Include="VL.Audio" Version="1.9.19" />
-    <PackageReference Include="VL.Core.Commands" Version="2025.7.4" />
-    <PackageReference Include="VL.CoreLib" Version="2025.7.4" />
+    <!-- Part of vvvv itself, so not a dependency of the package -->
+    <PackageReference Include="VL.Core.Commands" Version="2025.7.4" PrivateAssets="all" />
+    <PackageReference Include="VL.CoreLib" Version="2025.7.4" PrivateAssets="all" />
     <PackageReference Include="VL.IO.Midi" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\deployment\nugeticon.png" Pack="true" PackagePath="icon\" Visible="false" />
+    <None Include="..\README.md" Pack="true" PackagePath="docs\" Visible="false" />
+    <None Include="..\*.vl" Pack="true" PackagePath="" Visible="false" />
+    <None Include="..\help\**\*" Pack="true" PackagePath="help\%(RecursiveDir)%(Filename)%(Extension)" Visible="false" />
   </ItemGroup>
 
 </Project>

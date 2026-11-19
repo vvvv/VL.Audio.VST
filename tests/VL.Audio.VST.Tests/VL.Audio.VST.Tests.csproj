@@ -16,6 +16,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="NUnit" Version="4.5.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+    <!-- Private in the library (they come with vvvv), so they don't flow here through the project reference -->
+    <PackageReference Include="VL.Core.Commands" Version="2025.7.4" />
+    <PackageReference Include="VL.CoreLib" Version="2025.7.4" />
   </ItemGroup>
 
   <ItemGroup>

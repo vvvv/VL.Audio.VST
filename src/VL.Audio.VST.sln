@@ -8,12 +8,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{05EC4CAB-1E18-4BA4-BB68-E5EB7D76B77A}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
-		..\deployment\VL.Audio.VST.nuspec = ..\deployment\VL.Audio.VST.nuspec
+		..\build.cmd = ..\build.cmd
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSTHost", "..\sandbox\VSTHost\VSTHost.csproj", "{ABF12C76-AD6A-4E0B-9B93-488BABA29A38}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VL.Audio.VST.Tests", "..\tests\VL.Audio.VST.Tests\VL.Audio.VST.Tests.csproj", "{E870FC7A-E75D-4A98-903C-FC72708F0488}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_build", "..\build\_build.csproj", "{064068FB-A2E8-4835-BBB8-9169430E96AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,8 @@ Global
 		{E870FC7A-E75D-4A98-903C-FC72708F0488}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E870FC7A-E75D-4A98-903C-FC72708F0488}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E870FC7A-E75D-4A98-903C-FC72708F0488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{064068FB-A2E8-4835-BBB8-9169430E96AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{064068FB-A2E8-4835-BBB8-9169430E96AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

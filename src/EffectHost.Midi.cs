@@ -147,7 +147,19 @@ partial class EffectHost
         }
     }
 
-    bool TryTranslateToMidi(in Event e, [NotNullWhen(true)] out IMidiMessage? message)
+    private bool TryTranslateToMidiAndLog(in Event e, [NotNullWhen(true)] out IMidiMessage? message)
+    {
+        if (TryTranslateToMidi(in e, out message))
+            return true;
+
+        logger.LogTrace("Not implemented {type}", e.Type);
+        return false;
+    }
+
+    /// <summary>
+    /// Translates an event the plugin sent in process to a MIDI message; false for events without a MIDI equivalent.
+    /// </summary>
+    internal static bool TryTranslateToMidi(in Event e, [NotNullWhen(true)] out IMidiMessage? message)
     {
         switch (e.Type)
         {
@@ -156,26 +168,17 @@ partial class EffectHost
                 message = MessageUtils.NoteOn(noteOn.Channel, noteOn.Pitch, noteOn.Velocity);
                 return true;
             case Event.EventTypes.kNoteOffEvent:
+                // A real note off, so the release velocity survives and nothing is left hanging downstream
                 var noteOff = e.GetValue<NoteOffEvent>();
-                message = MessageUtils.NoteOn(noteOff.Channel, noteOff.Pitch, noteOff.Velocity);
+                message = MessageUtils.NoteOff(noteOff.Channel, noteOff.Pitch, noteOff.Velocity);
                 return true;
             case Event.EventTypes.kDataEvent:
                 var dataEvent = e.GetValue<DataEvent>();
-                switch (dataEvent.Type)
+                if (dataEvent.Type == DataEvent.DataTypes.kMidiSysEx)
                 {
-                    case DataEvent.DataTypes.kMidiSysEx:
-                        message = new SysExMessage(dataEvent.DataBlock.ToArray());
-                        return true;
-                    default:
-                        break;
+                    message = new SysExMessage(dataEvent.DataBlock.ToArray());
+                    return true;
                 }
-                break;
-            case Event.EventTypes.kPolyPressureEvent:
-            case Event.EventTypes.kNoteExpressionValueEvent:
-            case Event.EventTypes.kNoteExpressionTextEvent:
-            case Event.EventTypes.kChordEvent:
-            case Event.EventTypes.kScaleEvent:
-                logger.LogTrace("Not implemented {type}", e.Type);
                 break;
             case Event.EventTypes.kLegacyMIDICCOutEvent:
                 var midiCCEvent = e.GetValue<LegacyMIDICCOutEvent>();
@@ -188,15 +191,11 @@ partial class EffectHost
                         message = new ChannelMessage(ChannelCommand.PolyPressure, midiCCEvent.Channel, midiCCEvent.Value, midiCCEvent.Value2);
                         return true;
                     case ControllerNumbers.kCtrlQuarterFrame:
-                        logger.LogTrace("Not implemented kCtrlQuarterFrame");
                         break;
                     default:
                         message = MessageUtils.Controller(midiCCEvent.Channel, (int)midiCCEvent.ControlNumber, midiCCEvent.Value);
                         return true;
                 }
-                break;
-            default:
-                logger.LogTrace("Not implemented {type}", e.Type);
                 break;
         }
 

@@ -142,7 +142,7 @@ public partial class EffectHost : FactoryBasedVLNode, IHasCommands, IHasLearnMod
         component.setActive(true);
         processor.setProcessing(true);
 
-        midiOutput = outputEvents.ObserveOn(Scheduler.Default).SelectMany(e => TryTranslateToMidi(in e, out var m) ? new[] { m } : []);
+        midiOutput = outputEvents.ObserveOn(Scheduler.Default).SelectMany(e => TryTranslateToMidiAndLog(in e, out var m) ? new[] { m } : []);
 
         ReloadParameters();
 

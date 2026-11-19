@@ -1,0 +1,14 @@
+name: test
+
+# Runs on its own: the NuGet publishing in main.yml does not wait for it
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test tests/VL.Audio.VST.Tests/VL.Audio.VST.Tests.csproj

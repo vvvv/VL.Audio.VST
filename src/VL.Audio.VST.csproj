@@ -18,10 +18,10 @@
     <Version>0.3.0-alpha</Version>
     <Title>VL.Audio.VST</Title>
     <Authors>vvvv</Authors>
-    <Description>VST® support for vvvv</Description>
-    <PackageTags>VL;vst3;audio;effect;instrument</PackageTags>
+    <Description>VST 3 support for vvvv</Description>
+    <PackageTags>VL;vst3;effect;instrument</PackageTags>
     <PackageProjectUrl>https://github.com/vvvv/VL.Audio.VST</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/vvvv/VL.Audio.VST</RepositoryUrl>
+    <RepositoryUrl>https://github.com/vvvv/VL.Audio.VST.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
     <PackageIcon>icon\nugeticon.png</PackageIcon>
@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="VL.Audio" Version="1.9.19" />
+    <PackageReference Include="VL.Audio" Version="1.9.21" />
     <!-- Part of vvvv itself, so not a dependency of the package -->
     <PackageReference Include="VL.Core.Commands" Version="2025.7.4" PrivateAssets="all" />
     <PackageReference Include="VL.CoreLib" Version="2025.7.4" PrivateAssets="all" />

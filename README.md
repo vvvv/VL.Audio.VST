@@ -5,7 +5,26 @@ Adds support for [VST 3](https://steinbergmedia.github.io/vst3_dev_portal/pages/
 
 For use with vvvv, the visual live-programming environment for .NET: http://vvvv.org
 
-<details> <summary>Implementation Status</summary>
+## Getting started
+- Install as [described here](https://thegraybook.vvvv.org/reference/hde/managing-nugets.html) via commandline:
+
+    `nuget install VL.Audio.VST -pre`
+
+- Install some VSTs. They will automatically show up in the nodebrowser when installed in the default location `\Program Files\Common Files\VST3\` or when found in a `\VST3` folder next to your .vl document. Adding a VST requires a restart of vvvv.
+- Usage examples and more information are included in the pack and can be found via the [Help Browser](https://thegraybook.vvvv.org/reference/hde/findinghelp.html)
+
+## Contributing
+- Report issues on [the vvvv forum](https://discourse.vvvv.org/c/vvvv-gamma/28)
+- For custom development requests, please [get in touch](mailto:devvvvs@vvvv.org)
+- When making a pull-request, please make sure to read the general [guidelines on contributing to vvvv libraries](https://thegraybook.vvvv.org/reference/extending/contributing.html)
+
+## Sponsoring
+Development of this library was partially sponsored by:  
+* [m box](https://www.m-box.de/)
+* [SCHNELLE BUNTE BILDER](https://schnellebuntebilder.de/)
+* [3e8.studio](https://3e8.studio/)
+
+## Implementation Status
 Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Index.html)
 
 | Implemented Interfaces | Status  |
@@ -68,23 +87,3 @@ Compare [VST 3 Technical Documentation](https://steinbergmedia.github.io/vst3_de
 | Process  Requirements | no |
 | Data Transfert Between Processor/Controller | no |
 | Remap Parameter ID | no |
-</details> 
-
-## Getting started
-- Install as [described here](https://thegraybook.vvvv.org/reference/hde/managing-nugets.html) via commandline:
-
-    `nuget install VL.Audio.VST -pre`
-
-- Install some VSTs. They will automatically show up in the nodebrowser when installed in the default location `\Program Files\Common Files\VST3\` or when found in a `\VST3` folder next to your .vl document. Adding a VST requires a restart of vvvv.
-- Usage examples and more information are included in the pack and can be found via the [Help Browser](https://thegraybook.vvvv.org/reference/hde/findinghelp.html)
-
-## Contributing
-- Report issues on [the vvvv forum](https://discourse.vvvv.org/c/vvvv-gamma/28)
-- For custom development requests, please [get in touch](mailto:devvvvs@vvvv.org)
-- When making a pull-request, please make sure to read the general [guidelines on contributing to vvvv libraries](https://thegraybook.vvvv.org/reference/extending/contributing.html)
-
-## Sponsoring
-Development of this library was partially sponsored by:  
-* [m box](https://www.m-box.de/)
-* [SCHNELLE BUNTE BILDER](https://schnellebuntebilder.de/)
-* [3e8.studio](https://3e8.studio/)
